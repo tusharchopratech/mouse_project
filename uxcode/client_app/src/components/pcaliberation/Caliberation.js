@@ -62,10 +62,13 @@ class Caliberation extends Component {
   };
 
   onMouseDown = () => {
+        // console.log("Mouse down");
     this.click_info.down = new Date().toUTCString();
   };
 
   onMouseUp = () => {
+
+        // console.log("Mouse up");
     this.click_info.up = new Date().toUTCString();
     this.clicksInfoArray.push(this.click_info);
   };
@@ -96,6 +99,7 @@ class Caliberation extends Component {
       showCaliberationButton: false,
       openFinishDialog: false
     });
+    this.props.callbackSetMainSection('user_training');
   };
 
   render() {
@@ -131,7 +135,7 @@ class Caliberation extends Component {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.closeFinishDialog} color="primary" autoFocus>
+            <Button onClick={this.closeFinishDialog} color="primary">
               Next
             </Button>
           </DialogActions>

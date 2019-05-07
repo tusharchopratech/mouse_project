@@ -4,12 +4,22 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^3.9.3",
+    "bcrypt": "^3.0.6",
+    "bootstrap": "^4.3.1",
+    "chart.js": "^2.8.0",
     "concurrently": "^4.1.0",
     "electron-builder": "^20.39.0",
     "electron-is-dev": "^1.1.0",
+    "iohook": "^0.4.5",
+    "node-abi": "^2.8.0",
+    "node-gyp": "^4.0.0",
+    "rc-progress": "^2.3.0",
     "react": "^16.8.6",
+    "react-chartjs-2": "^2.7.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.0",
+    "reactstrap": "^8.0.0",
+    "robotjs": "^0.5.1",
     "wait-on": "^3.2.0"
   },
   "scripts": {
@@ -35,7 +45,20 @@
     ]
   },
   "main": "public/electron.js",
-  "devDependencies": {
-    "electron": "^4.1.4"
+  "devDependencies": {},
+  "iohook": {
+    "targets": [
+      "node-64",
+      "electron-70"
+    ],
+    "platforms": [
+      "win32",
+      "darwin",
+      "linux"
+    ],
+    "arches": [
+      "x64",
+      "ia32"
+    ]
   }
 }

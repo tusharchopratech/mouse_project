@@ -8,6 +8,7 @@ import Grid from '@material-ui/core/Grid';
 import MyDrawer from './MyDrawer';
 import Caliberation from '../pcaliberation/Caliberation';
 import UserTraining from '../pusertraning/UserTraining';
+// import IOHook from '../edata/iohook/IOHook';
 import UserTesting from '../pusertesting/UserTesting';
 import Report from '../preport/Report';
 
@@ -34,7 +35,7 @@ export class HomeScreen extends Component {
 
   getMainSectionComponent = (val) => {
     if (val === "caliberation") {
-      return <Caliberation myTop={this.top} myBottom={this.bottom} myLeft={this.left} myRight={this.right} />
+      return <Caliberation callbackSetMainSection={this.setMainSection} myTop={this.top} myBottom={this.bottom} myLeft={this.left} myRight={this.right} />
     } else if (val === "user_training") {
       return <UserTraining />
     } else if (val === "user_testing") {
@@ -56,6 +57,7 @@ export class HomeScreen extends Component {
     const { classes } = this.props;
     return (
       <div className={classes.root}>
+        {/* <IOHook/> */}
         <CssBaseline />
         <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
@@ -71,9 +73,7 @@ export class HomeScreen extends Component {
        
             <div className={classes.toolbar} />
             <Grid container direction='column' alignItems='center' justify='center' className={classes.main_content}>
-              <Grid item>
                 {this.getMainSectionComponent(this.state.current_screen)}
-              </Grid>
             </Grid>
             
           </main>
@@ -94,7 +94,7 @@ const styles = theme => ({
   content: {
     height: '100vh',
     flexGrow: 1,
-    padding: 90,
+    paddingBottom: 38,
   },
   // toolbar: theme.mixins.toolbar,
   toolbar: {

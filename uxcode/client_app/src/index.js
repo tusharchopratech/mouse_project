@@ -1,8 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import 'bootstrap/dist/css/bootstrap.css';
 import App from './components/App/App';
 import * as serviceWorker from './serviceWorker';
+
+
+// require('../src/components/edata/myiohook/myiohook');
 
 ReactDOM.render(<App/>, document.getElementById('root'));
 
