@@ -36,11 +36,14 @@
       console.log('mouseup : ', JSON.stringify(event)); // { type: 'mousemove', x: 700, y: 400 }
     });
 
-    // var robot = require("robotjs");
-    // robot.mouseClick();
-    // robot.mouseClick();
-    // robot.mouseClick();
-    // robot.moveMouse(100, 100);
+    var cmd=require('node-cmd');
+ 
+      cmd.get(
+          'node src/native_modules/mouse_click/index.js right',
+          function(err, data, stderr){
+              console.log('the current working dir is : ',err)
+          }
+      );
 
 
   </script>

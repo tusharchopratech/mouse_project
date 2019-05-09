@@ -12,7 +12,7 @@
     "electron-is-dev": "^1.1.0",
     "iohook": "^0.4.5",
     "node-abi": "^2.8.0",
-    "node-gyp": "^4.0.0",
+    "node-cmd": "^3.0.0",
     "rc-progress": "^2.3.0",
     "react": "^16.8.6",
     "react-chartjs-2": "^2.7.6",
@@ -24,10 +24,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "install": "prebuild-install || node-gyp rebuild",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron-dev": "concurrently \"BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron .\""
+    "electron-dev": "concurrently \"npm run start\" \"wait-on http://localhost:3000 && electron .\""
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -45,7 +46,9 @@
     ]
   },
   "main": "public/electron.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "electron": "^5.0.1"
+  },
   "iohook": {
     "targets": [
       "node-64",
