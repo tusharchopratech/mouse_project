@@ -1,7 +1,7 @@
 #ifndef MDaq_H
 #define MDaq_H
 
-#include "uldaq.h"
+#include "uldaq.hpp"
 #include <iostream>
 #include <stdio.h>
 

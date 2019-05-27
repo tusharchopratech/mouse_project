@@ -18,8 +18,6 @@ int main()
 {
 	MDaq mDaq;
 	mDaq.functionOne();
-	std::time_t result = std::time(nullptr);
-	cout << result << endl;
 
 	cout<<duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()<<endl;
 	// for (int i = 0; i < 1; i++)
