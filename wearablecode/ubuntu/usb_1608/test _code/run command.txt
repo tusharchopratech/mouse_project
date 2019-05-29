@@ -1,0 +1,2 @@
+g++ AInScan.cpp  -L/../lib -luldaq -std=c++0x
+./a.out
