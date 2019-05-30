@@ -23,21 +23,10 @@
   <title>Brink Bionics</title>
 
   <script>
-    'use strict';
-    const ioHook = require('iohook');
-    ioHook.start(true);
-    ioHook.on('mouseclick', event => {
-      console.log('mouseclick : ', JSON.stringify(event)); // { type: 'mousemove', x: 700, y: 400 }
-    });
-    ioHook.on('mousedown', event => {
-      console.log('mousedown : ', JSON.stringify(event)); // { type: 'mousemove', x: 700, y: 400 }
-    });
-    ioHook.on('mouseup', event => {
-      console.log('mouseup : ', JSON.stringify(event)); // { type: 'mousemove', x: 700, y: 400 }
-    });
-
+    var net = require('net');
+    var client = new net.Socket();
     // var cmd=require('node-cmd');
- 
+
     //   cmd.get(
     //       'node src/native_modules/mouse_click/index.js right',
     //       function(err, data, stderr){
@@ -45,6 +34,36 @@
     //       }
     //   );
 
+    function startSocket(socketData) {
+
+      client.connect(27015, 'localhost', function () {
+        console.log('Connected');
+        client.write('real_time_data');
+      });
+
+      client.on('data', function (data) {
+        // console.log('\nReceived: ' + data + ' at ' + new Date().getTime());
+        socketData(data);
+        client.write('real_time_data');
+      });
+
+      client.on('close', function () {
+        console.log('Connection closed');
+      });
+
+      client.on('error', function (err) {
+        console.log(err);
+      });
+    }
+
+
+
+
+
+    function myFunction(func) {
+      func("This is a text");
+      // console.log("Inside my function.");
+    }
 
   </script>
 </head>

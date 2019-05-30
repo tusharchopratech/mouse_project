@@ -8,8 +8,7 @@ import Grid from '@material-ui/core/Grid';
 import MyDrawer from './MyDrawer';
 import Caliberation from '../pcaliberation/Caliberation';
 import UserTraining from '../pusertraning/UserTraining';
-// import IOHook from '../edata/iohook/IOHook';
-import UserTesting from '../pusertesting/UserTesting';
+import RealTimeData from '../prealtimedata/RealTimeData';
 import Report from '../preport/Report';
 
 
@@ -38,8 +37,8 @@ export class HomeScreen extends Component {
       return <Caliberation callbackSetMainSection={this.setMainSection} myTop={this.top} myBottom={this.bottom} myLeft={this.left} myRight={this.right} />
     } else if (val === "user_training") {
       return <UserTraining />
-    } else if (val === "user_testing") {
-      return <UserTesting />
+    } else if (val === "real_time_data") {
+      return <RealTimeData />
     } else if (val === "report") {
       return <Report />
     }

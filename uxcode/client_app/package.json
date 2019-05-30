@@ -6,17 +6,18 @@
     "@material-ui/core": "^3.9.3",
     "bcrypt": "^3.0.6",
     "bootstrap": "^4.3.1",
+    "canvasjs": "^1.8.1",
     "chart.js": "^2.8.0",
     "concurrently": "^4.1.0",
     "electron-builder": "^20.39.0",
     "electron-is-dev": "^1.1.0",
-    "iohook": "^0.4.5",
     "node-abi": "^2.8.0",
     "node-cmd": "^3.0.0",
     "rc-progress": "^2.3.0",
     "react": "^16.8.6",
     "react-chartjs-2": "^2.7.6",
     "react-dom": "^16.8.6",
+    "react-rt-chart": "^2.0.0",
     "react-scripts": "3.0.0",
     "reactstrap": "^8.0.0",
     "robotjs": "^0.5.1",
@@ -24,7 +25,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "install": "prebuild-install || node-gyp rebuild",
+    "install": "prebuild-install",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -48,20 +49,5 @@
   "main": "public/electron.js",
   "devDependencies": {
     "electron": "^5.0.1"
-  },
-  "iohook": {
-    "targets": [
-      "node-64",
-      "electron-70"
-    ],
-    "platforms": [
-      "win32",
-      "darwin",
-      "linux"
-    ],
-    "arches": [
-      "x64",
-      "ia32"
-    ]
   }
 }

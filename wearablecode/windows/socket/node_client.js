@@ -18,7 +18,5 @@ client.on('close', function() {
 });
 
 client.on('error', function(err){
-	// console.log('Im in error');
-	// console.log(tmp);
 	console.log(err);
 });

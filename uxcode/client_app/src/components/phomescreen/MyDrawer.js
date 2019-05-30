@@ -60,12 +60,12 @@ class MyDrawer extends Component {
                         </ListItemIcon>
                         <ListItemText primary={'User Traning'} />
                     </ListItem>
-                    {/* <ListItem button onClick={this.handleClick.bind(this,'user_testing')}>
+                    <ListItem button onClick={this.handleClick.bind(this,'real_time_data')}>
                         <ListItemIcon>
                             <GamePadIcon />
                         </ListItemIcon>
-                        <ListItemText primary={'User Testing'} />
-                    </ListItem> */}
+                        <ListItemText primary={'Real Time Data'} />
+                    </ListItem>
                     <ListItem button onClick={this.handleClick.bind(this,'report')}>
                         <ListItemIcon>
                             <DocumentIcon />

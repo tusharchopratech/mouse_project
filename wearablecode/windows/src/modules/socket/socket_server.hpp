@@ -66,7 +66,7 @@ string getSocketData()
     string chV4S = to_string(chV4);
     string l = to_string(getLeftMouseStatus());
     string r = to_string(getRightMouseStatus());
-    data = "{\"type\":\"real_time_data\", \"ch_v1\":" + chV1S + ", \"ch_v2\":" + chV2S + ", \"ch_v3\":" + chV3S + ", \"ch_v4\":" + chV4S + ", \"left_clicl\":" + l + ", \"right_click\":" + r + "}";
+    data = "{\"type\":\"real_time_data\", \"ch_v1\":" + chV1S + ", \"ch_v2\":" + chV2S + ", \"ch_v3\":" + chV3S + ", \"ch_v4\":" + chV4S + ", \"left_click\":" + l + ", \"right_click\":" + r + "}";
     return data;
 }
 
@@ -148,9 +148,9 @@ int __cdecl setupSocket(void)
     }
 
     // Accept a client socket
-    printf("1");
+    printf("\n\nReady to connect Socket on port : %s", DEFAULT_PORT);
+    printf("\nPlease send connect request and data!!\n\n");
     ClientSocket = accept(ListenSocket, NULL, NULL);
-    printf("2");
     if (ClientSocket == INVALID_SOCKET)
     {
         printf("accept failed with error: %d\n", WSAGetLastError());
@@ -158,7 +158,6 @@ int __cdecl setupSocket(void)
         WSACleanup();
         return 1;
     }
-    printf("3");
     // No longer need server socket
     closesocket(ListenSocket);
     startListeningFromSocket();
