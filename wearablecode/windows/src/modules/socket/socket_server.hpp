@@ -31,42 +31,43 @@ int iSendResult;
 char receivedMessageFromClient[DEFAULT_BUFLEN];
 int recvbuflen = DEFAULT_BUFLEN;
 
-float chV1 = 0.0;
-float chV2 = 0.0;
-float chV3 = 0.0;
-float chV4 = 0.0;
+float chV1[3] = {0.0, 0.0, 0.0};
+float chV2[3] = {0.0, 0.0, 0.0};
+float chV3[3] = {0.0, 0.0, 0.0};
+float chV4[3] = {0.0, 0.0, 0.0};
+
 
 string finalSocketData;
 
 string getSocketData()
 {
-
-    if (chV1 == 0.0 || chV2 == 0.0 || chV3 == 0.0 || chV4 == 0.0)
+    if (chV1[0] == 0.0 || chV2[0] == 0.0 || chV3[0] == 0.0 || chV4[0] == 0.0)
     {
-        chV1 = getChannelOneVoltage();
-        chV2 = getChannelTwoVoltage();
-        chV3 = getChannelThreeVoltage();
-        chV4 = getChannelFourVoltage();
     }
     else
     {
-        while (chV1 == getChannelOneVoltage() || chV2 == getChannelTwoVoltage() || chV3 == getChannelThreeVoltage() || chV4 == getChannelFourVoltage())
+        while (chV1[0] == getChannelOneVoltage(0) || chV2[0] == getChannelTwoVoltage(0) || chV3[0] == getChannelThreeVoltage(0) || chV4[0] == getChannelFourVoltage(0))
         {
         }
-        chV1 = getChannelOneVoltage();
-        chV2 = getChannelTwoVoltage();
-        chV3 = getChannelThreeVoltage();
-        chV4 = getChannelFourVoltage();
     }
 
-    string data;
-    string chV1S = to_string(chV1);
-    string chV2S = to_string(chV2);
-    string chV3S = to_string(chV3);
-    string chV4S = to_string(chV4);
+    chV1[0] = getChannelOneVoltage(0); chV1[1] = getChannelOneVoltage(1); chV1[2] = getChannelOneVoltage(2);
+    chV2[0] = getChannelTwoVoltage(0); chV2[1] = getChannelTwoVoltage(1); chV2[2] = getChannelTwoVoltage(2);
+    chV3[0] = getChannelThreeVoltage(0); chV3[1] = getChannelThreeVoltage(1); chV3[2] = getChannelThreeVoltage(2);
+    chV4[0] = getChannelFourVoltage(0); chV4[1] = getChannelFourVoltage(1); chV4[2] = getChannelFourVoltage(2);
+
     string l = to_string(getLeftMouseStatus());
     string r = to_string(getRightMouseStatus());
-    data = "{\"type\":\"real_time_data\", \"ch_v1\":" + chV1S + ", \"ch_v2\":" + chV2S + ", \"ch_v3\":" + chV3S + ", \"ch_v4\":" + chV4S + ", \"left_click\":" + l + ", \"right_click\":" + r + "}";
+    string data = "{\"type\":\"real_time_data\", \"ch_v1\": [" + to_string(chV1[0]) +","+to_string(chV1[1]) +","+to_string(chV1[2]) +" ]" 
+    + ", \"ch_v2\":[" + to_string(chV2[0]) +","+to_string(chV2[1]) +","+to_string(chV2[2]) +"]"  
+    + ", \"ch_v3\":[" + to_string(chV3[0]) +","+to_string(chV3[1]) +","+to_string(chV3[2]) +"]"   
+    + ", \"ch_v4\":[" + to_string(chV4[0]) +","+to_string(chV4[1]) +","+to_string(chV4[2]) +"]"  
+    + ", \"ch_v1_tkeo\":[" + to_string(chV1[0]) +","+to_string(chV1[1]) +","+to_string(chV1[2]) +"]"  
+    + ", \"ch_v2_tkeo\":[" + to_string(chV2[0]) +","+to_string(chV2[1]) +","+to_string(chV2[2]) +"]"  
+    + ", \"ch_v3_tkeo\":[" + to_string(chV3[0]) +","+to_string(chV3[1]) +","+to_string(chV3[2]) +"]"  
+    + ", \"ch_v4_tkeo\":[" + to_string(chV4[0]) +","+to_string(chV4[1]) +","+to_string(chV4[2]) +"]"  
+    + ", \"left_click\":" + l 
+    + ", \"right_click\":" + r + "}";
     return data;
 }
 

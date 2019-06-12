@@ -8,7 +8,7 @@ export default class RealTimeData extends Component {
   constructor(props) {
     super(props)
 
-    this.totalSamplesOnChart = 200;
+    this.totalSamplesOnChart = 230;
 
 
     this.ch1Array = [];
@@ -34,6 +34,7 @@ export default class RealTimeData extends Component {
           },
           {
             label: 'Channel 2',
+
             data: this.tmp2
           },
           {
@@ -92,16 +93,16 @@ export default class RealTimeData extends Component {
               labelString: 'Voltage'
             },
             ticks: {
-              min: -4,
+              min: -3,
               beginAtZero: true,
               steps: 0.000001,
-              max: 4
+              max: 3
             }
           }]
         },
         title: {
           display: true,
-          text: 'Chart.js Line Chart - LegendChart'
+          text: 'Real Time Data EMG & Mouse Data'
         }
       }
     };
@@ -264,7 +265,7 @@ export default class RealTimeData extends Component {
           height: '100%',
           padding: '5%',
         }}>
-          <p>Real Time Data Section</p>
+          <p></p>
 
 
           <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
@@ -273,6 +274,14 @@ export default class RealTimeData extends Component {
             </div>
           </div>
 
+          <div style={{ display: 'flex', justifyContent: 'center'}}>
+            {/* <Bar
+              data={data}
+              options={{
+                maintainAspectRatio: true
+              }}
+            /> */}
+          </div>
 
         </div>
       </div>

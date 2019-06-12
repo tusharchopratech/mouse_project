@@ -25,6 +25,7 @@
   <script>
     var net = require('net');
     var client = new net.Socket();
+
     // var cmd=require('node-cmd');
 
     //   cmd.get(
@@ -42,8 +43,8 @@
       });
 
       client.on('data', function (data) {
-        // console.log('\nReceived: ' + data + ' at ' + new Date().getTime());
-        socketData(data);
+        console.log('\nReceived: ' + data + ' at ' + new Date().getTime());
+        // socketData(data);
         client.write('real_time_data');
       });
 
