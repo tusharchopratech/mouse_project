@@ -8,8 +8,8 @@ export default class RealTimeData extends Component {
   constructor(props) {
     super(props)
 
-    this.totalSamplesOnChartOne = 1000;
-    this.totalSamplesOnChartTwo = 1000;
+    this.totalSamplesOnChartOne = 2048;
+    this.totalSamplesOnChartTwo = 2048;
 
     this.ch1Array = [];
     this.ch2Array = [];
@@ -108,10 +108,10 @@ export default class RealTimeData extends Component {
               labelString: 'Voltage'
             },
             ticks: {
-              min: -3,
+              min: -4,
               beginAtZero: true,
               steps: 0.000001,
-              max: 3
+              max: 4
             }
           }]
         },
@@ -158,8 +158,8 @@ export default class RealTimeData extends Component {
             },
             ticks: {
               beginAtZero: true,
-              min: -0.05,
-              max: 0.05
+              min: -0.002,
+              max: 0.002
             }
           }]
         },
@@ -190,7 +190,7 @@ export default class RealTimeData extends Component {
     }
 
     setTimeout(window.startSocket(), 1);
-    // setTimeout(this.getTcpScoketData.bind(this), 1);
+    setTimeout(this.getTcpScoketData.bind(this), 1);
     this.start_time = new Date().getTime();
   }
 
@@ -215,46 +215,20 @@ export default class RealTimeData extends Component {
     var jsonObject = JSON.parse(String(val));
     if (jsonObject.type == "real_time_data") {
 
-      this.ch1Array.push(jsonObject.ch_v1[0]);
-      this.ch1Array.push(jsonObject.ch_v1[1]);
-      this.ch1Array.push(jsonObject.ch_v1[2]);
-      this.ch1Array.splice(0, 1);
-      this.ch1Array.splice(0, 1);
-      this.ch1Array.splice(0, 1);
-
-      this.ch2Array.push(jsonObject.ch_v2[0]);
-      this.ch2Array.push(jsonObject.ch_v2[1]);
-      this.ch2Array.push(jsonObject.ch_v2[2]);
-      this.ch2Array.splice(0, 1);
-      this.ch2Array.splice(0, 1);
-      this.ch2Array.splice(0, 1);
-
-      this.leftClickArray.push(jsonObject.left_click);
-      this.leftClickArray.push(jsonObject.left_click);
-      this.leftClickArray.push(jsonObject.left_click);
-      this.leftClickArray.splice(0, 1);
-      this.leftClickArray.splice(0, 1);
-      this.leftClickArray.splice(0, 1);
-
-      this.rightClickArray.push(jsonObject.right_click);
-      this.rightClickArray.push(jsonObject.right_click);
-      this.rightClickArray.push(jsonObject.right_click);
-      this.rightClickArray.splice(0, 1);
-      this.rightClickArray.splice(0, 1);
-      this.rightClickArray.splice(0, 1);
-
-      this.ch1ArrayTkeo.push(jsonObject.ch_v1_tkeo);
-      this.ch1ArrayTkeo.push(jsonObject.ch_v1_tkeo);
-      this.ch1ArrayTkeo.push(jsonObject.ch_v1_tkeo);
-      this.ch1ArrayTkeo.splice(0, 1);
-      this.ch1ArrayTkeo.splice(0, 1);
-      this.ch1ArrayTkeo.splice(0, 1);
-      this.ch2ArrayTkeo.push(jsonObject.ch_v2_tkeo);
-      this.ch2ArrayTkeo.push(jsonObject.ch_v2_tkeo);
-      this.ch2ArrayTkeo.push(jsonObject.ch_v2_tkeo);
-      this.ch2ArrayTkeo.splice(0, 1);
-      this.ch2ArrayTkeo.splice(0, 1);
-      this.ch2ArrayTkeo.splice(0, 1);
+      for (let index = 0; index < jsonObject.total_samples; index++) {
+        this.ch1Array.push(jsonObject.ch_v1[index]);
+        this.ch2Array.push(jsonObject.ch_v2[index]);
+        this.leftClickArray.push(jsonObject.left_click[index]);
+        this.rightClickArray.push(jsonObject.right_click[index]);
+        this.ch1ArrayTkeo.push(jsonObject.ch_v1_tkeo[index]);
+        this.ch2ArrayTkeo.push(jsonObject.ch_v2_tkeo[index]);
+        this.ch1Array.splice(0, 1);
+        this.ch2Array.splice(0, 1);
+        this.leftClickArray.splice(0, 1);
+        this.rightClickArray.splice(0, 1);
+        this.ch1ArrayTkeo.splice(0, 1);
+        this.ch2ArrayTkeo.splice(0, 1);
+      }
     }
   }
 
@@ -281,14 +255,14 @@ export default class RealTimeData extends Component {
             fill: false,
             backgroundColor: '#99ff0000',
             borderColor: '#ff0000',
-            data: this.getClickData("left", 1)
+            data: this.getClickData("left", 3)
           },
           {
             label: 'Right Click',
             fill: false,
             backgroundColor: '#99006600',
             borderColor: '#006600',
-            data: this.getClickData("right", 1)
+            data: this.getClickData("right", 3)
           },
         ]
       }
@@ -318,14 +292,14 @@ export default class RealTimeData extends Component {
             fill: false,
             backgroundColor: '#99ff0000',
             borderColor: '#ff0000',
-            data: this.getClickData("left", 0.005)
+            data: this.getClickData("left", 0.001)
           },
           {
             label: 'Right Click',
             fill: false,
             backgroundColor: '#99006600',
             borderColor: '#006600',
-            data: this.getClickData("right", 0.006)
+            data: this.getClickData("right", 0.001)
           },
         ]
       }

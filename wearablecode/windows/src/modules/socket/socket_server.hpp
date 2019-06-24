@@ -47,11 +47,14 @@ int *lC, *rC;
 int totalNumberOfSamplesForSocketData;
 string finalSocketData;
 
-double getTkeoValue(double sample1, double sample2, double sample3)
-{
-    double v1 = sample1 * sample1 * sample1;
-    double v2 = sample2 * sample2 * sample2;
-    double v3 = sample3 * sample3 * sample3;
+double getTkeoValue(double sample1, double sample2, double sample3, int channelNumber)
+{   
+    double v1 = getFilteredValue(channelNumber,sample1);
+    double v2 = getFilteredValue(channelNumber,sample2);
+    double v3 = getFilteredValue(channelNumber,sample3);
+    v1=v1*v1*v1;
+    v2=v2*v2*v2;
+    v3=v3*v3*v3;
     double result = v2 * v2 - v1 * v3;
     return result;
 }
@@ -83,10 +86,10 @@ string getSocketData()
 
         if (i == totalNumberOfSamplesForSocketData - 1)
         {
-            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i]);
-            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i]);
-            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i]);
-            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i]);
+            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i],1);
+            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i],2);
+            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i],3);
+            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i],4);
             chV1TkeoString = chV1TkeoString + "," + to_string(ch1Tkeo) + "," + to_string(ch1Tkeo) + "," + to_string(ch1Tkeo);
             chV2TkeoString = chV2TkeoString + "," + to_string(ch2Tkeo) + "," + to_string(ch2Tkeo) + "," + to_string(ch2Tkeo);
             chV3TkeoString = chV3TkeoString + "," + to_string(ch3Tkeo) + "," + to_string(ch3Tkeo) + "," + to_string(ch3Tkeo);
@@ -94,19 +97,19 @@ string getSocketData()
         }
         else if (i == 2)
         {
-            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i]);
-            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i]);
-            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i]);
-            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i]);
+            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i],1);
+            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i],2);
+            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i],3);
+            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i],4);
             chV1TkeoString = to_string(ch1Tkeo);
             chV2TkeoString = to_string(ch2Tkeo);
             chV3TkeoString = to_string(ch3Tkeo);
             chV4TkeoString = to_string(ch4Tkeo);
         } else  if (i > 2){
-            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i]);
-            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i]);
-            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i]);
-            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i]);
+            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i],1);
+            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i],2);
+            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i],3);
+            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i],4);
             chV1TkeoString = chV1TkeoString + "," + to_string(ch1Tkeo);
             chV2TkeoString = chV2TkeoString + "," + to_string(ch2Tkeo);
             chV3TkeoString = chV3TkeoString + "," + to_string(ch3Tkeo);
@@ -135,7 +138,7 @@ string getSocketData()
 
     string l = to_string(getLeftMouseStatus());
     string r = to_string(getRightMouseStatus());
-    string data = "{\"type\":\"real_time_data\", \"ch_v1\": [" + chV1String + "]" + ", \"ch_v2\":[" + chV2String + "]" + ", \"ch_v3\":[" + chV3String + "]" + ", \"ch_v4\":[" + chV4String + "]" + ", \"ch_v1_tkeo\": [" + chV1TkeoString + "]" + ", \"ch_v2_tkeo\":[" + chV2TkeoString + "]" + ", \"ch_v3_tkeo\":[" + chV3TkeoString + "]" + ", \"ch_v4_tkeo\":[" + chV4TkeoString + "]" + ", \"left_click\": [" + lCString + "]" + ", \"right_click\": [" + rCString + "]" + "}";
+    string data = "{\"type\":\"real_time_data\", \"total_samples\": "+to_string(totalNumberOfSamplesForSocketData)+", \"ch_v1\": [" + chV1String + "]" + ", \"ch_v2\":[" + chV2String + "]" + ", \"ch_v3\":[" + chV3String + "]" + ", \"ch_v4\":[" + chV4String + "]" + ", \"ch_v1_tkeo\": [" + chV1TkeoString + "]" + ", \"ch_v2_tkeo\":[" + chV2TkeoString + "]" + ", \"ch_v3_tkeo\":[" + chV3TkeoString + "]" + ", \"ch_v4_tkeo\":[" + chV4TkeoString + "]" + ", \"left_click\": [" + lCString + "]" + ", \"right_click\": [" + rCString + "]" + "}";
     return data;
 }
 
