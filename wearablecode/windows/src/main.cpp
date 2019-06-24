@@ -13,7 +13,7 @@ using namespace std::chrono;
 
 int main()
 {
-	int totalNumberOfSamples = 20;
+	int totalNumberOfSamples = 5;
 
 	setupFilter();
 	setupDaqCard(totalNumberOfSamples);

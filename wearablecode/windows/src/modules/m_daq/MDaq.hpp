@@ -24,7 +24,7 @@ int Options;
 int totalNumberOfSamplesForChannels;
 
 double *ADData;
-float *channelVoltage1, *channelVoltage2, *channelVoltage3, *channelVoltage4;
+double *channelVoltage1, *channelVoltage2, *channelVoltage3, *channelVoltage4;
 
 void getVoltageFromChannel()
 {
@@ -44,10 +44,10 @@ void getVoltageFromChannel()
 void setupDaqCard(int totalSamples)
 {
     totalNumberOfSamplesForChannels = totalSamples;
-    channelVoltage1 = new float[totalNumberOfSamplesForChannels];
-    channelVoltage2 = new float[totalNumberOfSamplesForChannels];
-    channelVoltage3 = new float[totalNumberOfSamplesForChannels];
-    channelVoltage4 = new float[totalNumberOfSamplesForChannels];
+    channelVoltage1 = new double[totalNumberOfSamplesForChannels];
+    channelVoltage2 = new double[totalNumberOfSamplesForChannels];
+    channelVoltage3 = new double[totalNumberOfSamplesForChannels];
+    channelVoltage4 = new double[totalNumberOfSamplesForChannels];
     
     BoardNum = 0;
     Gain = BIP5VOLTS;
@@ -72,22 +72,22 @@ void setupDaqCard(int totalSamples)
 }
 
 
-float getChannelOneVoltage(int samplePosition)
+double getChannelOneVoltage(int samplePosition)
 {
     return channelVoltage1[samplePosition];
 }
 
-float getChannelTwoVoltage(int samplePosition)
+double getChannelTwoVoltage(int samplePosition)
 {
     return channelVoltage2[samplePosition];
 }
 
-float getChannelThreeVoltage(int samplePosition)
+double getChannelThreeVoltage(int samplePosition)
 {
     return channelVoltage3[samplePosition];
 }
 
-float getChannelFourVoltage(int samplePosition)
+double getChannelFourVoltage(int samplePosition)
 {
     return channelVoltage4[samplePosition];
 }
