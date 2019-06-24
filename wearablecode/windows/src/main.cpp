@@ -13,9 +13,11 @@ using namespace std::chrono;
 
 int main()
 {
+	int totalNumberOfSamples = 20;
+
 	setupFilter();
-	setupDaqCard();
-	setupMouseMonitoring();
-	setupSocket();
+	setupDaqCard(totalNumberOfSamples);
+	setupMouseMonitoring(totalNumberOfSamples);
+	setupSocket(totalNumberOfSamples);
 	return 0;
 }

@@ -3,6 +3,11 @@
 
 #include <windows.h>
 #include <stdio.h>
+#include <thread>
+#include <vector>
+
+
+using namespace std;
 
 HHOOK hMouseHook;
 HANDLE hThread;
@@ -10,6 +15,40 @@ DWORD dwThread;
 
 int leftMouseStatus = 0;
 int rightMouseStatus = 0;
+int totalNumberOfSamples;
+vector<int> leftMouseClickVector, rightMouseClickVector;
+
+
+
+void setLeftMouseStatus(int status)
+{
+    leftMouseStatus = status;
+}
+
+int getLeftMouseStatus()
+{
+    return leftMouseStatus;
+}
+
+void setRightMouseStatus(int status)
+{
+    rightMouseStatus = status;
+}
+
+int getRightMouseStatus()
+{
+    return rightMouseStatus;
+}
+
+int getLeftMouseStatusAtIndex(int index){
+    return leftMouseClickVector[index];
+}
+
+int getRightMouseStatusAtIndex(int index){
+    return rightMouseClickVector[index];
+}
+
+
 
 LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
@@ -18,19 +57,19 @@ LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
     {
         if (wParam == WM_LBUTTONDOWN)
         {
-            leftMouseStatus = 1;
+            setLeftMouseStatus(1);
         }
         else if (wParam == WM_LBUTTONUP)
         {
-            leftMouseStatus = 0;
+            setLeftMouseStatus(0);
         }
         else if (wParam == WM_RBUTTONDOWN)
         {
-            rightMouseStatus = 1;
+            setRightMouseStatus(1);
         }
         else if (wParam == WM_RBUTTONUP)
         {
-            rightMouseStatus = 0;
+            setRightMouseStatus(0);
         }
     }
     return CallNextHookEx(hMouseHook, nCode, wParam, lParam);
@@ -54,24 +93,33 @@ DWORD WINAPI MyMouseLogger(LPVOID lpParm)
     return 0;
 }
 
-void setupMouseMonitoring()
+void startMouseRecording()
 {
+
+    while (1)
+    {
+        std::this_thread::sleep_for(std::chrono::microseconds(500));
+        leftMouseClickVector.insert(leftMouseClickVector.end(), getLeftMouseStatus());
+        rightMouseClickVector.insert(rightMouseClickVector.end(), getRightMouseStatus());
+        if (leftMouseClickVector.size() > totalNumberOfSamples)
+        {
+             leftMouseClickVector.erase(leftMouseClickVector.begin());
+        }
+        if (rightMouseClickVector.size() > totalNumberOfSamples)
+        {
+            rightMouseClickVector.erase(rightMouseClickVector.begin());
+        }
+    }
+}
+
+void setupMouseMonitoring(int totalSamples)
+{
+    totalNumberOfSamples = totalSamples;
     hThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)MyMouseLogger, NULL, NULL, &dwThread);
+    CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)startMouseRecording, NULL, NULL, NULL);
 }
 
 
-// Mouse Functions Below
-
-
-int getLeftMouseStatus()
-{
-    return leftMouseStatus;
-}
-
-int getRightMouseStatus()
-{
-    return rightMouseStatus;
-}
 
 void mouseEvent(char mouseButton, char mouseEvent)
 {
