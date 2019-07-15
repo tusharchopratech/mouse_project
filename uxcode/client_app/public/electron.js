@@ -1,72 +1,147 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
-
+const { app, BrowserWindow } = require('electron');
+const ipc = require('electron').ipcMain;
 
 const path = require('path');
 const url = require('url');
 const isDev = require('electron-is-dev');
 
+var child = require('child_process').execFile;
+var isBackendRunning = false;
+var backendRunningIndex = 1;
+var maxBackendRunningTry = 5;
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
+var isSocketConnect = false;
+var socketConnectionIndex = 1;
+var maxSocketConnectionTry = 5;
+
+var process_to_kill = [];
+
+var net = require('net');
+var client = new net.Socket();
+var socketData = null;
+var startReceivingRealTimeData = false;
+
 let mainWindow
 
-function createWindow () {
-  // Create the browser window.
+function createWindow() {
 
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    title:"Desktop App",
+    title: "Desktop App",
     webPreferences: {
       nodeIntegration: true
     }
   })
 
-  // and load the index.html of the app.
-  // mainWindow.loadFile('index.html')
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
-
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
-
-  // Emitted when the window is closed.
   mainWindow.on('closed', function () {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
     mainWindow = null
   })
 
-// mainWindow.setMinimizable(false);
-// mainWindow.setAlwaysOnTop(true, "floating");
-// mainWindow.setVisibleOnAllWorkspaces(true);
-// mainWindow.setFullScreenable(false);
+  startBackend();
+}
 
-// mainWindow.setKiosk(true);
+function startBackend() {
 
+  var error = false;
 
+  var processData = child("../../wearablecode/windows/src/main.exe", function (err, data) {
+    if (err) {
+      console.error("Backend Connection Error : ", err);
+      error = true;
+    } else {
+      error = false;
+    }
+  });
+
+  if (error) {
+    isBackendRunning = false;
+    if (backendRunningIndex < maxBackendRunningTry) {
+      backendRunningIndex += 1;
+      console.log('Retrying Backend Connection...');
+      startBackend();
+    } else {
+      console.log("Maximum attempt to start backedn reached.");
+      app.quit();
+    }
+  } else {
+    console.log('Backend Connected !!!');
+    setTimeout(connectSocket, 5000);
+    isBackendRunning = true;
+    process_to_kill.push(processData.pid);
+  }
 
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+function connectSocket() {
+
+  client.connect(27015, 'localhost', function () {
+    console.log('Socket Connected !!!');
+    isSocketConnect = true;
+    client.write('real_time_data');
+  });
+
+  client.on('data', function (data) {
+
+    socketData = new Buffer(data).toString('ascii');
+    mainWindow.webContents.send('real_time_data', socketData);
+    if (startReceivingRealTimeData) {
+      client.write('real_time_data');
+    }
+    // console.log(socketData);
+    // while (isDataArrayFree() == false) {
+    // }
+    // var status = tcpScoketData("write", data);
+    // if (status != 1) {
+    //   while (status != 1) {
+    //     status = tcpScoketData("write", data);
+    //   }
+    // // }
+    // client.write('real_time_data');
+  });
+
+  client.on('close', function () {
+    isSocketConnect = false;
+    console.log('Socket Closed...');
+  });
+
+  client.on('error', function (err) {
+    isSocketConnect = false;
+    console.error("Socket Connection Error : ", err);
+  });
+}
+
+ipc.on('socket_data_send', (event, data) => {
+  if (data == "real_time_data") {
+    startReceivingRealTimeData = true;
+    client.write('real_time_data');
+  } else {
+    startReceivingRealTimeData = false;
+  }
+})
+
+
 app.on('ready', createWindow)
 
-// Quit when all windows are closed.
 app.on('window-all-closed', function () {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Qer
   if (process.platform !== 'darwin') app.quit()
 })
 
 app.on('activate', function () {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow()
 })
 
+app.on('before-quit', function () {
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+});
+
+app.on('window-all-closed', function () {
+  for (var i = 0; i < process_to_kill.length; i++) {
+    var kill = require('tree-kill');
+    kill(process_to_kill[i]);
+  }
+  process_to_kill = [];
+});
+

@@ -24,65 +24,27 @@
 
   <script>
 
-    var net = require('net');
-    var client = new net.Socket();
     var isDataArrayAvaiable = true;
     var dataArray = [];
 
-    // var cmd=require('node-cmd');
 
-    //   cmd.get(
-    //       'node src/native_modules/mouse_click/index.js right',
-    //       function(err, data, stderr){
-    //           console.log('the current working dir is : ',err)
-    //       }
-    //   );
-
-
-
-    function startSocket() {
-      client.connect(27015, 'localhost', function () {
-        console.log('Connected');
-        client.write('real_time_data');
-      });
-
-      client.on('data', function (data) {
-
-        console.log('\nReceived: ' + data + ' at ' + new Date().getTime());
-        
-        while(isDataArrayFree() == false){
-        }
-        var status = tcpScoketData("write", data);
-        if (status != 1) {
-          while (status != 1) {
-            status = tcpScoketData("write", data);
-          }
-        } 
-        client.write('real_time_data');
-      });
-
-      client.on('close', function () {
-        console.log('Connection closed');
-      });
-
-      client.on('error', function (err) {
-        console.log(err);
-      });
+    function isDataArrayFree() {
+      return isDataArrayAvaiable;
     }
 
-    function tcpScoketData(operation, data) {
+    function getScoketData(operation, data) {
       if (isDataArrayFree()) {
         isDataArrayAvaiable = false;
         if (operation == "write") {
           dataArray.push(data);
-          console.log("Data in Windows 1 : "+dataArray.length + ' at ' + new Date().getTime());
+          console.log("Data in Windows 1 : " + dataArray.length + ' at ' + new Date().getTime());
           isDataArrayAvaiable = true;
           return 1;
         } else if (operation == "read") {
           var tmp = [];
           tmp = dataArray;
           dataArray = [];
-          console.log("Data in Windows 2 : "+dataArray.length + ' at ' + new Date().getTime());
+          console.log("Data in Windows 2 : " + dataArray.length + ' at ' + new Date().getTime());
           isDataArrayAvaiable = true;
           return tmp;
         }
@@ -91,15 +53,7 @@
       return 0;
     }
 
-    function isDataArrayFree() {
-      return isDataArrayAvaiable;
-    }
-
-
-    function myFunction(func) {
-      func("This is a text");
-      // console.log("Inside my function.");
-    }
+    
 
   </script>
 </head>

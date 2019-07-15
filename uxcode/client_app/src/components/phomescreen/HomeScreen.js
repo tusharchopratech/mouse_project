@@ -6,9 +6,10 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import MyDrawer from './MyDrawer';
-import Caliberation from '../pcaliberation/Caliberation';
+import Caliberation from '../pcaliberation/Caliberation2';
 import UserTraining from '../pusertraning/UserTraining';
 import RealTimeData from '../prealtimedata/RealTimeData';
+import Welcome from '../pwelcome/Welcome';
 import Report from '../preport/Report';
 
 
@@ -41,6 +42,8 @@ export class HomeScreen extends Component {
       return <RealTimeData />
     } else if (val === "report") {
       return <Report />
+    } else if (val === "welcome") {
+      return <Welcome  callbackSetMainSection={this.setMainSection} />
     }
   };
 
@@ -49,7 +52,7 @@ export class HomeScreen extends Component {
     this.right = this.left+this.containerRef.current.offsetWidth
     this.top=0
     this.bottom= this.top+ this.containerRef.current.offsetHeight;
-    this.setState({ current_screen: 'caliberation' });
+    this.setState({ current_screen: 'welcome' });
   };
 
   render() {

@@ -9,6 +9,7 @@ import { ReactComponent as WaveIcon } from '../../images/wave.svg';
 import { ReactComponent as MouseIcon } from '../../images/mouse.svg';
 import { ReactComponent as GamePadIcon } from '../../images/gamepad.svg';
 import { ReactComponent as DocumentIcon } from '../../images/document.svg';
+import { ReactComponent as HandIcon } from '../../images/hand.svg';
 
 
 const drawerWidth = 240;
@@ -48,6 +49,12 @@ class MyDrawer extends Component {
             >
                 <div className={classes.toolbar} />
                 <List>
+                    <ListItem button onClick={this.handleClick.bind(this,'welcome')}>
+                        <ListItemIcon>
+                            <HandIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={'Welcome'} />
+                    </ListItem>
                     <ListItem button onClick={this.handleClick.bind(this,'caliberation')}>
                         <ListItemIcon>
                             <WaveIcon />
