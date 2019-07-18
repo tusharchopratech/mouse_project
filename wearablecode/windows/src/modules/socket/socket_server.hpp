@@ -9,7 +9,10 @@
 #include <stdio.h>
 #include <string>
 
-#include "..\filter\Filter.hpp"
+
+// #include "modules\filter\FilterTools.cpp"
+// #include "..\filter\Filter.hpp"
+// #include "..\training\Training.cpp"
 using namespace std;
 // Need to link with Ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
@@ -24,8 +27,7 @@ using namespace std;
 using namespace std::chrono;
 void logTime()
 {
-    cout << "\n"
-         << duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() << std::flush;
+    cout << "\n"<< duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() << std::flush;
     // printf("\n%ld", duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
 }
 
@@ -45,16 +47,17 @@ int recvbuflen = DEFAULT_BUFLEN;
 double *chV1, *chV2, *chV3, *chV4;
 int *lC, *rC;
 int totalNumberOfSamplesForSocketData;
-string finalSocketData;
+
+FilterTools filterTools2;
 
 double getTkeoValue(double sample1, double sample2, double sample3, int channelNumber)
-{   
-    double v1 = getFilteredValue(channelNumber,sample1);
-    double v2 = getFilteredValue(channelNumber,sample2);
-    double v3 = getFilteredValue(channelNumber,sample3);
-    v1=v1*v1*v1;
-    v2=v2*v2*v2;
-    v3=v3*v3*v3;
+{
+    double v1 = filterTools2.getFilteredValue(channelNumber, sample1);
+    double v2 = filterTools2.getFilteredValue(channelNumber, sample2);
+    double v3 = filterTools2.getFilteredValue(channelNumber, sample3);
+    v1 = v1 * v1 * v1;
+    v2 = v2 * v2 * v2;
+    v3 = v3 * v3 * v3;
     double result = v2 * v2 - v1 * v3;
     return result;
 }
@@ -86,10 +89,10 @@ string getSocketData()
 
         if (i == totalNumberOfSamplesForSocketData - 1)
         {
-            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i],1);
-            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i],2);
-            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i],3);
-            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i],4);
+            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i], 1);
+            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i], 2);
+            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i], 3);
+            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i], 4);
             chV1TkeoString = chV1TkeoString + "," + to_string(ch1Tkeo) + "," + to_string(ch1Tkeo) + "," + to_string(ch1Tkeo);
             chV2TkeoString = chV2TkeoString + "," + to_string(ch2Tkeo) + "," + to_string(ch2Tkeo) + "," + to_string(ch2Tkeo);
             chV3TkeoString = chV3TkeoString + "," + to_string(ch3Tkeo) + "," + to_string(ch3Tkeo) + "," + to_string(ch3Tkeo);
@@ -97,19 +100,21 @@ string getSocketData()
         }
         else if (i == 2)
         {
-            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i],1);
-            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i],2);
-            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i],3);
-            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i],4);
+            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i], 1);
+            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i], 2);
+            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i], 3);
+            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i], 4);
             chV1TkeoString = to_string(ch1Tkeo);
             chV2TkeoString = to_string(ch2Tkeo);
             chV3TkeoString = to_string(ch3Tkeo);
             chV4TkeoString = to_string(ch4Tkeo);
-        } else  if (i > 2){
-            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i],1);
-            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i],2);
-            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i],3);
-            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i],4);
+        }
+        else if (i > 2)
+        {
+            ch1Tkeo = getTkeoValue(chV1[i - 2], chV1[i - 1], chV1[i], 1);
+            ch2Tkeo = getTkeoValue(chV2[i - 2], chV2[i - 1], chV2[i], 2);
+            ch3Tkeo = getTkeoValue(chV3[i - 2], chV3[i - 1], chV3[i], 3);
+            ch4Tkeo = getTkeoValue(chV4[i - 2], chV4[i - 1], chV4[i], 4);
             chV1TkeoString = chV1TkeoString + "," + to_string(ch1Tkeo);
             chV2TkeoString = chV2TkeoString + "," + to_string(ch2Tkeo);
             chV3TkeoString = chV3TkeoString + "," + to_string(ch3Tkeo);
@@ -138,12 +143,13 @@ string getSocketData()
 
     string l = to_string(getLeftMouseStatus());
     string r = to_string(getRightMouseStatus());
-    string data = "{\"type\":\"real_time_data\", \"total_samples\": "+to_string(totalNumberOfSamplesForSocketData)+", \"ch_v1\": [" + chV1String + "]" + ", \"ch_v2\":[" + chV2String + "]" + ", \"ch_v3\":[" + chV3String + "]" + ", \"ch_v4\":[" + chV4String + "]" + ", \"ch_v1_tkeo\": [" + chV1TkeoString + "]" + ", \"ch_v2_tkeo\":[" + chV2TkeoString + "]" + ", \"ch_v3_tkeo\":[" + chV3TkeoString + "]" + ", \"ch_v4_tkeo\":[" + chV4TkeoString + "]" + ", \"left_click\": [" + lCString + "]" + ", \"right_click\": [" + rCString + "]" + "}";
+    string data = "{\"type\":\"real_time_data\", \"total_samples\": " + to_string(totalNumberOfSamplesForSocketData) + ", \"ch_v1\": [" + chV1String + "]" + ", \"ch_v2\":[" + chV2String + "]" + ", \"ch_v3\":[" + chV3String + "]" + ", \"ch_v4\":[" + chV4String + "]" + ", \"ch_v1_tkeo\": [" + chV1TkeoString + "]" + ", \"ch_v2_tkeo\":[" + chV2TkeoString + "]" + ", \"ch_v3_tkeo\":[" + chV3TkeoString + "]" + ", \"ch_v4_tkeo\":[" + chV4TkeoString + "]" + ", \"left_click\": [" + lCString + "]" + ", \"right_click\": [" + rCString + "]" + "}";
     return data;
 }
 
 void startListeningFromSocket()
 {
+    string finalSocketData;
     do
     {
         iResult = recv(ClientSocket, receivedMessageFromClient, DEFAULT_BUFLEN, 0);
@@ -151,16 +157,20 @@ void startListeningFromSocket()
         if (str == "real_time_data")
         {
             finalSocketData = getSocketData();
-            // cout << "\n\n"
-                //  << finalSocketData;
             iSendResult = send(ClientSocket, finalSocketData.c_str(), finalSocketData.length(), 0);
-            // logTime();
+        }
+        else if (str == "start_training")
+        {
+        }
+        else if (str == "stop_training")
+        {
         }
     } while (iResult > 0);
 }
 
-int __cdecl setupSocket(int totalSamples)
+int __cdecl setupSocket(int totalSamples, FilterTools ft)
 {
+    filterTools2 = ft;
     totalNumberOfSamplesForSocketData = totalSamples;
     chV1 = new double[totalNumberOfSamplesForSocketData];
     chV2 = new double[totalNumberOfSamplesForSocketData];

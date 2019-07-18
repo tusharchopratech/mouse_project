@@ -6,7 +6,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import MyDrawer from './MyDrawer';
-import Caliberation from '../pcaliberation/Caliberation2';
+import Caliberation from '../pcaliberation/Caliberation';
 import UserTraining from '../pusertraning/UserTraining';
 import RealTimeData from '../prealtimedata/RealTimeData';
 import Welcome from '../pwelcome/Welcome';
@@ -35,9 +35,9 @@ export class HomeScreen extends Component {
 
   getMainSectionComponent = (val) => {
     if (val === "caliberation") {
-      return <Caliberation callbackSetMainSection={this.setMainSection} myTop={this.top} myBottom={this.bottom} myLeft={this.left} myRight={this.right} />
+      return <Caliberation callbackSetMainSection={this.setMainSection}  />
     } else if (val === "user_training") {
-      return <UserTraining />
+      return <UserTraining myTop={this.top} myBottom={this.bottom} myLeft={this.left} myRight={this.right} />
     } else if (val === "real_time_data") {
       return <RealTimeData />
     } else if (val === "report") {

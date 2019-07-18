@@ -1,157 +1,235 @@
-
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
+import PropTypes, { array } from 'prop-types';
 import Fab from '@material-ui/core/Fab';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import { ReactComponent as MouseIcon } from '../../images/mouse_white.svg';
-const BrowserWindow = window.require('electron').remote.BrowserWindow;
+import { Line } from 'react-chartjs-2';
+import { ReactComponent as HandIconWhite } from '../../images/hand_white.svg';
+
 
 class Caliberation extends Component {
 
-  constructor(props) {
-    super(props)
-    this.left = this.props.myLeft + 50; // adding 50 for bounday offset
-    this.right = this.props.myRight - 120; // bounday offset including width of the button
-    this.top = this.props.myTop + 64 + 50; // adding 64 for toolbar, 50 for boundary off set
-    this.bottom = this.props.myBottom - 80; // boundary offset including height of the button
-    this.max_clicks = 5;
-    this.i = 0;
-    this.click_info = {
-      up: null,
-      down: null
-    };
-    this.clicksInfoArray = []
-    this.state = {
-      start_showing_random_clicks: false,
-      showCaliberationButton: true,
-      openFinishDialog: false
-    };
-  };
+    constructor(props) {
+        super(props)
 
-  renderTest = (val) => {
-    if (val === true) {
-      if (this.i < this.max_clicks) {
-        this.i++;
-        this.x = this.top + Math.random() * (this.bottom - this.top);
-        this.y = this.left + Math.random() * (this.right - this.left);
-        return <Fab
-          size="small"
-          variant="extended"
-          color="primary"
-          aria-label="Add"
-          style={{ position: 'absolute', top: this.x, left: this.y }}
-          onMouseDown={this.onMouseDown}
-          onMouseUp={this.onMouseUp}
-          onClick={this.startCaliberation}> Click Me!</Fab>
-      } else {
-        console.log("Done Test");
-        this.setState({
-          start_showing_random_clicks: false,
-          showCaliberationButton: false,
-          openFinishDialog: true
-        });
-      }
-    } else {
-      return;
+        this.totalSamplesOnChart = 2048;
+        this.ch1Array = [];
+        this.ch2Array = [];
+        this.ch3Array = [];
+        this.ch1ArrayTemp = [];
+        this.ch2ArrayTemp = [];
+        this.ch3ArrayTemp = [];
+        this.startRendering = true;
+        this.tmp1 = [1];
+        this.state = {
+            first_plot_data: { labels: this.tmp1, datasets: [{ label: 'Channel 1', data: this.tmp1 }] },
+            second_plot_data: { labels: this.tmp1, datasets: [{ label: 'Channel 2', data: this.tmp1 }] },
+            third_plot_data: { labels: this.tmp1, datasets: [{ label: 'Channel 3', data: this.tmp1 }] },
+            plot_options: {
+                elements: {
+                    point: {
+                        radius: 0
+                    }
+                },
+                animation: {
+                    duration: 0
+                },
+                responsive: true,
+                legend: {
+                    position: 'bottom',
+                },
+                hover: {
+                    mode: 'label'
+                },
+                scales: {
+                    xAxes: [{
+                        gridLines: {
+                            color: "rgba(0, 0, 0, 0)",
+                        },
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Time'
+                        },
+                        ticks: {
+                            display: false
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Voltage'
+                        },
+                        ticks: {
+                            min: -4,
+                            beginAtZero: true,
+                            steps: 0.00001,
+                            max: 4
+                        }
+                    }]
+                },
+                title: {
+                    display: true,
+                    text: 'Channel 1 Data'
+                }
+            }
+        };
+    };
+
+    startTraining = () => {
+        const { ipcRenderer } = window.require("electron");
+        ipcRenderer.send("socket_data_send", "stop_real_time_data");
+        ipcRenderer.send("socket_data_send", "start_training");
+    };
+
+    componentDidMount = () => {
+        console.log("Component mounted");
+        for (var i = 0; i < this.totalSamplesOnChart; i++) {
+            this.ch1Array.push(0.0);
+            this.ch2Array.push(0.0);
+            this.ch3Array.push(0.0);
+        }
+        this.showRealTimeData();
     }
-  };
 
-  onMouseDown = () => {
-        // console.log("Mouse down");
-    this.click_info.down = new Date().toUTCString();
-  };
+    showRealTimeData = () => {
+        const { ipcRenderer } = window.require("electron");
+        ipcRenderer.send("socket_data_send", "start_real_time_data");
+        ipcRenderer.on('socket_data_received', function (event, data) {
+            // console.log("New Data at ", new Date().getTime());
+            var jsonObject = JSON.parse(String(data));
+            if (jsonObject.type == "real_time_data") {
+                if (this.startRendering) {
+                    this.startRendering = false;
+                    setTimeout(this.startRenderingGraphs, 50, this.ch1ArrayTemp, this.ch2ArrayTemp, this.ch3ArrayTemp);
+                    this.ch1ArrayTemp = [];
+                    this.ch2ArrayTemp = [];
+                    this.ch3ArrayTemp = [];
+                }
+                for (let index = 0; index < jsonObject.total_samples; index++) {
+                    this.ch1ArrayTemp.push(jsonObject.ch_v1[index]);
+                    this.ch2ArrayTemp.push(jsonObject.ch_v2[index]);
+                    this.ch3ArrayTemp.push(jsonObject.ch_v3[index]);
+                }
+            } else if (jsonObject.type == "training_started") {
+                this.props.callbackSetMainSection('user_training');
+            }
+        }.bind(this));
+    }
 
-  onMouseUp = () => {
+    startRenderingGraphs = (ch1Data, ch2Data, ch3Data) => {
+        this.ch1Array = this.ch1Array.concat(ch1Data);
+        this.ch2Array = this.ch2Array.concat(ch2Data);
+        this.ch3Array = this.ch3Array.concat(ch3Data);
+        this.ch1Array.splice(0, ch1Data.length);
+        this.ch2Array.splice(0, ch2Data.length);
+        this.ch3Array.splice(0, ch3Data.length);
+        this.setDataToChart();
+        this.startRendering = true;
+    }
 
-        // console.log("Mouse up");
-    this.click_info.up = new Date().toUTCString();
-    this.clicksInfoArray.push(this.click_info);
-  };
+    setDataToChart = () => {
+        this.setState({
+            first_plot_data: {
+                datasets: [
+                    {
+                        label: 'Channel 1',
+                        fill: false,
+                        backgroundColor: 'rgba(75,192,192,0.4)',
+                        borderColor: 'rgba(75,192,192,1)',
+                        data: this.getChannelData(1)
+                    }
+                ]
+            },
+            second_plot_data: {
+                datasets: [
+                    {
+                        label: 'Channel 2',
+                        fill: false,
+                        backgroundColor: 'rgba(75,192,192,0.4)',
+                        borderColor: 'rgba(75,192,192,1)',
+                        data: this.getChannelData(2)
+                    }
+                ]
+            },
+            third_plot_data: {
+                datasets: [
+                    {
+                        label: 'Channel 3',
+                        fill: false,
+                        backgroundColor: 'rgba(75,192,192,0.4)',
+                        borderColor: 'rgba(75,192,192,1)',
+                        data: this.getChannelData(3)
+                    }
+                ]
+            }
+        });
+    }
 
-  startCaliberation = () => {
-    this.setState({
-      start_showing_random_clicks: true,
-      showCaliberationButton: false,
-      openFinishDialog: false
-    });
-    // let w = new BrowserWindow({ 
-    //   width: 120, 
-    //   height: 60,
-    //   x:0,
-    //   y:0,
-    //   title:"Widget",
-    //   resizable: false,
-    //   fullscreenable:false,
-    //   // frame: false,
-    //   alwaysOnTop:true 
-    // })
+    getChannelData = (val) => {
+        var ar = [];
+        if (val == 1) {
+            for (var i = 0; i < this.ch1Array.length; i++) {
+                ar.push(this.ch1Array[i])
+            }
+        } else if (val == 2) {
+            for (var i = 0; i < this.ch2Array.length; i++) {
+                ar.push(this.ch2Array[i])
+            }
+        } else if (val == 3) {
+            for (var i = 0; i < this.ch3Array.length; i++) {
+                ar.push(this.ch3Array[i])
+            }
+        }
+        return ar;
+    }
 
-  };
 
-  closeFinishDialog = () => {
-    this.setState({
-      start_showing_random_clicks: false,
-      showCaliberationButton: false,
-      openFinishDialog: false
-    });
-    this.props.callbackSetMainSection('user_training');
-  };
+    render() {
+        const { classes } = this.props;
+        return (
+            <div style={{ height: '100%', width: '100%' }}>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    height: '100%',
+                    padding: '5%',
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column' }}>
 
-  render() {
-    const { classes } = this.props;
-    return (
-      <div>
-        {/* <p>Caliberation Section</p> */}
-        <Fab
-          variant="extended"
-          color="primary"
-          aria-label="Add"
-          onClick={this.startCaliberation}
-          style={{ display: this.state.showCaliberationButton ? '' : 'none' }}
-          className={classes.margin}
-        >
-          <MouseIcon className={classes.extendedIcon} />
-          Start Caliberation
-        </Fab>
-        {this.renderTest(this.state.start_showing_random_clicks)}
+                        <div style={{ flex: 1 }}>
+                            <Line data={this.state.first_plot_data} options={this.state.plot_options} height={40} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <Line data={this.state.second_plot_data} options={this.state.plot_options} height={40} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <Line data={this.state.third_plot_data} options={this.state.plot_options} height={40} />
+                        </div>
 
-        <Dialog
-          open={this.state.openFinishDialog}
-          onClose={this.closeFinishDialog}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-          disableBackdropClick={true}
-          disableEscapeKeyDown={true}
-        >
-          <DialogTitle id="alert-dialog-title">{"Caliberation Finished"}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Thank you for the calibration. Your click timings have been saved and threshold has been set.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.closeFinishDialog} color="primary">
-              Next
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </div>
-    )
-  }
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 30 }}>
+                        <Fab variant="extended" color="primary" aria-label="Add" onClick={this.startTraining} className={classes.margin}>
+                            <HandIconWhite className={classes.extendedIcon} />
+                            Next Step ( Click Training )
+                        </Fab>
+                    </div>
+
+                </div>
+            </div>
+        )
+    }
 }
 
 const styles = theme => ({
-  margin: {
-    margin: theme.spacing.unit,
-  },
-  extendedIcon: {
-    marginRight: theme.spacing.unit,
-  },
+    margin: {
+        margin: theme.spacing.unit,
+    },
+    extendedIcon: {
+        marginRight: theme.spacing.unit,
+    },
 });
 
 export default withStyles(styles, { withTheme: true })(Caliberation);

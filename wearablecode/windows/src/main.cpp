@@ -2,22 +2,26 @@
 #include <winsock2.h>
 #include <stdio.h>
 #include <chrono>
+#include <thread>
 
-#include "modules\m_daq\MDaq.hpp"
-#include "modules\mouse\MouseFunctions.hpp"
-#include "modules\socket\socket_server.hpp"
-#include "modules\filter\Filter.hpp"
-
-using namespace std;
-using namespace std::chrono;
+#include "modules\socket\SocketServer.cpp"
+// #include "modules\m_daq\MDaq.cpp"
 
 int main()
 {
-	int totalNumberOfSamples = 20;
 
-	setupFilter();
-	setupDaqCard(totalNumberOfSamples);
-	setupMouseMonitoring(totalNumberOfSamples);
-	setupSocket(totalNumberOfSamples);
+	// FilterTools filterTools;
+
+	// MouseFunctions::Instance().setupMouseMonitoring();
+	// MDaq mDaq;
+	// std::thread newThread(&MDaq::getVoltageFromChannel, mDaq);
+	SocketServer s;
+	// GloveTools gt;
+	// gt.startTraining();
+
+	// setupDaqCard(totalNumberOfSamples);
+	// setupMouseMonitoring(totalNumberOfSamples);
+	// setupSocket(totalNumberOfSamples, filterTools);
+
 	return 0;
 }

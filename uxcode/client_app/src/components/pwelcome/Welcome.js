@@ -14,12 +14,10 @@ class Welcome extends Component {
     }
 
     startCaliberation = () => {
-      
         this.props.callbackSetMainSection('caliberation');
     };
 
     componentDidMount = () => {
-      
     };
 
     render() {

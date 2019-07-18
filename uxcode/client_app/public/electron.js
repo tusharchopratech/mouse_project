@@ -84,22 +84,11 @@ function connectSocket() {
   });
 
   client.on('data', function (data) {
-
     socketData = new Buffer(data).toString('ascii');
-    mainWindow.webContents.send('real_time_data', socketData);
+    mainWindow.webContents.send('socket_data_received', socketData);
     if (startReceivingRealTimeData) {
       client.write('real_time_data');
     }
-    // console.log(socketData);
-    // while (isDataArrayFree() == false) {
-    // }
-    // var status = tcpScoketData("write", data);
-    // if (status != 1) {
-    //   while (status != 1) {
-    //     status = tcpScoketData("write", data);
-    //   }
-    // // }
-    // client.write('real_time_data');
   });
 
   client.on('close', function () {
@@ -114,11 +103,15 @@ function connectSocket() {
 }
 
 ipc.on('socket_data_send', (event, data) => {
-  if (data == "real_time_data") {
+  if (data == "start_real_time_data") {
     startReceivingRealTimeData = true;
     client.write('real_time_data');
-  } else {
+  } else if (data == "stop_real_time_data") {
     startReceivingRealTimeData = false;
+  } else if (data == "start_training") {
+    client.write('start_training');
+  } else if (data == "stop_training") {
+    client.write('stop_training');
   }
 })
 
