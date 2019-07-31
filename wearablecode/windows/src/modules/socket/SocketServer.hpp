@@ -38,7 +38,7 @@ private:
 
 public:
     SocketServer()
-    {
+    {     
         setupSocket();
         startListeningFromSocket();
     }

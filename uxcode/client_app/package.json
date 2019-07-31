@@ -1,17 +1,17 @@
 {
-  "name": "client-app",
+  "name": "impulse",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^3.9.3",
-    "bcrypt": "^3.0.6",
     "bootstrap": "^4.3.1",
     "canvasjs": "^1.8.1",
     "chart.js": "^2.8.0",
     "concurrently": "^4.1.0",
-    "electron-builder": "^20.39.0",
     "electron-common-ipc": "^6.4.1",
     "electron-is-dev": "^1.1.0",
+    "fast-tcp": "^3.3.2",
+    "jquery": "^3.4.1",
     "node-abi": "^2.8.0",
     "node-cmd": "^3.0.0",
     "ps-node": "^0.1.6",
@@ -23,8 +23,8 @@
     "react-rt-chart": "^2.0.0",
     "react-scripts": "3.0.0",
     "reactstrap": "^8.0.0",
-    "robotjs": "^0.5.1",
     "tree-kill": "^1.2.1",
+    "typescript": "^3.5.3",
     "wait-on": "^3.2.0"
   },
   "scripts": {
@@ -33,7 +33,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "electron-dev": "concurrently \"npm run start\" \"wait-on http://localhost:3000 && electron .\""
+    "pre-build": "node setup_backend_directory.js",
+    "electron-dev": "SET NODE_ENV=dev&& npm run pre-build && concurrently \"SET BROWSER=none&&npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-prod": "npm run pre-build && npm run build && build -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -52,6 +54,21 @@
   },
   "main": "public/electron.js",
   "devDependencies": {
-    "electron": "^5.0.1"
-  }
+    "electron": "^5.0.1",
+    "electron-packager": "^14.0.3",
+    "electron-builder": "^20.39.0"
+  },
+  "build": {
+    "appId": "com.example.electron-cra",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "extraResources": ["./src/extra-resources/**"]
+  },
+  "author": "Captain Tushar",
+  "homepage": "./"
 }

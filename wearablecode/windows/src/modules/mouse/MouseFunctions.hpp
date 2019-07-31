@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <thread>
-#include <vector>
+#include <queue>
 #include "..\edata\Global.cpp"
 
 using namespace std;
@@ -24,7 +24,7 @@ public:
     int leftMouseStatus = 0;
     int rightMouseStatus = 0;
     int thumbMouseStatus = 0;
-    vector<int> leftMouseClickVector, rightMouseClickVector, thumbMouseClickVector;
+    deque<int> leftMouseClickVector, rightMouseClickVector, thumbMouseClickVector;
 
     //single ton
     static MouseFunctions &Instance()

@@ -1,130 +1,76 @@
-// Modules to control application life and create native browser window
 const { app, BrowserWindow } = require('electron');
 const ipc = require('electron').ipcMain;
-
+var process = require('process');
 const path = require('path');
-const url = require('url');
 const isDev = require('electron-is-dev');
-
+var kill = require('tree-kill');
 var child = require('child_process').execFile;
-var isBackendRunning = false;
-var backendRunningIndex = 1;
-var maxBackendRunningTry = 5;
-
-var isSocketConnect = false;
-var socketConnectionIndex = 1;
-var maxSocketConnectionTry = 5;
-
-var process_to_kill = [];
-
 var net = require('net');
 var client = new net.Socket();
-var socketData = null;
-var startReceivingRealTimeData = false;
 
+
+var process_to_kill = [];
+var startReceivingRealTimeData = false;
 let mainWindow
 
-function createWindow() {
+var backEndPath;
+if (process.env.NODE_ENV == "dev") {
+  backEndPath = "./src/extra-resources/main.exe"; // For Dev
+} else {
+  backEndPath = "./resources/src/extra-resources/main.exe"; // For Prod
+}
 
+function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    title: "Desktop App",
-    webPreferences: {
+    title: "Desktop App",    webPreferences: {
       nodeIntegration: true
     }
   })
-
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
   mainWindow.on('closed', function () {
     mainWindow = null
-  })
-
-  startBackend();
-}
-
-function startBackend() {
-
-  var error = false;
-
-  var processData = child("../../wearablecode/windows/src/main.exe", function (err, data) {
-    if (err) {
-      console.error("Backend Connection Error : ", err);
-      error = true;
-    } else {
-      error = false;
-    }
   });
-
-  if (error) {
-    isBackendRunning = false;
-    if (backendRunningIndex < maxBackendRunningTry) {
-      backendRunningIndex += 1;
-      console.log('Retrying Backend Connection...');
-      startBackend();
-    } else {
-      console.log("Maximum attempt to start backedn reached.");
-      app.quit();
-    }
-  } else {
-    console.log('Backend Connected !!!');
-    setTimeout(connectSocket, 5000);
-    isBackendRunning = true;
-    process_to_kill.push(processData.pid);
-  }
-
-}
-
-function connectSocket() {
-
-  client.connect(27015, 'localhost', function () {
-    console.log('Socket Connected !!!');
-    isSocketConnect = true;
-    client.write('real_time_data');
-  });
-
-  client.on('data', function (data) {
-    socketData = new Buffer(data).toString('ascii');
-    mainWindow.webContents.send('socket_data_received', socketData);
-    if (startReceivingRealTimeData) {
-      client.write('real_time_data');
-    }
-  });
-
-  client.on('close', function () {
-    isSocketConnect = false;
-    console.log('Socket Closed...');
-  });
-
-  client.on('error', function (err) {
-    isSocketConnect = false;
-    console.error("Socket Connection Error : ", err);
-  });
+  connectSocket();
 }
 
 ipc.on('socket_data_send', (event, data) => {
-  if (data == "start_real_time_data") {
+  if (data == "start_raw_real_time_data") {
     startReceivingRealTimeData = true;
-    client.write('real_time_data');
-  } else if (data == "stop_real_time_data") {
+    client.write('raw_real_time_data' + '*****');
+  } else if (data == "stop_raw_real_time_data") {
     startReceivingRealTimeData = false;
   } else if (data == "start_training") {
-    client.write('start_training');
+    client.write('start_training' + '*****');
   } else if (data == "stop_training") {
-    client.write('stop_training');
+    client.write('stop_training' + '*****');
   }
-})
+});
 
+ipc.on('internal_ipc', (event, data) => {
+  if (data == "start_backend_and_socket") {
+    // for (var i = 0; i < process_to_kill.length; i++) {
+    //   try {
+    //     kill(process_to_kill[i]);
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // }
+    // process_to_kill = [];
+    // setTimeout(startBackend, 3000);
+  }
+});
 
 app.on('ready', createWindow)
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
-})
+});
 
 app.on('activate', function () {
   if (mainWindow === null) createWindow()
-})
+});
 
 app.on('before-quit', function () {
 
@@ -132,9 +78,60 @@ app.on('before-quit', function () {
 
 app.on('window-all-closed', function () {
   for (var i = 0; i < process_to_kill.length; i++) {
-    var kill = require('tree-kill');
-    kill(process_to_kill[i]);
+    kill(process_to_kill[i], 'SIGKILL', function (err) {
+      console.log("Error : ", err);
+    });
   }
   process_to_kill = [];
 });
 
+
+
+function startBackend() {
+  var error = false;
+  var processData = child(backEndPath, function (err, data) {
+    if (err) {
+      mainWindow.webContents.send('internal_ipc', err);
+      error = true;
+    } else {
+      error = false;
+    }
+  });
+
+  if (error) {
+    mainWindow.webContents.send('internal_ipc', 'backend_connection_error');
+  } else {
+    mainWindow.webContents.send('internal_ipc', 'backend_connected');
+    process_to_kill.push(processData.pid);
+    setTimeout(connectSocket, 2000);
+  }
+}
+
+function connectSocket() {
+  client.connect(27015, 'localhost', function () {
+    mainWindow.webContents.send('internal_ipc', 'socket_connected');
+    isSocketConnect = true;
+    client.write('raw_real_time_data' + '*****');
+  });
+
+  client.on('data', function (data) {
+    if (startReceivingRealTimeData) {
+      client.write('raw_real_time_data' + '*****');
+    }
+    if (mainWindow != null) {
+      mainWindow.webContents.send('socket_data_received', new Buffer(data).toString('ascii'));
+    }
+  });
+
+  client.on('close', function () {
+    isSocketConnect = false;
+    if (mainWindow != null) {
+      mainWindow.webContents.send('internal_ipc', 'socket_disconnected');
+    }
+  });
+
+  client.on('error', function (err) {
+    isSocketConnect = false;
+    console.error("Socket Connection Error : ", err);
+  });
+}

@@ -2,14 +2,16 @@
 #define MDaq_CPP
 
 #include "MDaq.hpp"
-
+#include <exception>
+#include <windows.h>
+#include <exception>
 
 void MDaq::getVoltageFromChannel()
 {
     while (1)
     {
         cbAInScan(BoardNum, LowChan, HighChan, Count, &Rate, Gain, ADData, Options);
-        for (int I = 0; I < totalNumberOfSamplesForChannels; I++)
+        for (int I = 0; I < GB_TOTAL_NUMBER_OF_SAMPLES; I++)
         {
             channelVoltage1[I] = ADData[I * 4 + 0];
             channelVoltage2[I] = ADData[I * 4 + 1];
@@ -29,11 +31,11 @@ void MDaq::setupDaqCard()
     BoardNum = 0;
     Gain = BIP5VOLTS;
 
-    LowChan = 11;
-    HighChan = 14;
-    Count = (HighChan - LowChan + 1) * totalNumberOfSamplesForChannels;
-    ADData = new double[(HighChan - LowChan + 1) * totalNumberOfSamplesForChannels];
-    Rate = 2000;
+    LowChan = GB_DAQ_LOWER_CHANNEL_NUMBER;
+    HighChan = GB_DAQ_HIGHER_CHANNEL_NUMBER;
+    Count = (HighChan - LowChan + 1) * GB_TOTAL_NUMBER_OF_SAMPLES;
+    ADData = new double[(HighChan - LowChan + 1) * GB_TOTAL_NUMBER_OF_SAMPLES];
+    Rate = GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD;
     DataValue = 0;
     DataValue32 = 0;
 
@@ -44,9 +46,7 @@ void MDaq::setupDaqCard()
     cbDeclareRevision(&RevLevel);
     cbErrHandling(PRINTALL, DONTSTOP);
     cbGetConfig(BOARDINFO, BoardNum, 0, BIADRES, &ADRes);
-
     // CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)getVoltageFromChannel, NULL, NULL, NULL);
-   
 }
 
 double MDaq::getChannelOneVoltage(int samplePosition)

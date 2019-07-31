@@ -1,5 +1,8 @@
-#include "FilterTools.hpp"
+#ifndef FilterTools_CPP
+#define FilterTools_CPP
 
+
+#include "FilterTools.hpp"
 
 void FilterTools::setupFilter()
 {
@@ -29,3 +32,6 @@ double FilterTools::getFilteredValue(int channelNumber, double value)
     }
     return 0.0;
 }
+
+
+#endif 

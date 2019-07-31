@@ -26,7 +26,6 @@ private:
     BOOL HighResAD;
     int ADRes;
     int Options;
-    int totalNumberOfSamplesForChannels;
 
     double *ADData;
     double *channelVoltage1, *channelVoltage2, *channelVoltage3, *channelVoltage4;

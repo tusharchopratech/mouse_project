@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Fab from '@material-ui/core/Fab';
+import ReactDOM from 'react-dom';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -35,7 +36,6 @@ class Caliberation extends Component {
     this.clicksInfoArray = []
     this.state = {
       start_showing_random_clicks: false,
-      showCaliberationButton: true,
       openFinishDialog: false
     };
   };
@@ -53,6 +53,7 @@ class Caliberation extends Component {
 
   renderTest = (val) => {
     if (val === true) {
+      console.log("I run ", this.i);
       if (this.i < this.clickSequence.length) {
         this.currentClickType = this.clickSequence[this.i];
         this.i++;
@@ -63,10 +64,13 @@ class Caliberation extends Component {
           variant="extended"
           color="primary"
           aria-label="Add"
+          ref="test_click_button"
           style={{ position: 'absolute', top: this.x, left: this.y }}
           onMouseDown={this.onMouseDown.bind(this)}> Click {this.currentClickType}!</Fab>
       } else {
         console.log("Done Test");
+        const { ipcRenderer } = window.require("electron");
+        ipcRenderer.send("socket_data_send", "stop_training");
         this.setState({
           start_showing_random_clicks: false,
           showCaliberationButton: false,
@@ -78,8 +82,19 @@ class Caliberation extends Component {
     }
   };
 
+  onClickStartTraining = (event) => {
+    ReactDOM.findDOMNode(this.refs.start_caliberation_button).style.display = 'none';
+    setTimeout(function () {
+      this.setState({
+        start_showing_random_clicks: true,
+        openFinishDialog: false
+      });
+    }.bind(this), 2000);
+  }
+
   onMouseDown = (event) => {
     console.log(event.button)
+
     if (this.state.start_showing_random_clicks) {
       if (this.currentClickType == "left") {
         if (event.button != this.leftClickId) {
@@ -95,11 +110,22 @@ class Caliberation extends Component {
         }
       }
     }
+
     this.setState({
       start_showing_random_clicks: true,
-      showCaliberationButton: false,
       openFinishDialog: false
     });
+
+    if (ReactDOM.findDOMNode(this.refs.test_click_button) != null) {
+      ReactDOM.findDOMNode(this.refs.test_click_button).style.display = 'none';
+    }
+
+    setTimeout(function () {
+      if (ReactDOM.findDOMNode(this.refs.test_click_button) != null) {
+        ReactDOM.findDOMNode(this.refs.test_click_button).style.display = '';
+      }
+    }.bind(this), 2000);
+    
   };
 
   closeFinishDialog = () => {
@@ -108,7 +134,6 @@ class Caliberation extends Component {
       showCaliberationButton: false,
       openFinishDialog: false
     });
-    // this.props.callbackSetMainSection('user_training');
   };
 
   componentDidMount = () => {
@@ -116,7 +141,6 @@ class Caliberation extends Component {
     for (var i = 0; i < 5; i++) { this.clickSequence.push("right"); }
     for (var i = 0; i < 5; i++) { this.clickSequence.push("thumb"); }
     this.clickSequence = this.shuffleArray(this.clickSequence);
-    // this.currentClickType = this.getNextClickType();
   }
 
   shuffleArray = (arra1) => {
@@ -140,9 +164,8 @@ class Caliberation extends Component {
           variant="extended"
           color="primary"
           aria-label="Add"
-          // onClick={this.startCaliberation}
-          onMouseDown={this.onMouseDown.bind(this)}
-          style={{ display: this.state.showCaliberationButton ? '' : 'none' }}
+          ref="start_caliberation_button"
+          onMouseDown={this.onClickStartTraining.bind(this)}
           className={classes.margin}
         >
           <MouseIcon className={classes.extendedIcon} />

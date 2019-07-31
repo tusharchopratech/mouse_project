@@ -18,6 +18,11 @@ class Welcome extends Component {
     };
 
     componentDidMount = () => {
+        const { ipcRenderer } = window.require("electron");
+        ipcRenderer.send("internal_ipc", "start_backend_and_socket");
+        ipcRenderer.on('internal_ipc', function (event, data) {
+            console.log(data);
+        });
     };
 
     render() {

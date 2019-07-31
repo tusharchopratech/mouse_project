@@ -1,4 +1,12 @@
 #include "SocketServer.hpp"
+#include <string.h>
+
+using namespace std::chrono;
+void logTime()
+{
+    cout << "\n"<< duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() << std::flush;
+    // printf("\n%ld", duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+}
 
 int __cdecl SocketServer::setupSocket()
 {
@@ -87,16 +95,28 @@ void SocketServer::startListeningFromSocket()
     {
         iResult = recv(ClientSocket, receivedMessageFromClient, DEFAULT_BUFLEN, 0);
         string str(receivedMessageFromClient);
-        if (str == "real_time_data")
-        {
-            // finalSocketData = gloveTools.getSocketData();
-            iSendResult = send(ClientSocket, finalSocketData.c_str(), finalSocketData.length(), 0);
+        str = str.substr(0, str.find("*****"));
+
+        if (str == "raw_real_time_data")
+        {   
+            // logTime();
+            finalSocketData = gloveTools.getRealTimeRawData();
+            send(ClientSocket, finalSocketData.c_str(), finalSocketData.length(), 0);
         }
         else if (str == "start_training")
         {
+            gloveTools.startTraining();
+            finalSocketData = "{\"type\":\"start_training_success\"}";
+            send(ClientSocket, finalSocketData.c_str(), finalSocketData.length(), 0);
         }
         else if (str == "stop_training")
         {
+            gloveTools.stopTraining();
+        }
+        else if (str == "debugging_real_time_data")
+        {
+            finalSocketData = gloveTools.getRealTimeDebuggingData();
+            send(ClientSocket, finalSocketData.c_str(), finalSocketData.length(), 0);
         }
     } while (iResult > 0);
 }

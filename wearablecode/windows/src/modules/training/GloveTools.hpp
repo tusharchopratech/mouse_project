@@ -2,7 +2,8 @@
 #define GloveTools_HPP
 
 #include <iostream>
-#include <vector>
+// #include <vector>
+#include <list> 
 #include "..\filter\FilterTools.cpp"
 #include "..\m_daq\MDaq.cpp"
 #include "..\edata\Global.cpp"
@@ -13,27 +14,25 @@ using namespace std;
 class GloveTools
 {
 private:
-    // vector<int> channel1, channel2, channel3;
-    // int yo = 10;
+    list<double> trainingDataChannel1, trainingDataChannel2, trainingDataChannel3, trainingDataChannel4;
+    list<int> trainingDataLeftClick, trainingDataRightClick, trainingDataThumbClick;
+
+    bool isTrainingRunning = false;
 
     double *chV1, *chV2, *chV3, *chV4;
-    int *lC, *rC;
+    int *lC, *rC, *tC;
     FilterTools filterTools;
-    MDaq mDaq; 
-	
+    MDaq mDaq;
+
 public:
-    GloveTools()
-    {
-        std::thread newThread(&MDaq::getVoltageFromChannel, mDaq);
-       
-        setupGloveTools();
-    }
-    // int startTraining();
-    // int stopTraining();
+    GloveTools();
+    int startTraining();
+    void startTrainingRecording();
+    void stopTraining();
     // string getResults();
 
-    void setupGloveTools();
-    string getSocketData();
+    string getRealTimeDebuggingData();
+    string getRealTimeRawData();
     double getTkeoValue(double sample1, double sample2, double sample3, int channelNumber);
 };
 

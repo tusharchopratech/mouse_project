@@ -37,17 +37,17 @@ int MouseFunctions::getThumbMouseStatus()
 
 int MouseFunctions::getLeftMouseStatusAtIndex(int index)
 {
-    return leftMouseClickVector[index];
+    return leftMouseClickVector.at(index);
 }
 
 int MouseFunctions::getRightMouseStatusAtIndex(int index)
 {
-    return rightMouseClickVector[index];
+    return rightMouseClickVector.at(index);
 }
 
 int MouseFunctions::getThumbMouseStatusAtIndex(int index)
 {
-    return thumbMouseClickVector[index];
+    return thumbMouseClickVector.at(index);
 }
 
 LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
@@ -55,7 +55,7 @@ LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
     MOUSEHOOKSTRUCT *pMouseStruct = (MOUSEHOOKSTRUCT *)lParam;
     if (pMouseStruct != NULL)
     {
-
+        
         if (wParam == WM_LBUTTONDOWN)
         {
             MouseFunctions::Instance().setLeftMouseStatus(1);
@@ -124,20 +124,20 @@ void startMouseRecording()
     while (1)
     {
         std::this_thread::sleep_for(std::chrono::microseconds(500));
-        MouseFunctions::Instance().leftMouseClickVector.insert(MouseFunctions::Instance().leftMouseClickVector.end(), MouseFunctions::Instance().getLeftMouseStatus());
-        MouseFunctions::Instance().rightMouseClickVector.insert(MouseFunctions::Instance().rightMouseClickVector.end(), MouseFunctions::Instance().getRightMouseStatus());
-        MouseFunctions::Instance().thumbMouseClickVector.insert(MouseFunctions::Instance().thumbMouseClickVector.end(), MouseFunctions::Instance().getThumbMouseStatus());
+        MouseFunctions::Instance().leftMouseClickVector.push_back(MouseFunctions::Instance().getLeftMouseStatus());
+        MouseFunctions::Instance().rightMouseClickVector.push_back(MouseFunctions::Instance().getRightMouseStatus());
+        MouseFunctions::Instance().thumbMouseClickVector.push_back(MouseFunctions::Instance().getThumbMouseStatus());
         if (MouseFunctions::Instance().leftMouseClickVector.size() > GB_TOTAL_NUMBER_OF_SAMPLES)
         {
-            MouseFunctions::Instance().leftMouseClickVector.erase(MouseFunctions::Instance().leftMouseClickVector.begin());
+            MouseFunctions::Instance().leftMouseClickVector.pop_front();
         }
         if (MouseFunctions::Instance().rightMouseClickVector.size() > GB_TOTAL_NUMBER_OF_SAMPLES)
         {
-            MouseFunctions::Instance().rightMouseClickVector.erase(MouseFunctions::Instance().rightMouseClickVector.begin());
+            MouseFunctions::Instance().rightMouseClickVector.pop_front();
         }
         if (MouseFunctions::Instance().thumbMouseClickVector.size() > GB_TOTAL_NUMBER_OF_SAMPLES)
         {
-            MouseFunctions::Instance().thumbMouseClickVector.erase(MouseFunctions::Instance().thumbMouseClickVector.begin());
+            MouseFunctions::Instance().thumbMouseClickVector.pop_front();
         }
     }
 }

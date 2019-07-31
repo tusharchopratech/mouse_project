@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="utf-8" />
+  <base href="./">
   <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#000000" />
@@ -21,7 +22,12 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
   <title>Brink Bionics</title>
-
+  <script>
+    var link = document.createElement('link')
+    link.setAttribute('rel', 'stylesheet')
+    link.setAttribute('href', require('path').join(__dirname, 'css', 'app.css'))
+    document.head.appendChild(link)
+  </script>
   <script>
 
     var isDataArrayAvaiable = true;
@@ -53,7 +59,7 @@
       return 0;
     }
 
-    
+
 
   </script>
 </head>

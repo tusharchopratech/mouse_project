@@ -213,7 +213,7 @@ export default class RealTimeData extends Component {
 
   addDataToArrays = (val) => {
     var jsonObject = JSON.parse(String(val));
-    if (jsonObject.type == "real_time_data") {
+    if (jsonObject.type == "real_time_debugging_data") {
 
       for (let index = 0; index < jsonObject.total_samples; index++) {
         this.ch1Array.push(jsonObject.ch_v1[index]);

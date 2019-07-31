@@ -12,12 +12,23 @@ class Caliberation extends Component {
         super(props)
 
         this.totalSamplesOnChart = 2048;
+
         this.ch1Array = [];
         this.ch2Array = [];
         this.ch3Array = [];
+        this.ch4Array = [];
+        this.lCArray = [];
+        this.rCArray = [];
+        this.tCArray = [];
+
         this.ch1ArrayTemp = [];
         this.ch2ArrayTemp = [];
         this.ch3ArrayTemp = [];
+        this.ch4ArrayTemp = [];
+        this.lCArrayTemp = [];
+        this.rCArrayTemp = [];
+        this.tCArrayTemp = [];
+
         this.startRendering = true;
         this.tmp1 = [1];
         this.state = {
@@ -78,7 +89,7 @@ class Caliberation extends Component {
 
     startTraining = () => {
         const { ipcRenderer } = window.require("electron");
-        ipcRenderer.send("socket_data_send", "stop_real_time_data");
+        ipcRenderer.send("socket_data_send", "stop_raw_real_time_data");
         ipcRenderer.send("socket_data_send", "start_training");
     };
 
@@ -88,42 +99,62 @@ class Caliberation extends Component {
             this.ch1Array.push(0.0);
             this.ch2Array.push(0.0);
             this.ch3Array.push(0.0);
+            this.ch4Array.push(0.0);
+            this.lCArray.push(0.0);
+            this.rCArray.push(0.0);
+            this.tCArray.push(0.0);
         }
         this.showRealTimeData();
     }
 
     showRealTimeData = () => {
         const { ipcRenderer } = window.require("electron");
-        ipcRenderer.send("socket_data_send", "start_real_time_data");
+        ipcRenderer.send("socket_data_send", "start_raw_real_time_data");
         ipcRenderer.on('socket_data_received', function (event, data) {
-            // console.log("New Data at ", new Date().getTime());
+            console.log(String(data), " at ", new Date().getTime());
             var jsonObject = JSON.parse(String(data));
-            if (jsonObject.type == "real_time_data") {
+            if (jsonObject.type == "real_time_raw_data") {
                 if (this.startRendering) {
                     this.startRendering = false;
-                    setTimeout(this.startRenderingGraphs, 50, this.ch1ArrayTemp, this.ch2ArrayTemp, this.ch3ArrayTemp);
+                    setTimeout(this.startRenderingGraphs, 100, this.ch1ArrayTemp, this.ch2ArrayTemp, this.ch3ArrayTemp, this.ch4ArrayTemp, this.lCArrayTemp, this.rCArrayTemp, this.tCArrayTemp);
                     this.ch1ArrayTemp = [];
                     this.ch2ArrayTemp = [];
                     this.ch3ArrayTemp = [];
+                    this.ch4ArrayTemp = [];
+                    this.lCArrayTemp = [];
+                    this.rCArrayTemp = [];
+                    this.tCArrayTemp = [];
                 }
                 for (let index = 0; index < jsonObject.total_samples; index++) {
                     this.ch1ArrayTemp.push(jsonObject.ch_v1[index]);
                     this.ch2ArrayTemp.push(jsonObject.ch_v2[index]);
                     this.ch3ArrayTemp.push(jsonObject.ch_v3[index]);
+                    this.ch4ArrayTemp.push(jsonObject.ch_v4[index]);
+                    this.lCArrayTemp.push(jsonObject.left_click[index]);
+                    this.rCArrayTemp.push(jsonObject.right_click[index]);
+                    this.tCArrayTemp.push(jsonObject.thumb_click[index]);
                 }
-            } else if (jsonObject.type == "training_started") {
+            } else if (jsonObject.type == "start_training_success") {
                 this.props.callbackSetMainSection('user_training');
             }
         }.bind(this));
     }
 
-    startRenderingGraphs = (ch1Data, ch2Data, ch3Data) => {
+    startRenderingGraphs = (ch1Data, ch2Data, ch3Data, ch4Data, lC, rC, tC) => {
         this.ch1Array = this.ch1Array.concat(ch1Data);
         this.ch2Array = this.ch2Array.concat(ch2Data);
         this.ch3Array = this.ch3Array.concat(ch3Data);
+        this.ch4Array = this.ch4Array.concat(ch4Data);
+        this.lCArray = this.lCArray.concat(lC);
+        this.rCArray = this.rCArray.concat(rC);
+        this.tCArray = this.tCArray.concat(tC);
         this.ch1Array.splice(0, ch1Data.length);
         this.ch2Array.splice(0, ch2Data.length);
         this.ch3Array.splice(0, ch3Data.length);
+        this.ch4Array.splice(0, ch4Data.length);
+        this.lCArray.splice(0, lC.length);
+        this.rCArray.splice(0, rC.length);
+        this.tCArray.splice(0, tC.length);
         this.setDataToChart();
         this.startRendering = true;
     }
@@ -138,7 +169,28 @@ class Caliberation extends Component {
                         backgroundColor: 'rgba(75,192,192,0.4)',
                         borderColor: 'rgba(75,192,192,1)',
                         data: this.getChannelData(1)
-                    }
+                    },
+                    {
+                        label: 'Left Click',
+                        fill: false,
+                        backgroundColor: '#99ff0000',
+                        borderColor: '#ff0000',
+                        data: this.getClickData("left", 3)
+                    },
+                    {
+                        label: 'Right Click',
+                        fill: false,
+                        backgroundColor: '#99006600',
+                        borderColor: '#006600',
+                        data: this.getClickData("right", 3)
+                    },
+                    {
+                        label: 'Thumb Click',
+                        fill: false,
+                        backgroundColor: '#99ff0000',
+                        borderColor: '#ff0000',
+                        data: this.getClickData("thumb", 3)
+                    },
                 ]
             },
             second_plot_data: {
@@ -149,7 +201,29 @@ class Caliberation extends Component {
                         backgroundColor: 'rgba(75,192,192,0.4)',
                         borderColor: 'rgba(75,192,192,1)',
                         data: this.getChannelData(2)
-                    }
+                    },
+                    {
+                        label: 'Left Click',
+                        fill: false,
+                        backgroundColor: '#99ff0000',
+                        borderColor: '#ff0000',
+                        data: this.getClickData("left", 3)
+                    },
+                    {
+                        label: 'Right Click',
+                        fill: false,
+                        backgroundColor: '#99006600',
+                        borderColor: '#006600',
+                        data: this.getClickData("right", 3)
+                    },
+                    {
+                        label: 'Thumb Click',
+                        fill: false,
+                        backgroundColor: '#99ff0000',
+                        borderColor: '#ff0000',
+                        data: this.getClickData("thumb", 3)
+                    },
+
                 ]
             },
             third_plot_data: {
@@ -159,10 +233,31 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: 'rgba(75,192,192,0.4)',
                         borderColor: 'rgba(75,192,192,1)',
-                        data: this.getChannelData(3)
-                    }
+                        data: this.getChannelData(4)
+                    },
+                    {
+                        label: 'Left Click',
+                        fill: false,
+                        backgroundColor: '#99ff0000',
+                        borderColor: '#ff0000',
+                        data: this.getClickData("left", 3)
+                    },
+                    {
+                        label: 'Right Click',
+                        fill: false,
+                        backgroundColor: '#99006600',
+                        borderColor: '#006600',
+                        data: this.getClickData("right", 3)
+                    },
+                    {
+                        label: 'Thumb Click',
+                        fill: false,
+                        backgroundColor: '#99ff0000',
+                        borderColor: '#ff0000',
+                        data: this.getClickData("thumb", 3)
+                    },
                 ]
-            }
+            },
         });
     }
 
@@ -180,8 +275,30 @@ class Caliberation extends Component {
             for (var i = 0; i < this.ch3Array.length; i++) {
                 ar.push(this.ch3Array[i])
             }
+        } else if (val == 4) {
+            for (var i = 0; i < this.ch4Array.length; i++) {
+                ar.push(this.ch4Array[i])
+            }
         }
         return ar;
+    }
+
+    getClickData = (val, amplitudeMultiplier) => {
+        var ar6 = [];
+        if (val == "right") {
+            for (var i = 0; i < this.rCArray.length; i++) {
+                ar6.push(this.rCArray[i] * amplitudeMultiplier)
+            }
+        } else if (val == "left") {
+            for (var i = 0; i < this.lCArray.length; i++) {
+                ar6.push(this.lCArray[i] * amplitudeMultiplier)
+            }
+        } else if (val == "thumb") {
+            for (var i = 0; i < this.tCArray.length; i++) {
+                ar6.push(this.tCArray[i] * amplitudeMultiplier)
+            }
+        }
+        return ar6;
     }
 
 
