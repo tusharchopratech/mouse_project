@@ -1,7 +1,6 @@
 #ifndef MyAlgo_CPP
 #define MyAlgo_CPP
 #include "MyAlgo.hpp"
-#include <gmtl/gmtl.h>
 
 // void MyAlgo::startTesting()
 // {
