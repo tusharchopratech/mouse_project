@@ -11,7 +11,7 @@ class Caliberation extends Component {
     constructor(props) {
         super(props)
 
-        this.totalSamplesOnChart = 2048;
+        this.totalSamplesOnChart = 2048*2;
 
         this.ch1Array = [];
         this.ch2Array = [];
@@ -28,6 +28,14 @@ class Caliberation extends Component {
         this.lCArrayTemp = [];
         this.rCArrayTemp = [];
         this.tCArrayTemp = [];
+
+        this.ch1Temp = 0.0;
+        this.ch2Temp = 0.0;
+        this.ch3Temp = 0.0;
+        this.ch4Temp = 0.0;
+        this.lCTemp = 0;
+        this.rCTemp = 0;
+        this.tCTemp = 0;
 
         this.startRendering = true;
         this.tmp1 = [1];
@@ -110,13 +118,23 @@ class Caliberation extends Component {
     showRealTimeData = () => {
         const { ipcRenderer } = window.require("electron");
         ipcRenderer.send("socket_data_send", "start_raw_real_time_data");
+
         ipcRenderer.on('socket_data_received', function (event, data) {
-            console.log(String(data), " at ", new Date().getTime());
+            // console.log(String(data), " at ", new Date().getTime());
+            console.log("New Data at ", new Date().getTime());
             var jsonObject = JSON.parse(String(data));
             if (jsonObject.type == "real_time_raw_data") {
-                if (this.startRendering) {
+                this.ch1Temp = jsonObject.ch_v1[0];
+                this.ch2Temp = jsonObject.ch_v2[0];
+                this.ch3Temp = jsonObject.ch_v3[0];
+                this.ch4Temp = jsonObject.ch_v4[0];
+                this.lCTemp = jsonObject.left_click[0];
+                this.rCTemp = jsonObject.right_click[0];
+                this.tCTemp = jsonObject.thumb_click[0];
+
+                if (this.ch1ArrayTemp.length > 1000 && this.startRendering) {
                     this.startRendering = false;
-                    setTimeout(this.startRenderingGraphs, 100, this.ch1ArrayTemp, this.ch2ArrayTemp, this.ch3ArrayTemp, this.ch4ArrayTemp, this.lCArrayTemp, this.rCArrayTemp, this.tCArrayTemp);
+                    setTimeout(this.startRenderingGraphs2, 10, this.ch1ArrayTemp, this.ch2ArrayTemp, this.ch3ArrayTemp, this.ch4ArrayTemp, this.lCArrayTemp, this.rCArrayTemp, this.tCArrayTemp);
                     this.ch1ArrayTemp = [];
                     this.ch2ArrayTemp = [];
                     this.ch3ArrayTemp = [];
@@ -138,9 +156,34 @@ class Caliberation extends Component {
                 this.props.callbackSetMainSection('user_training');
             }
         }.bind(this));
+
+        setTimeout(this.startRenderingGraphs, 20);
+        // setTimeout( this.startRederingCharts2, 20);
+        // this.startRederingCharts2();    
     }
 
-    startRenderingGraphs = (ch1Data, ch2Data, ch3Data, ch4Data, lC, rC, tC) => {
+    startRederingCharts2 = () => {
+
+        this.ch1Array.push(this.ch1Temp);
+        this.ch2Array.push(this.ch2Temp);
+        this.ch3Array.push(this.ch3Temp);
+        this.ch4Array.push(this.ch4Temp);
+        this.lCArray.push(this.lCTemp);
+        this.rCArray.push(this.rCTemp);
+        this.tCArray.push(this.tCTemp);
+        this.ch1Array.splice(0, 1);
+        this.ch2Array.splice(0, 1);
+        this.ch3Array.splice(0, 1);
+        this.ch4Array.splice(0, 1);
+        this.lCArray.splice(0, 1);
+        this.rCArray.splice(0, 1);
+        this.tCArray.splice(0, 1);
+        this.setDataToChart();
+
+    }
+
+    startRenderingGraphs2 = (ch1Data, ch2Data, ch3Data, ch4Data, lC, rC, tC) => {
+
         this.ch1Array = this.ch1Array.concat(ch1Data);
         this.ch2Array = this.ch2Array.concat(ch2Data);
         this.ch3Array = this.ch3Array.concat(ch3Data);
@@ -155,8 +198,51 @@ class Caliberation extends Component {
         this.lCArray.splice(0, lC.length);
         this.rCArray.splice(0, rC.length);
         this.tCArray.splice(0, tC.length);
+
+        this.ch2ArrayTemp = [];
+        this.ch3ArrayTemp = [];
+        this.ch4ArrayTemp = [];
+        this.lCArrayTemp = [];
+        this.rCArrayTemp = [];
+        this.tCArrayTemp = [];
+
         this.setDataToChart();
         this.startRendering = true;
+    }
+
+    startRenderingGraphs = () => {
+
+        var ch1Data = this.ch1ArrayTemp;
+        var ch2Data = this.ch2ArrayTemp;
+        var ch3Data = this.ch3ArrayTemp;
+        var ch4Data = this.ch4ArrayTemp;
+        var lC = this.lCArrayTemp;
+        var rC = this.rCArrayTemp;
+        var tC = this.tCArrayTemp;
+
+        this.ch1Array = this.ch1Array.concat(ch1Data);
+        this.ch2Array = this.ch2Array.concat(ch2Data);
+        this.ch3Array = this.ch3Array.concat(ch3Data);
+        this.ch4Array = this.ch4Array.concat(ch4Data);
+        this.lCArray = this.lCArray.concat(lC);
+        this.rCArray = this.rCArray.concat(rC);
+        this.tCArray = this.tCArray.concat(tC);
+        this.ch1Array.splice(0, ch1Data.length);
+        this.ch2Array.splice(0, ch2Data.length);
+        this.ch3Array.splice(0, ch3Data.length);
+        this.ch4Array.splice(0, ch4Data.length);
+        this.lCArray.splice(0, lC.length);
+        this.rCArray.splice(0, rC.length);
+        this.tCArray.splice(0, tC.length);
+
+        this.ch2ArrayTemp = [];
+        this.ch3ArrayTemp = [];
+        this.ch4ArrayTemp = [];
+        this.lCArrayTemp = [];
+        this.rCArrayTemp = [];
+        this.tCArrayTemp = [];
+
+        this.setDataToChart();
     }
 
     setDataToChart = () => {
@@ -259,6 +345,11 @@ class Caliberation extends Component {
                 ]
             },
         });
+
+        // setTimeout(this.startRenderingGraphs, 2);
+
+        // setTimeout(this.startRederingCharts2, 2);
+        // this.startRederingCharts2();
     }
 
     getChannelData = (val) => {
@@ -316,13 +407,13 @@ class Caliberation extends Component {
                     <div style={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column' }}>
 
                         <div style={{ flex: 1 }}>
-                            <Line data={this.state.first_plot_data} options={this.state.plot_options} height={40} />
+                            <Line data={this.state.first_plot_data} options={this.state.plot_options} height={60} />
                         </div>
                         <div style={{ flex: 1 }}>
-                            <Line data={this.state.second_plot_data} options={this.state.plot_options} height={40} />
+                            <Line data={this.state.second_plot_data} options={this.state.plot_options} height={60} />
                         </div>
                         <div style={{ flex: 1 }}>
-                            <Line data={this.state.third_plot_data} options={this.state.plot_options} height={40} />
+                            <Line data={this.state.third_plot_data} options={this.state.plot_options} height={60} />
                         </div>
 
                     </div>

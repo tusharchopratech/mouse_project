@@ -1,12 +1,8 @@
 #include "SocketServer.hpp"
 #include <string.h>
 
-using namespace std::chrono;
-void logTime()
-{
-    cout << "\n"<< duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() << std::flush;
-    // printf("\n%ld", duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
-}
+
+
 
 int __cdecl SocketServer::setupSocket()
 {
@@ -72,8 +68,13 @@ int __cdecl SocketServer::setupSocket()
     }
 
     // Accept a client socket
+    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+    {
+        gloveTools.readDemoData();
+    }
     printf("\n\nReady to connect Socket on port : %s", DEFAULT_PORT);
     printf("\nPlease send connect request and data!!\n\n");
+
     ClientSocket = accept(ListenSocket, NULL, NULL);
     if (ClientSocket == INVALID_SOCKET)
     {
@@ -84,7 +85,6 @@ int __cdecl SocketServer::setupSocket()
     }
     // No longer need server socket
     closesocket(ListenSocket);
-
     return 0;
 }
 
@@ -96,18 +96,24 @@ void SocketServer::startListeningFromSocket()
         iResult = recv(ClientSocket, receivedMessageFromClient, DEFAULT_BUFLEN, 0);
         string str(receivedMessageFromClient);
         str = str.substr(0, str.find("*****"));
-
         if (str == "raw_real_time_data")
-        {   
-            // logTime();
-            finalSocketData = gloveTools.getRealTimeRawData();
+        {
+            finalSocketData = "";
+            if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+            {
+                finalSocketData = gloveTools.getRealTimeRawDemoData();
+            }
+            else
+            {
+                finalSocketData = gloveTools.getRealTimeRawData();
+            }   
             send(ClientSocket, finalSocketData.c_str(), finalSocketData.length(), 0);
         }
         else if (str == "start_training")
         {
             gloveTools.startTraining();
             finalSocketData = "{\"type\":\"start_training_success\"}";
-            send(ClientSocket, finalSocketData.c_str(), finalSocketData.length(), 0);
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
         else if (str == "stop_training")
         {
@@ -115,8 +121,8 @@ void SocketServer::startListeningFromSocket()
         }
         else if (str == "debugging_real_time_data")
         {
-            finalSocketData = gloveTools.getRealTimeDebuggingData();
-            send(ClientSocket, finalSocketData.c_str(), finalSocketData.length(), 0);
+            finalSocketData = gloveTools.getRealTimeDataWithTkeo();
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
     } while (iResult > 0);
 }

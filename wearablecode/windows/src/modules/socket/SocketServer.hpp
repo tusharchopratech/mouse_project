@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string>
 #include "..\training\GloveTools.cpp"
+#include "..\edata\Global.cpp"
 
 using namespace std;
 // Need to link with Ws2_32.lib

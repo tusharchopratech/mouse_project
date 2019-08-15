@@ -184,7 +184,7 @@ class Caliberation extends Component {
           <DialogTitle id="alert-dialog-title">{"Caliberation Finished"}</DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              Thank you for the calibration. Your click timings have been saved and threshold has been set.
+              Thank you. Please check C/impulse_data for results.
             </DialogContentText>
           </DialogContent>
           <DialogActions>

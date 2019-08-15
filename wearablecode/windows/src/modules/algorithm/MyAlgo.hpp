@@ -11,8 +11,9 @@
 #include <numeric>
 #include "..\edata\Global.cpp"
 #include "..\filter\FilterTools.cpp"
+
 using namespace std;
-#include <vector>
+// using namespace dlib;
 
 class MyAlgo
 {
@@ -25,48 +26,52 @@ private:
     int totalNumberOfTrainingDataSamples;
 
     // Reading Data From file
-    vector<double> trainingDataChannel1, trainingDataChannel2, trainingDataChannel3, trainingDataChannel4;
-    vector<int> trainingDataLeftClick, trainingDataRightClick, trainingDataThumbClick;
+    std::vector<double> trainingDataChannel1, trainingDataChannel2, trainingDataChannel3, trainingDataChannel4;
+    std::vector<int> trainingDataLeftClick, trainingDataRightClick, trainingDataThumbClick;
 
     // Trying differeny signal types
-    vector<double> ch1_raw, ch1_tkeo, ch1_p3_tkeo, ch1_f_tkeo, ch1_p3_f_tkeo;
-    vector<double> ch2_raw, ch2_tkeo, ch2_p3_tkeo, ch2_f_tkeo, ch2_p3_f_tkeo;
-    vector<double> ch3_raw, ch3_tkeo, ch3_p3_tkeo, ch3_f_tkeo, ch3_p3_f_tkeo;
-    vector<double> ch4_raw, ch4_tkeo, ch4_p3_tkeo, ch4_f_tkeo, ch4_p3_f_tkeo;
-    vector<int> l_c, r_c, t_c;
+    std::vector<double> ch1_raw, ch1_tkeo, ch1_p3_tkeo, ch1_f_tkeo, ch1_p3_f_tkeo;
+    std::vector<double> ch2_raw, ch2_tkeo, ch2_p3_tkeo, ch2_f_tkeo, ch2_p3_f_tkeo;
+    std::vector<double> ch3_raw, ch3_tkeo, ch3_p3_tkeo, ch3_f_tkeo, ch3_p3_f_tkeo;
+    std::vector<double> ch4_raw, ch4_tkeo, ch4_p3_tkeo, ch4_f_tkeo, ch4_p3_f_tkeo;
+    std::vector<int> l_c, r_c, t_c;
 
     // Calculating global noise
     double globalChannelNoise[4] = {5.0, 5.0, 5.0, 5.0};
 
     // Calculating Mean and Covariance
-    vector<vector<double>> covMatrixRightClick;
-    vector<vector<double>> covMatrixLeftClick;
-    vector<vector<double>> covMatrixThumbClick;
-    vector<double> meanLeftClick;
-    vector<double> meanRightClick;
-    vector<double> meanThumbClick;
+    std::vector<std::vector<double>> covMatrixRightClick;
+    std::vector<std::vector<double>> covMatrixLeftClick;
+    std::vector<std::vector<double>> covMatrixThumbClick;
+    std::vector<double> meanLeftClick;
+    std::vector<double> meanRightClick;
+    std::vector<double> meanThumbClick;
 
 public:
     MyAlgo()
     {
-        readData();
+        // Training Part
+        readData("data.txt");
         processData();
-        computeGlobalNoice();
-        computeFeatures();
-        getDistanceFromClickType(ch4_tkeo);
+        predictAndWriteResults();
     }
-    void readData();
+    void readData(string file);
     void processData();
     double getTkeoValue(double v1, double v2, double v3);
 
-    void computeGlobalNoice();
+    void computeGlobalNoice(int algoMode, int signFlag);
     void getEachChannelMaxValueForClickType(int *clickArray, int algoMode, int signFlag, double (&eachChannelMaxSample)[4]);
     double minOfThree(double x, double y, double z);
 
-    void computeFeatures();
-    void getFeaturesForClickType(int *clickArray, int algoMode, int signFlag, vector<vector<double>> &featureVector);
+    void computeFeatures(int algoMode, int signFlag);
+    void getFeaturesForClickType(int *clickArray, int algoMode, int signFlag, std::vector<std::vector<double>> &featureVector);
 
-    void MyAlgo::getDistanceFromClickType(vector<double> aSampleOf4Channels);
+    double getDistance(std::vector<double> sample, std::vector<double> mean, std::vector<std::vector<double>> cov);
+    string predictCLickTypeFromOneSample(std::vector<double> sample);
+    string predictCLickTypeFromThreeSamples(std::vector<std::vector<double>> threeSamples);
+
+    void predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, string filePath);
+    void predictAndWriteResults();
 };
 
 #endif // !MyAlgo_HPP

@@ -24,7 +24,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
-    title: "Desktop App",    webPreferences: {
+    title: "Desktop App", webPreferences: {
       nodeIntegration: true
     }
   })
@@ -32,7 +32,7 @@ function createWindow() {
   mainWindow.on('closed', function () {
     mainWindow = null
   });
-  connectSocket();
+  // connectSocket();
 }
 
 ipc.on('socket_data_send', (event, data) => {
@@ -49,16 +49,23 @@ ipc.on('socket_data_send', (event, data) => {
 });
 
 ipc.on('internal_ipc', (event, data) => {
+
+
+
   if (data == "start_backend_and_socket") {
-    // for (var i = 0; i < process_to_kill.length; i++) {
-    //   try {
-    //     kill(process_to_kill[i]);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // }
-    // process_to_kill = [];
-    // setTimeout(startBackend, 3000);
+    if (process.env.NODE_ENV == "dev") {
+      setTimeout(connectSocket, 3000);
+    } else {
+      for (var i = 0; i < process_to_kill.length; i++) {
+        try {
+          kill(process_to_kill[i]);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      process_to_kill = [];
+      setTimeout(startBackend, 3000);
+    }
   }
 });
 
@@ -103,18 +110,21 @@ function startBackend() {
   } else {
     mainWindow.webContents.send('internal_ipc', 'backend_connected');
     process_to_kill.push(processData.pid);
-    setTimeout(connectSocket, 2000);
+    setTimeout(connectSocket, 3000);
   }
 }
 
 function connectSocket() {
+  client = null;
+  client = new net.Socket();
   client.connect(27015, 'localhost', function () {
     mainWindow.webContents.send('internal_ipc', 'socket_connected');
-    isSocketConnect = true;
-    client.write('raw_real_time_data' + '*****');
+    // isSocketConnect = true;
+    // client.write('raw_real_time_data' + '*****');
   });
 
   client.on('data', function (data) {
+    // console.log(String(data), " at ", new Date().getTime());
     if (startReceivingRealTimeData) {
       client.write('raw_real_time_data' + '*****');
     }
@@ -131,7 +141,10 @@ function connectSocket() {
   });
 
   client.on('error', function (err) {
-    isSocketConnect = false;
-    console.error("Socket Connection Error : ", err);
+    // isSocketConnect = false;
+    // console.error("Socket Connection Error : ", err);
+    if (mainWindow != null) {
+      mainWindow.webContents.send('internal_ipc', err);
+    }
   });
 }

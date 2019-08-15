@@ -2,62 +2,206 @@
 #define MyAlgo_CPP
 #include "MyAlgo.hpp"
 
-// void MyAlgo::startTesting()
-// {
-//     printVector(covMatrixLeftClick);
-//     cout << "\n";
-//     for (unsigned j = 0; j < meanLeftClick.size(); j++)
-//     {
-//         cout << meanLeftClick[j] << " ";
-//     }
-// }
-
-void MyAlgo::getDistanceFromClickType(vector<double> aSampleOf4Channels)
+void MyAlgo::predictAndWriteResults()
 {
-    double distance;
+    computeGlobalNoice(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH);
+    computeFeatures(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH);
+    predictAndWriteAlgoSpecificResults(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_f_tkeo_sign_both.txt");
 
-    print2DVector(covMatrixRightClick);
+    computeGlobalNoice(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH);
+    computeFeatures(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH);
+    predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_tkeo_sign_both.txt");
 
-    // double **arr = vectorTo2DArray(covMatrixRightClick);
-    // const int M = covMatrixRightClick.size();
-    double covMatrixRightClick2DArray[4][4];
+    computeGlobalNoice(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH);
+    computeFeatures(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH);
+    predictAndWriteAlgoSpecificResults(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_tkeo_sign_both.txt");
 
-    // double arr;
-    // inverse(vectorTo2DArray(covMatrixRightClick), arr);
-    // cout << "\n\n\n\n";
-
-    for (int i = 0; i < covMatrixRightClick.size(); i++)
-    {
-        for (int j = 0; j < covMatrixRightClick[0].size(); j++)
-        {
-            covMatrixRightClick2DArray[i][j] = covMatrixRightClick[i][j];
-            // cout << covMatrixRightClick2DArray[i][j] << " ";
-        }
-        cout << endl;
-    }
-
-    double tmp[4][4];
-
-    // inverse(covMatrixRightClick2DArray, tmp);
-    // gmtl::Matrix44f test_matrix;
-    // test_matrix.set(1,2,3,4);
-    // cout<<test_matrix.getData();
-    // for (int i = 0; i < covMatrixRightClick.size(); i++)
-    // {
-    //     for (int j = 0; j < covMatrixRightClick[0].size(); j++)
-    //     {
-    //         cout << tmp[i][j] << " ";
-    //     }
-    //     cout << endl;
-    // }
+    computeGlobalNoice(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH);
+    computeFeatures(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH);
+    predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_f_tkeo_sign_both.txt");
 }
 
-void MyAlgo::computeFeatures()
+void MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, string fileName)
+{
+    totalNumberOfTrainingDataSamples = ch1_tkeo.size();
+
+    std::vector<double> tmpCh1;
+    std::vector<double> tmpCh2;
+    std::vector<double> tmpCh3;
+    std::vector<double> tmpCh4;
+
+    std::vector<double> sample1;
+    std::vector<double> sample2;
+    std::vector<double> sample3;
+    std::vector<std::vector<double>> threeSamples;
+    string clickType;
+
+    if (algoMode == ALGO_MODE_RAW)
+    {
+        tmpCh1 = ch1_raw;
+        tmpCh2 = ch2_raw;
+        tmpCh3 = ch3_raw;
+        tmpCh4 = ch4_raw;
+    }
+    else if (algoMode == ALGO_MODE_TKEO)
+    {
+        tmpCh1 = ch1_tkeo;
+        tmpCh2 = ch2_tkeo;
+        tmpCh3 = ch3_tkeo;
+        tmpCh4 = ch4_tkeo;
+    }
+    else if (algoMode == ALGO_MODE_P3_TKEO)
+    {
+        tmpCh1 = ch1_p3_tkeo;
+        tmpCh2 = ch2_p3_tkeo;
+        tmpCh3 = ch3_p3_tkeo;
+        tmpCh4 = ch4_p3_tkeo;
+    }
+    else if (algoMode == ALGO_MODE_F_TKEO)
+    {
+        tmpCh1 = ch1_f_tkeo;
+        tmpCh2 = ch2_f_tkeo;
+        tmpCh3 = ch3_f_tkeo;
+        tmpCh4 = ch4_f_tkeo;
+    }
+    else if (algoMode == ALGO_MODE_P3_F_TKEO)
+    {
+        tmpCh1 = ch1_p3_f_tkeo;
+        tmpCh2 = ch2_p3_f_tkeo;
+        tmpCh3 = ch3_p3_f_tkeo;
+        tmpCh4 = ch4_p3_f_tkeo;
+    }
+
+    ofstream myfile(GB_IMPULSE_DIRECTORY + "/" + fileName);
+    for (int i = 0; i < totalNumberOfTrainingDataSamples; i++)
+    {
+        if (i > 1)
+        {
+            sample1.clear();
+            sample2.clear();
+            sample3.clear();
+            threeSamples.clear();
+
+            sample1.push_back(tmpCh1.at(i - 2));
+            sample1.push_back(tmpCh2.at(i - 2));
+            sample1.push_back(tmpCh3.at(i - 2));
+            sample1.push_back(tmpCh4.at(i - 2));
+
+            sample2.push_back(tmpCh1.at(i - 1));
+            sample2.push_back(tmpCh2.at(i - 1));
+            sample2.push_back(tmpCh3.at(i - 1));
+            sample2.push_back(tmpCh4.at(i - 1));
+
+            sample3.push_back(tmpCh1.at(i));
+            sample3.push_back(tmpCh2.at(i));
+            sample3.push_back(tmpCh3.at(i));
+            sample3.push_back(tmpCh4.at(i));
+
+            threeSamples.push_back(sample1);
+            threeSamples.push_back(sample2);
+            threeSamples.push_back(sample3);
+
+            clickType = predictCLickTypeFromThreeSamples(threeSamples);
+            if (i > 3)
+            {
+                if (clickType == "left")
+                {
+                    myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                           << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                           << " " << trainingDataThumbClick.at(i) << " 1 0 0" << endl;
+                }
+                else if (clickType == "right")
+                {
+                    myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                           << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                           << " " << trainingDataThumbClick.at(i) << " 0 1 0" << endl;
+                }
+                else if (clickType == "thumb")
+                {
+                    myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                           << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                           << " " << trainingDataThumbClick.at(i) << " 0 0 1" << endl;
+                }
+                else if (clickType == "none")
+                {
+                    myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                           << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                           << " " << trainingDataThumbClick.at(i) << " 0 0 0" << endl;
+                }
+            }
+            else
+            {
+                myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                       << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                       << " " << trainingDataThumbClick.at(i) << " 0 0 0" << endl;
+            }
+        }
+    }
+    myfile.close();
+}
+
+string MyAlgo::predictCLickTypeFromThreeSamples(std::vector<std::vector<double>> threeSamples)
+{
+    string clickType1 = predictCLickTypeFromOneSample(threeSamples.at(0));
+    string clickType2 = predictCLickTypeFromOneSample(threeSamples.at(1));
+    string clickType3 = predictCLickTypeFromOneSample(threeSamples.at(2));
+    if (clickType1 == clickType2 && clickType1 == clickType3 && clickType2 == clickType3)
+    {
+        return clickType1;
+    }
+    return "none";
+}
+
+string MyAlgo::predictCLickTypeFromOneSample(std::vector<double> sample)
+{
+    if (sample.at(0) >= globalChannelNoise[0] || sample.at(1) >= globalChannelNoise[1] || sample.at(2) >= globalChannelNoise[2] || sample.at(3) >= globalChannelNoise[3])
+    {
+        double leftClickDistance = getDistance(sample, meanLeftClick, covMatrixLeftClick);
+        double rightClickDistance = getDistance(sample, meanRightClick, covMatrixRightClick);
+        double thumbClickDistance = getDistance(sample, meanThumbClick, covMatrixThumbClick);
+        if (leftClickDistance <= rightClickDistance && leftClickDistance <= thumbClickDistance)
+        {
+            return "left";
+        }
+        else if (rightClickDistance <= leftClickDistance && rightClickDistance <= thumbClickDistance)
+        {
+            return "right";
+        }
+        else if (thumbClickDistance <= rightClickDistance && thumbClickDistance <= leftClickDistance)
+        {
+            return "thumb";
+        }
+    }
+    return "none";
+}
+
+double MyAlgo::getDistance(std::vector<double> sample, std::vector<double> mean, std::vector<std::vector<double>> cov)
+{
+    double distance;
+    matrix<double> M = dlib::mat(mean);
+    matrix<double> S = dlib::mat(sample);
+    matrix<double> COV;
+    COV.set_size(cov.size(), cov.at(0).size());
+    for (unsigned i = 0; i < cov.size(); i++)
+    {
+        for (unsigned j = 0; j < cov[i].size(); j++)
+        {
+            COV(i, j) = cov[i][j];
+        }
+    }
+    matrix<double> term1 = trans(M - S);
+    matrix<double> term2 = pinv(COV);
+    matrix<double> term3 = M - S;
+    distance = term1 * (term2 * term3);
+    return distance;
+}
+
+void MyAlgo::computeFeatures(int algoMode, int signFlag)
 {
     double mean1, mean2, mean3, mean4;
     // Left Click
-    vector<vector<double>> leftCLickFeatures;
-    getFeaturesForClickType(&l_c[0], ALGO_MODE, SIGN_FLAG, leftCLickFeatures);
+    std::vector<std::vector<double>> leftCLickFeatures;
+    getFeaturesForClickType(&l_c[0], algoMode, signFlag, leftCLickFeatures);
     mean1 = std::accumulate(leftCLickFeatures[0].begin(), leftCLickFeatures[0].end(), 0.0) / leftCLickFeatures[0].size();
     mean2 = std::accumulate(leftCLickFeatures[1].begin(), leftCLickFeatures[1].end(), 0.0) / leftCLickFeatures[1].size();
     mean3 = std::accumulate(leftCLickFeatures[2].begin(), leftCLickFeatures[2].end(), 0.0) / leftCLickFeatures[2].size();
@@ -66,11 +210,12 @@ void MyAlgo::computeFeatures()
     meanLeftClick.push_back(mean2);
     meanLeftClick.push_back(mean3);
     meanLeftClick.push_back(mean4);
+    // print2DVector(leftCLickFeatures);
     computeCovarianceMatrix(leftCLickFeatures, covMatrixLeftClick);
 
     // Right Click Features
-    vector<vector<double>> rightCLickFeatures;
-    getFeaturesForClickType(&r_c[0], ALGO_MODE, SIGN_FLAG, rightCLickFeatures);
+    std::vector<std::vector<double>> rightCLickFeatures;
+    getFeaturesForClickType(&r_c[0], algoMode, signFlag, rightCLickFeatures);
     mean1 = std::accumulate(rightCLickFeatures[0].begin(), rightCLickFeatures[0].end(), 0.0) / rightCLickFeatures[0].size();
     mean2 = std::accumulate(rightCLickFeatures[1].begin(), rightCLickFeatures[1].end(), 0.0) / rightCLickFeatures[1].size();
     mean3 = std::accumulate(rightCLickFeatures[2].begin(), rightCLickFeatures[2].end(), 0.0) / rightCLickFeatures[2].size();
@@ -82,8 +227,8 @@ void MyAlgo::computeFeatures()
     computeCovarianceMatrix(rightCLickFeatures, covMatrixRightClick);
 
     // Thumb Click Features
-    vector<vector<double>> thumbCLickFeatures;
-    getFeaturesForClickType(&t_c[0], ALGO_MODE, SIGN_FLAG, thumbCLickFeatures);
+    std::vector<std::vector<double>> thumbCLickFeatures;
+    getFeaturesForClickType(&t_c[0], algoMode, signFlag, thumbCLickFeatures);
     mean1 = std::accumulate(thumbCLickFeatures[0].begin(), thumbCLickFeatures[0].end(), 0.0) / thumbCLickFeatures[0].size();
     mean2 = std::accumulate(thumbCLickFeatures[1].begin(), thumbCLickFeatures[1].end(), 0.0) / thumbCLickFeatures[1].size();
     mean3 = std::accumulate(thumbCLickFeatures[2].begin(), thumbCLickFeatures[2].end(), 0.0) / thumbCLickFeatures[2].size();
@@ -95,39 +240,39 @@ void MyAlgo::computeFeatures()
     computeCovarianceMatrix(thumbCLickFeatures, covMatrixThumbClick);
 }
 
-void MyAlgo::getFeaturesForClickType(int *clickArray, int algoMode, int signFlag, vector<vector<double>> &featureVector)
+void MyAlgo::getFeaturesForClickType(int *clickArray, int algoMode, int signFlag, std::vector<std::vector<double>> &featureVector)
 {
-    vector<double> featureCh1, featureCh2, featureCh3, featureCh4;
+    std::vector<double> featureCh1, featureCh2, featureCh3, featureCh4;
     double *ch1, *ch2, *ch3, *ch4;
-    if (algoMode == 0)
+    if (algoMode == ALGO_MODE_RAW)
     {
         ch1 = &ch1_raw[0];
         ch2 = &ch2_raw[0];
         ch3 = &ch3_raw[0];
         ch4 = &ch4_raw[0];
     }
-    else if (algoMode == 1)
+    else if (algoMode == ALGO_MODE_TKEO)
     {
         ch1 = &ch1_tkeo[0];
         ch2 = &ch2_tkeo[0];
         ch3 = &ch3_tkeo[0];
         ch4 = &ch4_tkeo[0];
     }
-    else if (algoMode == 2)
+    else if (algoMode == ALGO_MODE_P3_TKEO)
     {
         ch1 = &ch1_p3_tkeo[0];
         ch2 = &ch2_p3_tkeo[0];
         ch3 = &ch3_p3_tkeo[0];
         ch4 = &ch4_p3_tkeo[0];
     }
-    else if (algoMode == 3)
+    else if (algoMode == ALGO_MODE_F_TKEO)
     {
         ch1 = &ch1_f_tkeo[0];
         ch2 = &ch2_f_tkeo[0];
         ch3 = &ch3_f_tkeo[0];
         ch4 = &ch4_f_tkeo[0];
     }
-    else if (algoMode == 4)
+    else if (algoMode == ALGO_MODE_P3_F_TKEO)
     {
         ch1 = &ch1_p3_f_tkeo[0];
         ch2 = &ch2_p3_f_tkeo[0];
@@ -139,11 +284,11 @@ void MyAlgo::getFeaturesForClickType(int *clickArray, int algoMode, int signFlag
     {
         if (i > trainingWindowStartPointForFeatureConstruction && clickArray[i] == 1 && previousValue == 0)
         {
-            vector<double> tmpCh1, tmpCh2, tmpCh3, tmpCh4;
+            std::vector<double> tmpCh1, tmpCh2, tmpCh3, tmpCh4;
             for (int j = i - trainingWindowStartPointForFeatureConstruction; j < i; j++)
             {
                 // Considering Positive Phase
-                if (signFlag == 1)
+                if (signFlag == ALGO_SIGN_FLAG_POS)
                 {
                     if (ch1[j] < 0.0)
                     {
@@ -163,7 +308,7 @@ void MyAlgo::getFeaturesForClickType(int *clickArray, int algoMode, int signFlag
                     }
                 }
                 // Considering Negative Phase
-                else if (signFlag == -1)
+                else if (signFlag == ALGO_SIGN_FLAG_NEG)
                 {
                     if (ch1[j] > 0.0)
                     {
@@ -183,7 +328,7 @@ void MyAlgo::getFeaturesForClickType(int *clickArray, int algoMode, int signFlag
                     }
                 }
                 // Considering Both
-                else if (signFlag == 0)
+                else if (signFlag == ALGO_SIGN_FLAG_BOTH)
                 {
                     ch1[j] = abs(ch1[j]);
                     ch2[j] = abs(ch2[j]);
@@ -221,19 +366,19 @@ void MyAlgo::getFeaturesForClickType(int *clickArray, int algoMode, int signFlag
     featureVector.push_back(featureCh4);
 }
 
-void MyAlgo::computeGlobalNoice()
+void MyAlgo::computeGlobalNoice(int algoMode, int signFlag)
 {
     double leftClickEachChannelMaxValue[] = {-5.0, -5.0, -5.0, -5.0};
     double rightClickEachChannelMaxValue[] = {-5.0, -5.0, -5.0, -5.0};
     double thumbClickEachChannelMaxValue[] = {-5.0, -5.0, -5.0, -5.0};
-    getEachChannelMaxValueForClickType(&l_c[0], ALGO_MODE, SIGN_FLAG, leftClickEachChannelMaxValue);  // Left Click
-    getEachChannelMaxValueForClickType(&r_c[0], ALGO_MODE, SIGN_FLAG, rightClickEachChannelMaxValue); // Right Click
-    getEachChannelMaxValueForClickType(&t_c[0], ALGO_MODE, SIGN_FLAG, thumbClickEachChannelMaxValue); // Thumb Click
+    getEachChannelMaxValueForClickType(&l_c[0], algoMode, signFlag, leftClickEachChannelMaxValue);  // Left Click
+    getEachChannelMaxValueForClickType(&r_c[0], algoMode, signFlag, rightClickEachChannelMaxValue); // Right Click
+    getEachChannelMaxValueForClickType(&t_c[0], algoMode, signFlag, thumbClickEachChannelMaxValue); // Thumb Click
     for (int i = 0; i < 4; i++)
     {
         globalChannelNoise[i] = minOfThree(leftClickEachChannelMaxValue[i], rightClickEachChannelMaxValue[i], thumbClickEachChannelMaxValue[i]);
     }
-    cout << globalChannelNoise[0] << " " << globalChannelNoise[1] << " " << globalChannelNoise[2] << " " << globalChannelNoise[3] << endl;
+    // cout << globalChannelNoise[0] << " " << globalChannelNoise[1] << " " << globalChannelNoise[2] << " " << globalChannelNoise[3] << endl;
 }
 
 double MyAlgo::minOfThree(double x, double y, double z)
@@ -245,35 +390,35 @@ void MyAlgo::getEachChannelMaxValueForClickType(int *clickArray, int algoMode, i
 {
 
     double *ch1, *ch2, *ch3, *ch4;
-    if (algoMode == 0)
+    if (algoMode == ALGO_MODE_RAW)
     {
         ch1 = &ch1_raw[0];
         ch2 = &ch2_raw[0];
         ch3 = &ch3_raw[0];
         ch4 = &ch4_raw[0];
     }
-    else if (algoMode == 1)
+    else if (algoMode == ALGO_MODE_TKEO)
     {
         ch1 = &ch1_tkeo[0];
         ch2 = &ch2_tkeo[0];
         ch3 = &ch3_tkeo[0];
         ch4 = &ch4_tkeo[0];
     }
-    else if (algoMode == 2)
+    else if (algoMode == ALGO_MODE_P3_TKEO)
     {
         ch1 = &ch1_p3_tkeo[0];
         ch2 = &ch2_p3_tkeo[0];
         ch3 = &ch3_p3_tkeo[0];
         ch4 = &ch4_p3_tkeo[0];
     }
-    else if (algoMode == 3)
+    else if (algoMode == ALGO_MODE_F_TKEO)
     {
         ch1 = &ch1_f_tkeo[0];
         ch2 = &ch2_f_tkeo[0];
         ch3 = &ch3_f_tkeo[0];
         ch4 = &ch4_f_tkeo[0];
     }
-    else if (algoMode == 4)
+    else if (algoMode == ALGO_MODE_P3_F_TKEO)
     {
         ch1 = &ch1_p3_f_tkeo[0];
         ch2 = &ch2_p3_f_tkeo[0];
@@ -282,14 +427,14 @@ void MyAlgo::getEachChannelMaxValueForClickType(int *clickArray, int algoMode, i
     }
 
     int previousValue = 0;
-    for (int i = 0; i < totalNumberOfTrainingDataSamples; i++)
+    for (int i = 0; i < ch1_raw.size(); i++)
     {
         if (i > trainingWindowStartPointForNoise && clickArray[i] == 1 && previousValue == 0)
         {
             for (int j = i - trainingWindowStartPointForNoise; j < i - trainingWindowEndPointForNoise; j++)
             {
                 // Considering Positive Phase
-                if (signFlag == 1)
+                if (signFlag == ALGO_SIGN_FLAG_POS)
                 {
                     if (ch1[j] < 0.0)
                     {
@@ -309,7 +454,7 @@ void MyAlgo::getEachChannelMaxValueForClickType(int *clickArray, int algoMode, i
                     }
                 }
                 // Considering Negative Phase
-                else if (signFlag == -1)
+                else if (signFlag == ALGO_SIGN_FLAG_NEG)
                 {
                     if (ch1[j] > 0.0)
                     {
@@ -329,7 +474,7 @@ void MyAlgo::getEachChannelMaxValueForClickType(int *clickArray, int algoMode, i
                     }
                 }
                 // Considering Both
-                else if (signFlag == 0)
+                else if (signFlag == ALGO_SIGN_FLAG_BOTH)
                 {
                     ch1[j] = abs(ch1[j]);
                     ch2[j] = abs(ch2[j]);
@@ -446,10 +591,14 @@ void MyAlgo::processData()
     }
 }
 
-void MyAlgo::readData()
+void MyAlgo::readData(string fileName)
 {
     std::string line;
-    std::ifstream infile("data_train.txt");
+    std::ifstream infile(GB_IMPULSE_DIRECTORY+"/"+fileName);
+    if (infile.fail())
+    {
+        cout << "Unable to open file : " << GB_IMPULSE_DIRECTORY+"/"+fileName << endl;
+    }
     while (std::getline(infile, line))
     {
         std::istringstream iss(line);
@@ -482,16 +631,16 @@ void MyAlgo::readData()
             }
             else if (i == 4)
             {
-                trainingDataLeftClick.push_back(std::stod(token));
+                trainingDataLeftClick.push_back(std::stoi(token));
             }
             else if (i == 5)
             {
-                trainingDataRightClick.push_back(std::stod(token));
+                trainingDataRightClick.push_back(std::stoi(token));
             }
             i++;
         }
         // std::cout << s << std::endl;
-        trainingDataThumbClick.push_back(std::stod(s));
+        trainingDataThumbClick.push_back(std::stoi(s));
     }
 }
 
