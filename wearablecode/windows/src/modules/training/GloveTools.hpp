@@ -31,12 +31,13 @@ private:
     int *lC, *rC, *tC;
     FilterTools filterTools;
     MDaq mDaq;
+    MyAlgo myAlgo;
 
 public:
     GloveTools();
     int startTraining();
     void startTrainingRecording();
-    void stopTraining();
+    string stopTraining();
 
     string getRealTimeDataWithTkeo();
     string getRealTimeRawDemoData();

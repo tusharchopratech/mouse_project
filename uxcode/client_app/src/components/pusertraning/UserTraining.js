@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Fab from '@material-ui/core/Fab';
@@ -10,7 +9,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { ReactComponent as MouseIcon } from '../../images/mouse_white.svg';
-const BrowserWindow = window.require('electron').remote.BrowserWindow;
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 class Caliberation extends Component {
 
@@ -36,7 +35,8 @@ class Caliberation extends Component {
     this.clicksInfoArray = []
     this.state = {
       start_showing_random_clicks: false,
-      openFinishDialog: false
+      openFinishDialog: false,
+      openLoadingDialogForUserTraining: false,
     };
   };
 
@@ -69,13 +69,14 @@ class Caliberation extends Component {
           onMouseDown={this.onMouseDown.bind(this)}> Click {this.currentClickType}!</Fab>
       } else {
         console.log("Done Test");
-        const { ipcRenderer } = window.require("electron");
-        ipcRenderer.send("socket_data_send", "stop_training");
         this.setState({
           start_showing_random_clicks: false,
           showCaliberationButton: false,
-          openFinishDialog: true
+          openFinishDialog: false,
+          openLoadingDialogForUserTraining: true
         });
+        const { ipcRenderer } = window.require("electron");
+        ipcRenderer.send("socket_data_send", "stop_training");
       }
     } else {
       return;
@@ -83,13 +84,24 @@ class Caliberation extends Component {
   };
 
   onClickStartTraining = (event) => {
-    ReactDOM.findDOMNode(this.refs.start_caliberation_button).style.display = 'none';
-    setTimeout(function () {
+    if (window.require('electron').remote.getGlobal('shared_object').current_envirnoment == "dev") {
       this.setState({
-        start_showing_random_clicks: true,
-        openFinishDialog: false
+        start_showing_random_clicks: false,
+        showCaliberationButton: false,
+        openFinishDialog: false,
+        openLoadingDialogForUserTraining: true
       });
-    }.bind(this), 2000);
+      const { ipcRenderer } = window.require("electron");
+      ipcRenderer.send("socket_data_send", "stop_training");
+    } else {
+      ReactDOM.findDOMNode(this.refs.start_caliberation_button).style.display = 'none';
+      setTimeout(function () {
+        this.setState({
+          start_showing_random_clicks: true,
+          openFinishDialog: false
+        });
+      }.bind(this), 2000);
+    }
   }
 
   onMouseDown = (event) => {
@@ -125,7 +137,7 @@ class Caliberation extends Component {
         ReactDOM.findDOMNode(this.refs.test_click_button).style.display = '';
       }
     }.bind(this), 2000);
-    
+
   };
 
   closeFinishDialog = () => {
@@ -141,6 +153,21 @@ class Caliberation extends Component {
     for (var i = 0; i < 5; i++) { this.clickSequence.push("right"); }
     for (var i = 0; i < 5; i++) { this.clickSequence.push("thumb"); }
     this.clickSequence = this.shuffleArray(this.clickSequence);
+
+    const { ipcRenderer } = window.require("electron");
+    ipcRenderer.on('socket_data_received', function (event, data) {
+      var jsonObject = JSON.parse(String(data));
+      if (jsonObject.type == "algo_outputs") {
+        // console.log(jsonObject);
+        this.setState({
+          start_showing_random_clicks: false,
+          showCaliberationButton: false,
+          openFinishDialog: false,
+          openLoadingDialogForUserTraining: false
+        });
+        this.props.callbackSetMainSection('report',jsonObject);
+      }
+    }.bind(this));
   }
 
   shuffleArray = (arra1) => {
@@ -192,6 +219,19 @@ class Caliberation extends Component {
               Next
             </Button>
           </DialogActions>
+        </Dialog>
+
+        <Dialog
+          open={this.state.openLoadingDialogForUserTraining}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          disableBackdropClick={true}
+          disableEscapeKeyDown={true}
+        >
+          <DialogTitle id="alert-dialog-title">{"Extracting Information..."}</DialogTitle>
+          <DialogContent>
+            <CircularProgress className={classes.progress} />
+          </DialogContent>
         </Dialog>
       </div>
     )

@@ -10,8 +10,10 @@
 #include <string>
 #include "..\training\GloveTools.cpp"
 #include "..\edata\Global.cpp"
-
+#include "..\edata\json\json.hpp"
+using Json = nlohmann::json;
 using namespace std;
+
 // Need to link with Ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
 // #pragma comment (lib, "Mswsock.lib")

@@ -1,9 +1,6 @@
 #include "SocketServer.hpp"
 #include <string.h>
 
-
-
-
 int __cdecl SocketServer::setupSocket()
 {
 
@@ -96,7 +93,8 @@ void SocketServer::startListeningFromSocket()
         iResult = recv(ClientSocket, receivedMessageFromClient, DEFAULT_BUFLEN, 0);
         string str(receivedMessageFromClient);
         str = str.substr(0, str.find("*****"));
-        if (str == "raw_real_time_data")
+        Json obj = Json::parse(str);
+        if (obj["type"] == "message" && obj["value"] == "raw_real_time_data")
         {
             finalSocketData = "";
             if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
@@ -106,20 +104,21 @@ void SocketServer::startListeningFromSocket()
             else
             {
                 finalSocketData = gloveTools.getRealTimeRawData();
-            }   
+            }
             send(ClientSocket, finalSocketData.c_str(), finalSocketData.length(), 0);
         }
-        else if (str == "start_training")
+        else if (obj["type"] == "message" && obj["value"] == "start_training")
         {
             gloveTools.startTraining();
             finalSocketData = "{\"type\":\"start_training_success\"}";
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
-        else if (str == "stop_training")
+        else if (obj["type"] == "message" && obj["value"] == "stop_training")
         {
-            gloveTools.stopTraining();
+            finalSocketData = gloveTools.stopTraining();
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
-        else if (str == "debugging_real_time_data")
+        else if (obj["type"] == "message" && obj["value"] == "debugging_real_time_data")
         {
             finalSocketData = gloveTools.getRealTimeDataWithTkeo();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);

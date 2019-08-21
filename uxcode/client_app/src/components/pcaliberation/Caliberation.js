@@ -11,7 +11,7 @@ class Caliberation extends Component {
     constructor(props) {
         super(props)
 
-        this.totalSamplesOnChart = 2048*2;
+        this.totalSamplesOnChart = 2048 * 2;
 
         this.ch1Array = [];
         this.ch2Array = [];
@@ -115,6 +115,10 @@ class Caliberation extends Component {
         this.showRealTimeData();
     }
 
+    componentWillUnmount = () => {
+
+    }
+
     showRealTimeData = () => {
         const { ipcRenderer } = window.require("electron");
         ipcRenderer.send("socket_data_send", "start_raw_real_time_data");
@@ -122,8 +126,13 @@ class Caliberation extends Component {
         ipcRenderer.on('socket_data_received', function (event, data) {
             // console.log(String(data), " at ", new Date().getTime());
             console.log("New Data at ", new Date().getTime());
-            var jsonObject = JSON.parse(String(data));
-            if (jsonObject.type == "real_time_raw_data") {
+            try {
+                var jsonObject = JSON.parse(String(data));
+            } catch (e) {
+                console.log("Error in paring data ", String(data));
+                console.log(e);
+            }
+            if (jsonObject!=null && jsonObject.type == "real_time_raw_data") {
                 this.ch1Temp = jsonObject.ch_v1[0];
                 this.ch2Temp = jsonObject.ch_v2[0];
                 this.ch3Temp = jsonObject.ch_v3[0];
@@ -152,7 +161,7 @@ class Caliberation extends Component {
                     this.rCArrayTemp.push(jsonObject.right_click[index]);
                     this.tCArrayTemp.push(jsonObject.thumb_click[index]);
                 }
-            } else if (jsonObject.type == "start_training_success") {
+            } else if (jsonObject!=null && jsonObject.type == "start_training_success") {
                 this.props.callbackSetMainSection('user_training');
             }
         }.bind(this));

@@ -2,27 +2,72 @@
 #define MyAlgo_CPP
 #include "MyAlgo.hpp"
 
-void MyAlgo::predictAndWriteResults()
+string MyAlgo::getAlgoResults()
 {
+    readData("data.txt");
+    processData();
+    string result = predictAndWriteResults();
+    return result;
+}
+
+string MyAlgo::predictAndWriteResults()
+{
+    string info = "";
+    Json finalJson, tmp;
+    finalJson["type"] = "algo_outputs";
+
     computeGlobalNoice(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH);
-    predictAndWriteAlgoSpecificResults(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_f_tkeo_sign_both.txt");
+    info = predictAndWriteAlgoSpecificResults(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_f_tkeo_sign_both");
+    tmp.push_back(Json::parse(info));
+    // finalJson.push_back(tmp);
 
     computeGlobalNoice(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH);
-    predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_tkeo_sign_both.txt");
+    info = predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_tkeo_sign_both");
+    tmp.push_back(Json::parse(info));
+    // tmp = Json::parse(info);
+    // finalJson.push_back(tmp);
 
     computeGlobalNoice(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH);
-    predictAndWriteAlgoSpecificResults(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_tkeo_sign_both.txt");
+    info = predictAndWriteAlgoSpecificResults(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_tkeo_sign_both");
+    tmp.push_back(Json::parse(info));
+    // tmp = Json::parse(info);
+    // finalJson.push_back(tmp);
 
     computeGlobalNoice(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH);
-    predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_f_tkeo_sign_both.txt");
+    info = predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_f_tkeo_sign_both");
+    tmp.push_back(Json::parse(info));
+    // tmp = Json::parse(info);
+    // finalJson.push_back(tmp);
+    finalJson["results"] = tmp;
+    finalJson["actual_left_click_indices"] = getActualClickIndices(trainingDataLeftClick);
+    finalJson["actual_right_click_indices"] = getActualClickIndices(trainingDataRightClick);
+
+    return finalJson.dump();
 }
 
-void MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, string fileName)
+string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, string algoType)
 {
+    Json info;
+    info["algo_type"] = algoType;
+    std::vector<int> truePositivesLeftClickLead;
+    std::vector<int> truePositivesLeftClickIndex;
+    std::vector<int> falsePositivesLeftClickIndex;
+    std::vector<int> truePositivesRightClickLead;
+    std::vector<int> truePositivesRightClickIndex;
+    std::vector<int> falsePositivesRightClickIndex;
+    std::vector<int> truePositivesThumbClickLead;
+    std::vector<int> truePositivesThumbClickIndex;
+    std::vector<int> falsePositivesThumbClickIndex;
+    int lead = -100;
+
+    int nextLeftClickCheckAfterSampleNumber = 0;
+    int nextRightClickCheckAfterSampleNumber = 0;
+    int nextThumbClickCheckAfterSampleNumber = 0;
+
     totalNumberOfTrainingDataSamples = ch1_tkeo.size();
 
     std::vector<double> tmpCh1;
@@ -72,7 +117,7 @@ void MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, stri
         tmpCh4 = ch4_p3_f_tkeo;
     }
 
-    ofstream myfile(GB_IMPULSE_DIRECTORY + "/" + fileName);
+    ofstream myfile(GB_IMPULSE_DIRECTORY + "/" + algoType + ".txt");
     for (int i = 0; i < totalNumberOfTrainingDataSamples; i++)
     {
         if (i > 1)
@@ -106,21 +151,84 @@ void MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, stri
             {
                 if (clickType == "left")
                 {
-                    myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
-                           << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
-                           << " " << trainingDataThumbClick.at(i) << " 1 0 0" << endl;
+
+                    if (i > nextLeftClickCheckAfterSampleNumber)
+                    {
+                        myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                               << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                               << " " << trainingDataThumbClick.at(i) << " 1 0 0" << endl;
+                        nextLeftClickCheckAfterSampleNumber = ((int)((GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD * GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE) / 1000)) + i;
+                        lead = getClickLead(i, trainingDataLeftClick);
+                        if (lead == -1)
+                        {
+                            falsePositivesLeftClickIndex.push_back(i);
+                        }
+                        else
+                        {
+                            truePositivesLeftClickLead.push_back(lead);
+                            truePositivesLeftClickIndex.push_back(i);
+                        }
+                    }
+                    else
+                    {
+                        myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                               << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                               << " " << trainingDataThumbClick.at(i) << " 0 0 0" << endl;
+                    }
                 }
                 else if (clickType == "right")
                 {
-                    myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
-                           << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
-                           << " " << trainingDataThumbClick.at(i) << " 0 1 0" << endl;
+
+                    if (i > nextRightClickCheckAfterSampleNumber)
+                    {
+                        myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                               << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                               << " " << trainingDataThumbClick.at(i) << " 0 1 0" << endl;
+                        lead = getClickLead(i, trainingDataRightClick);
+                        if (lead == -1)
+                        {
+                            falsePositivesRightClickIndex.push_back(i);
+                        }
+                        else
+                        {
+                            truePositivesRightClickLead.push_back(lead);
+                            truePositivesRightClickIndex.push_back(i);
+                            nextRightClickCheckAfterSampleNumber = ((int)((GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD * GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE) / 1000)) + i;
+                        }
+                    }
+                    else
+                    {
+                        myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                               << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                               << " " << trainingDataThumbClick.at(i) << " 0 0 0" << endl;
+                    }
                 }
                 else if (clickType == "thumb")
                 {
-                    myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
-                           << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
-                           << " " << trainingDataThumbClick.at(i) << " 0 0 1" << endl;
+
+                    if (i > nextThumbClickCheckAfterSampleNumber)
+                    {
+                        myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                               << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                               << " " << trainingDataThumbClick.at(i) << " 0 0 1" << endl;
+                        lead = getClickLead(i, trainingDataThumbClick);
+                        if (lead == -1)
+                        {
+                            falsePositivesThumbClickIndex.push_back(i);
+                        }
+                        else
+                        {
+                            truePositivesThumbClickLead.push_back(lead);
+                            truePositivesThumbClickIndex.push_back(i);
+                            nextThumbClickCheckAfterSampleNumber = ((int)((GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD * GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE) / 1000)) + i;
+                        }
+                    }
+                    else
+                    {
+                        myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
+                               << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
+                               << " " << trainingDataThumbClick.at(i) << " 0 0 0" << endl;
+                    }
                 }
                 else if (clickType == "none")
                 {
@@ -138,6 +246,59 @@ void MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, stri
         }
     }
     myfile.close();
+    Json tmp, tmp2;
+
+    tmp["false_positives_indices"] = falsePositivesLeftClickIndex;
+    tmp2["lead"] = truePositivesLeftClickLead;
+    tmp2["indices"] = truePositivesLeftClickIndex;
+    tmp["true_positives"] = tmp2;
+    info["left_click"] = tmp;
+
+    tmp["false_positives_indices"] = falsePositivesRightClickIndex;
+    tmp2["lead"] = truePositivesRightClickLead;
+    tmp2["indices"] = truePositivesRightClickIndex;
+    tmp["true_positives"] = tmp2;
+    info["right_click"] = tmp;
+
+    return info.dump();
+}
+
+std::vector<int> MyAlgo::getActualClickIndices(std::vector<int> clickData)
+{
+    std::vector<int> tmp;
+    int flag = 1;
+    for (int i = 0; i < clickData.size(); i++)
+    {
+        if (clickData.at(i) == 1)
+        {
+            if (flag == 1)
+            {
+                tmp.push_back(i);
+                flag = 0;
+            }
+        }
+        else
+        {
+            flag = 1;
+        }
+    }
+    return tmp;
+}
+
+int MyAlgo::getClickLead(int loc, std::vector<int> clickArray)
+{
+    int i = loc;
+    int next150MsSampleIndex = ((int)((GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD * TRUE_POSTIVE_MILLISECONDS_CHECK) / 1000)) + loc;
+
+    while (i < clickArray.size() && i < next150MsSampleIndex)
+    {
+        if (clickArray.at(i) == 1)
+        {
+            return (int)((i - loc) / 2);
+        }
+        i++;
+    }
+    return -1;
 }
 
 string MyAlgo::predictCLickTypeFromThreeSamples(std::vector<std::vector<double>> threeSamples)
@@ -145,10 +306,24 @@ string MyAlgo::predictCLickTypeFromThreeSamples(std::vector<std::vector<double>>
     string clickType1 = predictCLickTypeFromOneSample(threeSamples.at(0));
     string clickType2 = predictCLickTypeFromOneSample(threeSamples.at(1));
     string clickType3 = predictCLickTypeFromOneSample(threeSamples.at(2));
-    if (clickType1 == clickType2 && clickType1 == clickType3 && clickType2 == clickType3)
+
+    if (clickType1 == clickType2)
     {
         return clickType1;
     }
+    else if (clickType3 == clickType2)
+    {
+        return clickType2;
+    }
+    else if (clickType1 == clickType3)
+    {
+        return clickType3;
+    }
+
+    // if (clickType1 == clickType2 && clickType1 == clickType3 && clickType2 == clickType3)
+    // {
+    //     return clickType1;
+    // }
     return "none";
 }
 
@@ -593,11 +768,22 @@ void MyAlgo::processData()
 
 void MyAlgo::readData(string fileName)
 {
+    string file = "";
+
+    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+    {
+        file = GB_IMPULSE_DEV_DIRECTORY + "/" + fileName;
+    }
+    else
+    {
+        file = GB_IMPULSE_DIRECTORY + "/" + fileName;
+    }
+
     std::string line;
-    std::ifstream infile(GB_IMPULSE_DIRECTORY+"/"+fileName);
+    std::ifstream infile(file);
     if (infile.fail())
     {
-        cout << "Unable to open file : " << GB_IMPULSE_DIRECTORY+"/"+fileName << endl;
+        cout << "Unable to open file : " << GB_IMPULSE_DIRECTORY + "/" + fileName << endl;
     }
     while (std::getline(infile, line))
     {
@@ -642,6 +828,11 @@ void MyAlgo::readData(string fileName)
         // std::cout << s << std::endl;
         trainingDataThumbClick.push_back(std::stoi(s));
     }
+
+    std::vector<double> tmp;
+    tmp = trainingDataChannel3;
+    trainingDataChannel3 = trainingDataChannel4;
+    trainingDataChannel4 = tmp;
 }
 
 #endif // !MyAlgo_CPP

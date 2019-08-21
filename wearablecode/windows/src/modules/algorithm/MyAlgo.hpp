@@ -11,7 +11,8 @@
 #include <numeric>
 #include "..\edata\Global.cpp"
 #include "..\filter\FilterTools.cpp"
-
+#include "..\edata\json\json.hpp"
+using Json = nlohmann::json;
 using namespace std;
 // using namespace dlib;
 
@@ -50,11 +51,8 @@ private:
 public:
     MyAlgo()
     {
-        // Training Part
-        readData("data.txt");
-        processData();
-        predictAndWriteResults();
     }
+
     void readData(string file);
     void processData();
     double getTkeoValue(double v1, double v2, double v3);
@@ -70,8 +68,12 @@ public:
     string predictCLickTypeFromOneSample(std::vector<double> sample);
     string predictCLickTypeFromThreeSamples(std::vector<std::vector<double>> threeSamples);
 
-    void predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, string filePath);
-    void predictAndWriteResults();
+    string predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, string filePath);
+    string predictAndWriteResults();
+    int getClickLead(int loc, std::vector<int> clickArray);
+    std::vector<int> MyAlgo::getActualClickIndices(std::vector<int> clickData);
+
+    string getAlgoResults();
 };
 
 #endif // !MyAlgo_HPP

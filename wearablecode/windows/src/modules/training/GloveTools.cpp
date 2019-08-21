@@ -31,27 +31,34 @@ int GloveTools::startTraining()
     return 1;
 }
 
-void GloveTools::stopTraining()
+string GloveTools::stopTraining()
 {
     isTrainingRunning = false;
-    ofstream myfile(GB_IMPULSE_DIRECTORY + "/data.txt");
-    if (myfile.is_open())
+    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
     {
-        auto ch1 = trainingDataChannel1.begin();
-        auto ch2 = trainingDataChannel2.begin();
-        auto ch3 = trainingDataChannel3.begin();
-        auto ch4 = trainingDataChannel4.begin();
-        auto lc = trainingDataLeftClick.begin();
-        auto rc = trainingDataRightClick.begin();
-        auto tc = trainingDataThumbClick.begin();
-
-        while (ch1 != trainingDataChannel1.end())
-        {
-            myfile << *ch1++ << " " << *ch2++ << " " << *ch3++ << " " << *ch4++ << " " << *lc++ << " " << *rc++ << " " << *tc++ << endl;
-        }
-        myfile.close();
     }
-    MyAlgo m;
+    else
+    {
+        ofstream myfile(GB_IMPULSE_DIRECTORY + "/data.txt");
+        if (myfile.is_open())
+        {
+            auto ch1 = trainingDataChannel1.begin();
+            auto ch2 = trainingDataChannel2.begin();
+            auto ch3 = trainingDataChannel3.begin();
+            auto ch4 = trainingDataChannel4.begin();
+            auto lc = trainingDataLeftClick.begin();
+            auto rc = trainingDataRightClick.begin();
+            auto tc = trainingDataThumbClick.begin();
+
+            while (ch1 != trainingDataChannel1.end())
+            {
+                myfile << *ch1++ << " " << *ch2++ << " " << *ch3++ << " " << *ch4++ << " " << *lc++ << " " << *rc++ << " " << *tc++ << endl;
+            }
+            myfile.close();
+        }
+    }
+   string result = myAlgo.getAlgoResults();
+   return result;
 }
 
 void GloveTools::startTrainingRecording()
@@ -106,7 +113,7 @@ double GloveTools::getTkeoValue(double sample1, double sample2, double sample3, 
 void GloveTools::readDemoData()
 {
     std::string line;
-    std::ifstream infile(GB_IMPULSE_DIRECTORY+"/data.txt");
+    std::ifstream infile(GB_IMPULSE_DEV_DIRECTORY + "/data.txt");
     while (std::getline(infile, line))
     {
         std::istringstream iss(line);

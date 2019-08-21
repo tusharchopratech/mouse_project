@@ -4,12 +4,13 @@ import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
 import { ReactComponent as HandIconWhite } from '../../images/hand_white.svg';
 
+
 class Welcome extends Component {
 
     constructor(props) {
         super(props)
         this.state = {
-
+            openLoadingDialog: true,
         }
     }
 
@@ -18,11 +19,9 @@ class Welcome extends Component {
     };
 
     componentDidMount = () => {
+        console.log("Welcome mounted");
         const { ipcRenderer } = window.require("electron");
-        ipcRenderer.send("internal_ipc", "start_backend_and_socket");
-        ipcRenderer.on('internal_ipc', function (event, data) {
-            console.log(data);
-        });
+        ipcRenderer.send("socket_data_send", "stop_raw_real_time_data");
     };
 
     render() {

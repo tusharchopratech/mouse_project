@@ -14,11 +14,16 @@ var startReceivingRealTimeData = false;
 let mainWindow
 
 var backEndPath;
+global.shared_object = {current_envirnoment: process.env.NODE_ENV};
+
+
 if (process.env.NODE_ENV == "dev") {
   backEndPath = "./src/extra-resources/main.exe"; // For Dev
 } else {
   backEndPath = "./resources/src/extra-resources/main.exe"; // For Prod
 }
+
+
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -38,19 +43,17 @@ function createWindow() {
 ipc.on('socket_data_send', (event, data) => {
   if (data == "start_raw_real_time_data") {
     startReceivingRealTimeData = true;
-    client.write('raw_real_time_data' + '*****');
+    client.write(JSON.stringify({ type: 'message', value: 'raw_real_time_data' }) + '*****');
   } else if (data == "stop_raw_real_time_data") {
     startReceivingRealTimeData = false;
   } else if (data == "start_training") {
-    client.write('start_training' + '*****');
+    client.write(JSON.stringify({ type: 'message', value: 'start_training' }) + '*****');
   } else if (data == "stop_training") {
-    client.write('stop_training' + '*****');
+    client.write(JSON.stringify({ type: 'message', value: 'stop_training' }) + '*****');
   }
 });
 
 ipc.on('internal_ipc', (event, data) => {
-
-
 
   if (data == "start_backend_and_socket") {
     if (process.env.NODE_ENV == "dev") {
@@ -98,7 +101,7 @@ function startBackend() {
   var error = false;
   var processData = child(backEndPath, function (err, data) {
     if (err) {
-      mainWindow.webContents.send('internal_ipc', err);
+      mainWindow.webContents.send('internal_ipc', JSON.stringify({ type: 'error', value: err }));
       error = true;
     } else {
       error = false;
@@ -106,9 +109,9 @@ function startBackend() {
   });
 
   if (error) {
-    mainWindow.webContents.send('internal_ipc', 'backend_connection_error');
+    mainWindow.webContents.send('internal_ipc', JSON.stringify({ type: 'status', value: 'backend_connection_error' }));
   } else {
-    mainWindow.webContents.send('internal_ipc', 'backend_connected');
+    mainWindow.webContents.send('internal_ipc', JSON.stringify({ type: 'status', value: 'backend_connected' }));
     process_to_kill.push(processData.pid);
     setTimeout(connectSocket, 3000);
   }
@@ -118,15 +121,15 @@ function connectSocket() {
   client = null;
   client = new net.Socket();
   client.connect(27015, 'localhost', function () {
-    mainWindow.webContents.send('internal_ipc', 'socket_connected');
-    // isSocketConnect = true;
-    // client.write('raw_real_time_data' + '*****');
+    mainWindow.webContents.send('internal_ipc', JSON.stringify({ type: 'status', value: 'socket_connected' }));
+    mainWindow.webContents.send('internal_ipc', JSON.stringify({ type: 'current_envirnoment', value: process.env.NODE_ENV }));
   });
 
   client.on('data', function (data) {
     // console.log(String(data), " at ", new Date().getTime());
     if (startReceivingRealTimeData) {
-      client.write('raw_real_time_data' + '*****');
+      // client.write('raw_real_time_data' + '*****');
+      client.write(JSON.stringify({ type: 'message', value: 'raw_real_time_data' }) + '*****');
     }
     if (mainWindow != null) {
       mainWindow.webContents.send('socket_data_received', new Buffer(data).toString('ascii'));
@@ -136,7 +139,7 @@ function connectSocket() {
   client.on('close', function () {
     isSocketConnect = false;
     if (mainWindow != null) {
-      mainWindow.webContents.send('internal_ipc', 'socket_disconnected');
+      mainWindow.webContents.send('internal_ipc', JSON.stringify({ type: 'status', value: 'socket_disconnected' }));
     }
   });
 
