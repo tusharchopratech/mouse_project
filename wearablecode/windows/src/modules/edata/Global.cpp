@@ -19,7 +19,6 @@ void gb_logTime()
 void gb_setCurrentEnvirnoment(string env)
 {
     currentEnvirnoment = env;
-    CreateDirectory(GB_IMPULSE_DIRECTORY.c_str(), NULL);
 }
 
 string gb_getCurrentEnvirnoment()

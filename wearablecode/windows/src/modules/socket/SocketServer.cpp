@@ -123,5 +123,17 @@ void SocketServer::startListeningFromSocket()
             finalSocketData = gloveTools.getRealTimeDataWithTkeo();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
+        else if (obj["type"] == "communication" && obj["value"] == "settings")
+        {
+            gloveTools.setTrainingSettings(obj["participant_name"],obj["trail_no"],obj["no_of_channels"]);
+            finalSocketData = "{\"type\":\"communication_success\", \"value\":\"settings_set\"}";
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+        }
+        else if (obj["type"] == "message" && obj["value"] == "start_real_time")
+        {
+            gloveTools.startTraining();
+            finalSocketData = "{\"type\":\"start_real_time_success\"}";
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+        }
     } while (iResult > 0);
 }

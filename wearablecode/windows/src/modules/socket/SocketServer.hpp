@@ -11,6 +11,7 @@
 #include "..\training\GloveTools.cpp"
 #include "..\edata\Global.cpp"
 #include "..\edata\json\json.hpp"
+
 using Json = nlohmann::json;
 using namespace std;
 

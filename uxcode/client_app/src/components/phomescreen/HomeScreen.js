@@ -53,11 +53,11 @@ export class HomeScreen extends Component {
     if (val === "caliberation") {
       return <Caliberation callbackSetMainSection={this.setMainSection} />
     } else if (val === "user_training") {
-      return <UserTraining myTop={this.top} myBottom={this.bottom} myLeft={this.left} myRight={this.right}  callbackSetMainSection={this.setMainSectionWithData}/>
+      return <UserTraining myTop={this.top} myBottom={this.bottom} myLeft={this.left} myRight={this.right} callbackSetMainSection={this.setMainSectionWithData} />
     } else if (val === "real_time_data") {
       return <RealTimeData />
     } else if (val === "report") {
-      return <Report report={this.report}/>
+      return <Report report={this.report} />
     } else if (val === "welcome") {
       return <Welcome callbackSetMainSection={this.setMainSection} />
     }
@@ -85,9 +85,15 @@ export class HomeScreen extends Component {
           this.setState({ openLoadingDialogText: "Please press Ctrl + R", openLoadingDialog: true });
         }
       } catch (e) {
-        console.log("Error in paring data ", String(data));
+        console.log("Error in paring data ");
+        console.log(data);
         console.log(e);
       }
+    }.bind(this));
+
+    ipcRenderer.on('internal_ipc_error', function (event, data) {
+      console.log("Internal IPC Error");
+      console.log(data);
     }.bind(this));
 
   };

@@ -2,9 +2,12 @@
 #define MyAlgo_CPP
 #include "MyAlgo.hpp"
 
-string MyAlgo::getAlgoResults()
+string MyAlgo::getAlgoResults(string pName, int noCh, int trialNo)
 {
-    readData("data.txt");
+    participantName = pName;
+    trialNumber = trialNo;
+    numberOfChannelesUsedForTraining = noCh;
+    readData();
     processData();
     string result = predictAndWriteResults();
     return result;
@@ -15,33 +18,26 @@ string MyAlgo::predictAndWriteResults()
     string info = "";
     Json finalJson, tmp;
     finalJson["type"] = "algo_outputs";
-
     computeGlobalNoice(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     info = predictAndWriteAlgoSpecificResults(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_f_tkeo_sign_both");
     tmp.push_back(Json::parse(info));
-    // finalJson.push_back(tmp);
 
     computeGlobalNoice(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH);
     info = predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_tkeo_sign_both");
     tmp.push_back(Json::parse(info));
-    // tmp = Json::parse(info);
-    // finalJson.push_back(tmp);
 
     computeGlobalNoice(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH);
     info = predictAndWriteAlgoSpecificResults(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_tkeo_sign_both");
     tmp.push_back(Json::parse(info));
-    // tmp = Json::parse(info);
-    // finalJson.push_back(tmp);
 
     computeGlobalNoice(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     info = predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_f_tkeo_sign_both");
     tmp.push_back(Json::parse(info));
-    // tmp = Json::parse(info);
-    // finalJson.push_back(tmp);
+
     finalJson["results"] = tmp;
     finalJson["actual_left_click_indices"] = getActualClickIndices(trainingDataLeftClick);
     finalJson["actual_right_click_indices"] = getActualClickIndices(trainingDataRightClick);
@@ -117,7 +113,9 @@ string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, st
         tmpCh4 = ch4_p3_f_tkeo;
     }
 
-    ofstream myfile(GB_IMPULSE_DIRECTORY + "/" + algoType + ".txt");
+    // ofstream myfile(GB_IMPULSE_DIRECTORY + "/" + algoType + ".txt");
+    ofstream myfile(GB_IMPULSE_DIRECTORY + "/" + participantName + "_xxx_" + std::to_string(numberOfChannelesUsedForTraining) + "_channels_xxx_" + std::to_string(trialNumber) + "_xxx_" + algoType + ".txt");
+
     for (int i = 0; i < totalNumberOfTrainingDataSamples; i++)
     {
         if (i > 1)
@@ -151,7 +149,6 @@ string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, st
             {
                 if (clickType == "left")
                 {
-
                     if (i > nextLeftClickCheckAfterSampleNumber)
                     {
                         myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
@@ -184,6 +181,7 @@ string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, st
                         myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
                                << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
                                << " " << trainingDataThumbClick.at(i) << " 0 1 0" << endl;
+                        nextRightClickCheckAfterSampleNumber = ((int)((GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD * GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE) / 1000)) + i;
                         lead = getClickLead(i, trainingDataRightClick);
                         if (lead == -1)
                         {
@@ -193,7 +191,6 @@ string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, st
                         {
                             truePositivesRightClickLead.push_back(lead);
                             truePositivesRightClickIndex.push_back(i);
-                            nextRightClickCheckAfterSampleNumber = ((int)((GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD * GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE) / 1000)) + i;
                         }
                     }
                     else
@@ -211,6 +208,7 @@ string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, st
                         myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
                                << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
                                << " " << trainingDataThumbClick.at(i) << " 0 0 1" << endl;
+                        nextThumbClickCheckAfterSampleNumber = ((int)((GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD * GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE) / 1000)) + i;
                         lead = getClickLead(i, trainingDataThumbClick);
                         if (lead == -1)
                         {
@@ -220,7 +218,6 @@ string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, st
                         {
                             truePositivesThumbClickLead.push_back(lead);
                             truePositivesThumbClickIndex.push_back(i);
-                            nextThumbClickCheckAfterSampleNumber = ((int)((GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD * GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE) / 1000)) + i;
                         }
                     }
                     else
@@ -553,7 +550,6 @@ void MyAlgo::computeGlobalNoice(int algoMode, int signFlag)
     {
         globalChannelNoise[i] = minOfThree(leftClickEachChannelMaxValue[i], rightClickEachChannelMaxValue[i], thumbClickEachChannelMaxValue[i]);
     }
-    // cout << globalChannelNoise[0] << " " << globalChannelNoise[1] << " " << globalChannelNoise[2] << " " << globalChannelNoise[3] << endl;
 }
 
 double MyAlgo::minOfThree(double x, double y, double z)
@@ -694,6 +690,31 @@ double MyAlgo::getTkeoValue(double v1, double v2, double v3)
 
 void MyAlgo::processData()
 {
+    ch1_raw.clear();
+    ch2_raw.clear();
+    ch3_raw.clear();
+    ch4_raw.clear();
+
+    ch1_tkeo.clear();
+    ch2_tkeo.clear();
+    ch3_tkeo.clear();
+    ch4_tkeo.clear();
+
+    ch1_p3_tkeo.clear();
+    ch2_p3_tkeo.clear();
+    ch3_p3_tkeo.clear();
+    ch4_p3_tkeo.clear();
+
+    ch1_p3_f_tkeo.clear();
+    ch2_p3_f_tkeo.clear();
+    ch3_p3_f_tkeo.clear();
+    ch4_p3_f_tkeo.clear();
+
+    ch1_f_tkeo.clear();
+    ch2_f_tkeo.clear();
+    ch3_f_tkeo.clear();
+    ch4_f_tkeo.clear();
+
     totalNumberOfTrainingDataSamples = trainingDataChannel1.size();
 
     auto ch1 = trainingDataChannel1.begin();
@@ -766,24 +787,23 @@ void MyAlgo::processData()
     }
 }
 
-void MyAlgo::readData(string fileName)
+void MyAlgo::readData()
 {
-    string file = "";
+    trainingDataChannel1.clear();
+    trainingDataChannel2.clear();
+    trainingDataChannel3.clear();
+    trainingDataChannel4.clear();
+    trainingDataLeftClick.clear();
+    trainingDataRightClick.clear();
+    trainingDataThumbClick.clear();
 
-    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
-    {
-        file = GB_IMPULSE_DEV_DIRECTORY + "/" + fileName;
-    }
-    else
-    {
-        file = GB_IMPULSE_DIRECTORY + "/" + fileName;
-    }
+    string file = GB_IMPULSE_DIRECTORY + "/" + participantName + "_xxx_" + std::to_string(numberOfChannelesUsedForTraining) + "_channels_xxx_" + std::to_string(trialNumber) + "_xxx_" + "data.txt";
 
     std::string line;
     std::ifstream infile(file);
     if (infile.fail())
     {
-        cout << "Unable to open file : " << GB_IMPULSE_DIRECTORY + "/" + fileName << endl;
+        cout << "Unable to open file : " << file << endl;
     }
     while (std::getline(infile, line))
     {
@@ -825,7 +845,7 @@ void MyAlgo::readData(string fileName)
             }
             i++;
         }
-        // std::cout << s << std::endl;
+
         trainingDataThumbClick.push_back(std::stoi(s));
     }
 
@@ -833,6 +853,10 @@ void MyAlgo::readData(string fileName)
     tmp = trainingDataChannel3;
     trainingDataChannel3 = trainingDataChannel4;
     trainingDataChannel4 = tmp;
+}
+
+void fireImpulseClicks(std::vector<double> ch1, std::vector<double> ch2, std::vector<double> ch3, std::vector<double> ch4)
+{
 }
 
 #endif // !MyAlgo_CPP

@@ -10,8 +10,10 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { ReactComponent as MouseIcon } from '../../images/mouse_white.svg';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import TextField from '@material-ui/core/TextField';
+import Snackbar from '@material-ui/core/Snackbar';
 
-class Caliberation extends Component {
+class UserTraining extends Component {
 
   constructor(props) {
     super(props)
@@ -20,6 +22,12 @@ class Caliberation extends Component {
     this.top = this.props.myTop + 64 + 50; // adding 64 for toolbar, 50 for boundary off set
     this.bottom = this.props.myBottom - 80; // boundary offset including height of the button
     this.clickSequence = [];
+
+    this.tfNoClicks = 0;
+
+    this.tfPName = "";
+    this.tfnoChannels = 0;
+    this.tfTrainNo = 0;
 
     this.currentClickType = 'left';
     this.leftClickId = 0;
@@ -37,6 +45,9 @@ class Caliberation extends Component {
       start_showing_random_clicks: false,
       openFinishDialog: false,
       openLoadingDialogForUserTraining: false,
+      openConfigDialog: true,
+      settingsErrorMessage: "",
+      openSnackBar: false
     };
   };
 
@@ -104,6 +115,59 @@ class Caliberation extends Component {
     }
   }
 
+  handleTfChange = (name, event) => {
+    if (name == "tf_no_of_clicks") {
+      this.tfNoClicks = event.target.value;
+    }
+    if (name == "tf_p_name") {
+      this.tfPName = event.target.value;
+    }
+    if (name == "tf_no_channels") {
+      this.tfnoChannels = event.target.value;
+    }
+    if (name == "tf_trail_no") {
+      this.tfTrainNo = event.target.value;
+    }
+  }
+
+
+  sendSettings = (event) => {
+    var noClicks = this.tfNoClicks;
+    var pName = this.tfPName;
+    var noChannels = this.tfnoChannels;
+    var trainNo = this.tfTrainNo;
+    if (isNaN(noClicks) == false && parseInt(noClicks) >= 5 && parseInt(noClicks) <= 50) {
+      if (pName != "") {
+        if (isNaN(noChannels) == false && parseInt(noChannels) >= 1 && parseInt(noChannels) <= 4) {
+          if (isNaN(trainNo) == false && parseInt(trainNo) >= 1) {
+
+            const { ipcRenderer } = window.require("electron");
+            var json = JSON.stringify({ 'type': 'communication', 'value': 'settings', 'participant_name': pName, 'no_of_channels': parseInt(noChannels), 'trail_no': parseInt(trainNo) });
+            ipcRenderer.send("socket_data_send", json);
+
+            for (var i = 0; i < this.tfNoClicks; i++) { this.clickSequence.push("left"); }
+            for (var i = 0; i < this.tfNoClicks; i++) { this.clickSequence.push("right"); }
+            for (var i = 0; i < this.tfNoClicks; i++) { this.clickSequence.push("thumb"); }
+            this.clickSequence = this.shuffleArray(this.clickSequence);
+
+          } else {
+            this.setState({ settingsErrorMessage: "Train Number should be a positive integer, >=1", openSnackBar: true });
+            setTimeout(function () { this.setState({ openSnackBar: false }); }.bind(this), 4000);
+          }
+        } else {
+          this.setState({ settingsErrorMessage: "Number of channels should be between 1 to 4.", openSnackBar: true });
+          setTimeout(function () { this.setState({ openSnackBar: false }); }.bind(this), 4000);
+        }
+      } else {
+        this.setState({ settingsErrorMessage: "Participant name cannot be blank", openSnackBar: true });
+        setTimeout(function () { this.setState({ openSnackBar: false }); }.bind(this), 4000);
+      }
+    } else {
+      this.setState({ settingsErrorMessage: "Number of click should be a positive number and between 5 and 50.", openSnackBar: true });
+      setTimeout(function () { this.setState({ openSnackBar: false }); }.bind(this), 4000);
+    }
+  }
+
   onMouseDown = (event) => {
     console.log(event.button)
 
@@ -149,23 +213,21 @@ class Caliberation extends Component {
   };
 
   componentDidMount = () => {
-    for (var i = 0; i < 5; i++) { this.clickSequence.push("left"); }
-    for (var i = 0; i < 5; i++) { this.clickSequence.push("right"); }
-    for (var i = 0; i < 5; i++) { this.clickSequence.push("thumb"); }
-    this.clickSequence = this.shuffleArray(this.clickSequence);
-
     const { ipcRenderer } = window.require("electron");
     ipcRenderer.on('socket_data_received', function (event, data) {
       var jsonObject = JSON.parse(String(data));
       if (jsonObject.type == "algo_outputs") {
-        // console.log(jsonObject);
         this.setState({
           start_showing_random_clicks: false,
           showCaliberationButton: false,
           openFinishDialog: false,
           openLoadingDialogForUserTraining: false
         });
-        this.props.callbackSetMainSection('report',jsonObject);
+        this.props.callbackSetMainSection('report', jsonObject);
+      } else if (jsonObject.type == "communication_success" && jsonObject.value == "settings_set") {
+        this.setState({
+          openConfigDialog: false,
+        });
       }
     }.bind(this));
   }
@@ -233,6 +295,75 @@ class Caliberation extends Component {
             <CircularProgress className={classes.progress} />
           </DialogContent>
         </Dialog>
+
+        <Dialog
+          open={this.state.openConfigDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+          disableBackdropClick={true}
+          disableEscapeKeyDown={true}
+        >
+          <DialogTitle id="alert-dialog-title">{"Training Configuration"}</DialogTitle>
+          <DialogContent>
+            <div style={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column' }}>
+              <div style={{ flex: 1 }}>
+                <TextField
+                  label="Number of Clicks"
+                  className={classes.textField}
+                  margin="normal"
+                  onChange={this.handleTfChange.bind(this, "tf_no_of_clicks")}
+                  variant="outlined"
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <TextField
+                  label="Participant Name"
+                  className={classes.textField}
+                  margin="normal"
+                  onChange={this.handleTfChange.bind(this, "tf_p_name")}
+                  variant="outlined"
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <TextField
+                  label="Number Of Channels"
+                  className={classes.textField}
+                  margin="normal"
+                  onChange={this.handleTfChange.bind(this, "tf_no_channels")}
+                  variant="outlined"
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <TextField
+                  label="Trail Number"
+                  className={classes.textField}
+                  margin="normal"
+                  onChange={this.handleTfChange.bind(this, "tf_trail_no")}
+                  variant="outlined"
+                />
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <Button variant="outlined" color="primary" className={classes.button} onClick={this.sendSettings}>Start Training</Button>
+              </div>
+
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Snackbar
+          // key={messageInfo ? messageInfo.key : undefined}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          open={this.state.openSnackBar}
+          ContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">{this.state.settingsErrorMessage}</span>}
+        />
+
       </div>
     )
   }
@@ -247,4 +378,4 @@ const styles = theme => ({
   },
 });
 
-export default withStyles(styles, { withTheme: true })(Caliberation);
+export default withStyles(styles, { withTheme: true })(UserTraining);

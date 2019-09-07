@@ -2,7 +2,6 @@
 #define GloveTools_CPP
 
 #include "GloveTools.hpp"
-
 #include <iostream>
 #include <fstream>
 
@@ -23,47 +22,100 @@ GloveTools::GloveTools()
     tC = new int[GB_TOTAL_NUMBER_OF_SAMPLES];
 }
 
+int GloveTools::startRealTime()
+{
+    isRealTimeRunning = true;
+    MouseFunctions::Instance().startRealTimePlay();
+    std::thread newThread(&GloveTools::startRealTimeSampleCollections, this);
+
+    return 1;
+}
+
+void GloveTools::setTrainingSettings(string pName, int trialNo, int noCh)
+{
+    participantName = pName;
+    trialNumber = trialNo;
+    numberOfChannelesUsedForTraining = noCh;
+}
+
 int GloveTools::startTraining()
 {
     isTrainingRunning = true;
     std::thread newThread(&GloveTools::startTrainingRecording, this);
     newThread.detach();
+    if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
+    {
+        cout << "Unable to delete folder : " << GB_IMPULSE_DIRECTORY << endl;
+    }
     return 1;
 }
 
 string GloveTools::stopTraining()
 {
     isTrainingRunning = false;
+
+    if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
+    {
+        cout << "Unable to delete folder : " << GB_IMPULSE_DIRECTORY << endl;
+    }
+    if (!CreateDirectoryA(GB_IMPULSE_DIRECTORY.c_str(), NULL))
+    {
+        cout << "Unable to create folder : " << GB_IMPULSE_DIRECTORY << endl;
+    }
+
     if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
     {
+        trainingDataChannel1.clear();
+        trainingDataChannel2.clear();
+        trainingDataChannel3.clear();
+        trainingDataChannel4.clear();
+        trainingDataLeftClick.clear();
+        trainingDataRightClick.clear();
+        trainingDataThumbClick.clear();
+        trainingDataChannel1 = demoTrainingDataChannel1;
+        trainingDataChannel2 = demoTrainingDataChannel2;
+        trainingDataChannel3 = demoTrainingDataChannel3;
+        trainingDataChannel4 = demoTrainingDataChannel4;
+        trainingDataLeftClick = demoTrainingDataLeftClick;
+        trainingDataRightClick = demoTrainingDataRightClick;
+        trainingDataThumbClick = demoTrainingDataThumbClick;
     }
-    else
+    string file = GB_IMPULSE_DIRECTORY + "/" + participantName + "_xxx_" + std::to_string(numberOfChannelesUsedForTraining) + "_channels_xxx_" + std::to_string(trialNumber) + "_xxx_" + "data.txt";
+    ofstream myfile(file);
+    if (myfile.fail())
     {
-        ofstream myfile(GB_IMPULSE_DIRECTORY + "/data.txt");
-        if (myfile.is_open())
-        {
-            auto ch1 = trainingDataChannel1.begin();
-            auto ch2 = trainingDataChannel2.begin();
-            auto ch3 = trainingDataChannel3.begin();
-            auto ch4 = trainingDataChannel4.begin();
-            auto lc = trainingDataLeftClick.begin();
-            auto rc = trainingDataRightClick.begin();
-            auto tc = trainingDataThumbClick.begin();
-
-            while (ch1 != trainingDataChannel1.end())
-            {
-                myfile << *ch1++ << " " << *ch2++ << " " << *ch3++ << " " << *ch4++ << " " << *lc++ << " " << *rc++ << " " << *tc++ << endl;
-            }
-            myfile.close();
-        }
+        cout << "Unable to write file : " << file << endl;
     }
-   string result = myAlgo.getAlgoResults();
-   return result;
+    if (myfile.is_open())
+    {
+        auto ch1 = trainingDataChannel1.begin();
+        auto ch2 = trainingDataChannel2.begin();
+        auto ch3 = trainingDataChannel3.begin();
+        auto ch4 = trainingDataChannel4.begin();
+        auto lc = trainingDataLeftClick.begin();
+        auto rc = trainingDataRightClick.begin();
+        auto tc = trainingDataThumbClick.begin();
+        while (ch1 != trainingDataChannel1.end())
+        {
+            myfile << *ch1++ << " " << *ch2++ << " " << *ch3++ << " " << *ch4++ << " " << *lc++ << " " << *rc++ << " " << *tc++ << endl;
+        }
+        myfile.close();
+    }
+    string result = myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber);
+    return result;
 }
 
 void GloveTools::startTrainingRecording()
 {
     double t1 = 0.0, t2 = 0.0, t3 = 0.0, t4 = 0.0;
+    trainingDataChannel1.clear();
+    trainingDataChannel2.clear();
+    trainingDataChannel3.clear();
+    trainingDataChannel4.clear();
+    trainingDataLeftClick.clear();
+    trainingDataRightClick.clear();
+    trainingDataThumbClick.clear();
+
     while (isTrainingRunning)
     {
         if (t1 == 0.0 || t2 == 0.0 || t3 == 0.0 || t4 == 0.0)
@@ -98,20 +150,66 @@ void GloveTools::startTrainingRecording()
     }
 }
 
-double GloveTools::getTkeoValue(double sample1, double sample2, double sample3, int channelNumber)
+void GloveTools::startRealTimeSampleCollections()
 {
-    double v1 = filterTools.getFilteredValue(channelNumber, sample1);
-    double v2 = filterTools.getFilteredValue(channelNumber, sample2);
-    double v3 = filterTools.getFilteredValue(channelNumber, sample3);
-    v1 = v1 * v1 * v1;
-    v2 = v2 * v2 * v2;
-    v3 = v3 * v3 * v3;
-    double result = v2 * v2 - v1 * v3;
-    return result;
+    double t1 = 0.0, t2 = 0.0, t3 = 0.0, t4 = 0.0;
+    realTimeDataChannel1.clear();
+    realTimeDataChannel2.clear();
+    realTimeDataChannel3.clear();
+    realTimeDataChannel4.clear();
+
+    while (isRealTimeRunning)
+    {
+        if (t1 == 0.0 || t2 == 0.0 || t3 == 0.0 || t4 == 0.0)
+        {
+        }
+        else
+        {
+            while (t1 == mDaq.getChannelOneVoltage(0) || t2 == mDaq.getChannelTwoVoltage(0) || t3 == mDaq.getChannelThreeVoltage(0) || t4 == mDaq.getChannelFourVoltage(0))
+            {
+            }
+        }
+
+        for (int i = 0; i < GB_TOTAL_NUMBER_OF_SAMPLES; i++)
+        {
+            realTimeDataChannel1.push_back(mDaq.getChannelOneVoltage(i));
+            realTimeDataChannel2.push_back(mDaq.getChannelTwoVoltage(i));
+            realTimeDataChannel3.push_back(mDaq.getChannelThreeVoltage(i));
+            realTimeDataChannel4.push_back(mDaq.getChannelFourVoltage(i));
+        }
+
+        t1 = mDaq.getChannelOneVoltage(0);
+        t2 = mDaq.getChannelTwoVoltage(0);
+        t3 = mDaq.getChannelThreeVoltage(0);
+        t4 = mDaq.getChannelFourVoltage(0);
+
+        myAlgo.fireImpulseClicks(realTimeDataChannel1, realTimeDataChannel2, realTimeDataChannel3, realTimeDataChannel4);
+        // Perform Click
+    }
 }
+
+// double GloveTools::getTkeoValue(double sample1, double sample2, double sample3, int channelNumber)
+// {
+//     double v1 = filterTools.getFilteredValue(channelNumber, sample1);
+//     double v2 = filterTools.getFilteredValue(channelNumber, sample2);
+//     double v3 = filterTools.getFilteredValue(channelNumber, sample3);
+//     v1 = v1 * v1 * v1;
+//     v2 = v2 * v2 * v2;
+//     v3 = v3 * v3 * v3;
+//     double result = v2 * v2 - v1 * v3;
+//     return result;
+// }
 
 void GloveTools::readDemoData()
 {
+    demoTrainingDataChannel1.clear();
+    demoTrainingDataChannel2.clear();
+    demoTrainingDataChannel3.clear();
+    demoTrainingDataChannel4.clear();
+    demoTrainingDataLeftClick.clear();
+    demoTrainingDataRightClick.clear();
+    demoTrainingDataThumbClick.clear();
+
     std::string line;
     std::ifstream infile(GB_IMPULSE_DEV_DIRECTORY + "/data.txt");
     while (std::getline(infile, line))
@@ -157,6 +255,11 @@ void GloveTools::readDemoData()
         // std::cout << s << std::endl;
         demoTrainingDataThumbClick.push_back(std::stoi(s));
     }
+
+    std::vector<double> tmp;
+    tmp = demoTrainingDataChannel3;
+    demoTrainingDataChannel3 = demoTrainingDataChannel4;
+    demoTrainingDataChannel4 = tmp;
 }
 
 string GloveTools::getRealTimeRawDemoData()

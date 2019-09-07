@@ -25,7 +25,7 @@ static const string GB_ENV_DEVELOPMENT = "development";
 static const string GB_ENV_STAGING = "staging";
 static const string GB_ENV_PRODUCTION = "production";
 
-static const string GB_IMPULSE_DIRECTORY = "C:/impluse_data";
+static const string GB_IMPULSE_DIRECTORY = "C:/impulse_data";
 static const string GB_IMPULSE_DEV_DIRECTORY = "./../debug/dataset";
 
 static const double TRUE_POSTIVE_MILLISECONDS_CHECK = 300;

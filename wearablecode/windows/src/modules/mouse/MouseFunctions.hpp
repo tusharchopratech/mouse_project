@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <thread>
 #include <queue>
+using namespace std::chrono;
 #include "..\edata\Global.cpp"
 
 using namespace std;
@@ -25,6 +26,12 @@ public:
     int rightMouseStatus = 0;
     int thumbMouseStatus = 0;
     deque<int> leftMouseClickVector, rightMouseClickVector, thumbMouseClickVector;
+
+    bool isRealTimeRunning;
+    std::vector<std::vector<double>> osMouseClicksTimeStamps;
+    std::vector<double> osLeftClicksTimeStamps;
+    std::vector<double> osRightClicksTimeStamps;
+    std::vector<double> osThumbClicksTimeStamps;
 
     //single ton
     static MouseFunctions &Instance()
@@ -58,6 +65,9 @@ public:
     void startMouseRecording();
 
     void setupMouseMonitoring();
+
+    void startRealTimePlay();
+    std::vector<std::vector<double>> stopRealTimePlayAndReturnTimestamps();
 
     void mouseEvent(char mouseButton, char mouseEvent);
 };

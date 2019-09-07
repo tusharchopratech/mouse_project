@@ -11,7 +11,6 @@ import { ReactComponent as GamePadIcon } from '../../images/gamepad.svg';
 import { ReactComponent as DocumentIcon } from '../../images/document.svg';
 import { ReactComponent as HandIcon } from '../../images/hand.svg';
 
-
 const drawerWidth = 240;
 const styles = theme => ({
     drawer: {
@@ -34,7 +33,7 @@ class MyDrawer extends Component {
     };
 
     handleClick = (val) => {
-     this.props.callbackSetMainSection(val);
+        this.props.callbackSetMainSection(val);
     };
 
     render() {
@@ -49,35 +48,35 @@ class MyDrawer extends Component {
             >
                 <div className={classes.toolbar} />
                 <List>
-                    <ListItem button onClick={this.handleClick.bind(this,'welcome')}>
+                    <ListItem button onClick={this.handleClick.bind(this, 'welcome')}>
                         <ListItemIcon>
                             <HandIcon />
                         </ListItemIcon>
                         <ListItemText primary={'Welcome'} />
                     </ListItem>
-                    <ListItem button onClick={this.handleClick.bind(this,'caliberation')}>
+                    <ListItem button onClick={this.handleClick.bind(this, 'caliberation')}>
                         <ListItemIcon>
                             <WaveIcon />
                         </ListItemIcon>
                         <ListItemText primary={'Caliberation'} />
                     </ListItem>
-                    <ListItem button onClick={this.handleClick.bind(this,'user_training')}>
+                    <ListItem button onClick={this.handleClick.bind(this, 'user_training')}>
                         <ListItemIcon>
                             <MouseIcon />
                         </ListItemIcon>
                         <ListItemText primary={'User Traning'} />
                     </ListItem>
-                    {/* <ListItem button onClick={this.handleClick.bind(this,'real_time_data')}>
-                        <ListItemIcon>
-                            <GamePadIcon />
-                        </ListItemIcon>
-                        <ListItemText primary={'Real Time Data'} />
-                    </ListItem> */}
-                    <ListItem button onClick={this.handleClick.bind(this,'report')}>
+                    <ListItem button onClick={this.handleClick.bind(this, 'report')}>
                         <ListItemIcon>
                             <DocumentIcon />
                         </ListItemIcon>
                         <ListItemText primary={'Report'} />
+                    </ListItem>
+                    <ListItem button onClick={this.handleClick.bind(this, 'real_time_data')}>
+                        <ListItemIcon>
+                            <GamePadIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={'Real Time Play'} />
                     </ListItem>
                 </List>
             </Drawer>

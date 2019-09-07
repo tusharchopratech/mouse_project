@@ -39,10 +39,14 @@ class Caliberation extends Component {
 
         this.startRendering = true;
         this.tmp1 = [1];
+        this.tmp2 = [2];
+        this.tmp3 = [9,8];
+        this.tmp4 = [4,3,3];
         this.state = {
             first_plot_data: { labels: this.tmp1, datasets: [{ label: 'Channel 1', data: this.tmp1 }] },
-            second_plot_data: { labels: this.tmp1, datasets: [{ label: 'Channel 2', data: this.tmp1 }] },
-            third_plot_data: { labels: this.tmp1, datasets: [{ label: 'Channel 3', data: this.tmp1 }] },
+            second_plot_data: { labels: this.tmp2, datasets: [{ label: 'Channel 2', data: this.tmp2 }] },
+            third_plot_data: { labels: this.tmp3, datasets: [{ label: 'Channel 3', data: this.tmp3 }] },
+            fourth_plot_data: { labels: this.tmp4, datasets: [{ label: 'Channel 4', data: this.tmp4 }] },
             plot_options: {
                 elements: {
                     point: {
@@ -89,7 +93,7 @@ class Caliberation extends Component {
                 },
                 title: {
                     display: true,
-                    text: 'Channel 1 Data'
+                    text: 'Channel Data'
                 }
             }
         };
@@ -98,7 +102,9 @@ class Caliberation extends Component {
     startTraining = () => {
         const { ipcRenderer } = window.require("electron");
         ipcRenderer.send("socket_data_send", "stop_raw_real_time_data");
-        ipcRenderer.send("socket_data_send", "start_training");
+        setTimeout(function () {
+            ipcRenderer.send("socket_data_send", "start_training");
+        }.bind(this), 75);
     };
 
     componentDidMount = () => {
@@ -125,14 +131,14 @@ class Caliberation extends Component {
 
         ipcRenderer.on('socket_data_received', function (event, data) {
             // console.log(String(data), " at ", new Date().getTime());
-            console.log("New Data at ", new Date().getTime());
+            // console.log("New Data at ", new Date().getTime());
             try {
                 var jsonObject = JSON.parse(String(data));
             } catch (e) {
                 console.log("Error in paring data ", String(data));
                 console.log(e);
             }
-            if (jsonObject!=null && jsonObject.type == "real_time_raw_data") {
+            if (jsonObject != null && jsonObject.type == "real_time_raw_data") {
                 this.ch1Temp = jsonObject.ch_v1[0];
                 this.ch2Temp = jsonObject.ch_v2[0];
                 this.ch3Temp = jsonObject.ch_v3[0];
@@ -161,7 +167,7 @@ class Caliberation extends Component {
                     this.rCArrayTemp.push(jsonObject.right_click[index]);
                     this.tCArrayTemp.push(jsonObject.thumb_click[index]);
                 }
-            } else if (jsonObject!=null && jsonObject.type == "start_training_success") {
+            } else if (jsonObject != null && jsonObject.type == "start_training_success") {
                 this.props.callbackSetMainSection('user_training');
             }
         }.bind(this));
@@ -208,12 +214,13 @@ class Caliberation extends Component {
         this.rCArray.splice(0, rC.length);
         this.tCArray.splice(0, tC.length);
 
-        this.ch2ArrayTemp = [];
-        this.ch3ArrayTemp = [];
-        this.ch4ArrayTemp = [];
-        this.lCArrayTemp = [];
-        this.rCArrayTemp = [];
-        this.tCArrayTemp = [];
+        // this.ch1ArrayTemp = [];
+        // this.ch2ArrayTemp = [];
+        // this.ch3ArrayTemp = [];
+        // this.ch4ArrayTemp = [];
+        // this.lCArrayTemp = [];
+        // this.rCArrayTemp = [];
+        // this.tCArrayTemp = [];
 
         this.setDataToChart();
         this.startRendering = true;
@@ -244,17 +251,22 @@ class Caliberation extends Component {
         this.rCArray.splice(0, rC.length);
         this.tCArray.splice(0, tC.length);
 
-        this.ch2ArrayTemp = [];
-        this.ch3ArrayTemp = [];
-        this.ch4ArrayTemp = [];
-        this.lCArrayTemp = [];
-        this.rCArrayTemp = [];
-        this.tCArrayTemp = [];
+        // this.ch1ArrayTemp = [];
+        // this.ch2ArrayTemp = [];
+        // this.ch3ArrayTemp = [];
+        // this.ch4ArrayTemp = [];
+        // this.lCArrayTemp = [];
+        // this.rCArrayTemp = [];
+        // this.tCArrayTemp = [];
 
         this.setDataToChart();
     }
 
     setDataToChart = () => {
+        // console.log(this.getChannelData(2));
+        // console.log(this.getChannelData(3));
+        // console.log(this.getChannelData(4));
+        // console.log("\n\n\n\n");
         this.setState({
             first_plot_data: {
                 datasets: [
@@ -325,6 +337,37 @@ class Caliberation extends Component {
                 datasets: [
                     {
                         label: 'Channel 3',
+                        fill: false,
+                        backgroundColor: 'rgba(75,192,192,0.4)',
+                        borderColor: 'rgba(75,192,192,1)',
+                        data: this.getChannelData(3)
+                    },
+                    {
+                        label: 'Left Click',
+                        fill: false,
+                        backgroundColor: '#99ff0000',
+                        borderColor: '#ff0000',
+                        data: this.getClickData("left", 3)
+                    },
+                    {
+                        label: 'Right Click',
+                        fill: false,
+                        backgroundColor: '#99006600',
+                        borderColor: '#006600',
+                        data: this.getClickData("right", 3)
+                    },
+                    {
+                        label: 'Thumb Click',
+                        fill: false,
+                        backgroundColor: '#99ff0000',
+                        borderColor: '#ff0000',
+                        data: this.getClickData("thumb", 3)
+                    },
+                ]
+            }, fourth_plot_data: {
+                datasets: [
+                    {
+                        label: 'Channel 4',
                         fill: false,
                         backgroundColor: 'rgba(75,192,192,0.4)',
                         borderColor: 'rgba(75,192,192,1)',
@@ -423,6 +466,9 @@ class Caliberation extends Component {
                         </div>
                         <div style={{ flex: 1 }}>
                             <Line data={this.state.third_plot_data} options={this.state.plot_options} height={60} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <Line data={this.state.fourth_plot_data} options={this.state.plot_options} height={60} />
                         </div>
 
                     </div>

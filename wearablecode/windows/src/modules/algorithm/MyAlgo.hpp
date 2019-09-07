@@ -48,12 +48,15 @@ private:
     std::vector<double> meanRightClick;
     std::vector<double> meanThumbClick;
 
+    string participantName;
+    int trialNumber, numberOfChannelesUsedForTraining;
+
 public:
     MyAlgo()
     {
     }
 
-    void readData(string file);
+    void readData();
     void processData();
     double getTkeoValue(double v1, double v2, double v3);
 
@@ -73,7 +76,9 @@ public:
     int getClickLead(int loc, std::vector<int> clickArray);
     std::vector<int> MyAlgo::getActualClickIndices(std::vector<int> clickData);
 
-    string getAlgoResults();
+    string getAlgoResults(string pName, int noCh, int trialNo);
+
+    void fireImpulseClicks(std::vector<double> ch1, std::vector<double> ch2, std::vector<double> ch3, std::vector<double> ch4);
 };
 
 #endif // !MyAlgo_HPP

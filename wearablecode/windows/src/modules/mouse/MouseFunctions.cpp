@@ -8,6 +8,10 @@ using namespace std;
 void MouseFunctions::setLeftMouseStatus(int status)
 {
     leftMouseStatus = status;
+    if (status == 1 && isRealTimeRunning)
+    {
+        osLeftClicksTimeStamps.push_back(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+    }
 }
 
 int MouseFunctions::getLeftMouseStatus()
@@ -18,6 +22,10 @@ int MouseFunctions::getLeftMouseStatus()
 void MouseFunctions::setRightMouseStatus(int status)
 {
     rightMouseStatus = status;
+    if (status == 1 && isRealTimeRunning)
+    {
+        osRightClicksTimeStamps.push_back(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+    }
 }
 
 int MouseFunctions::getRightMouseStatus()
@@ -28,6 +36,10 @@ int MouseFunctions::getRightMouseStatus()
 void MouseFunctions::setThumbMouseStatus(int status)
 {
     thumbMouseStatus = status;
+    if (status == 1 && isRealTimeRunning)
+    {
+        osThumbClicksTimeStamps.push_back(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+    }
 }
 
 int MouseFunctions::getThumbMouseStatus()
@@ -55,7 +67,7 @@ LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
     MOUSEHOOKSTRUCT *pMouseStruct = (MOUSEHOOKSTRUCT *)lParam;
     if (pMouseStruct != NULL)
     {
-        
+
         if (wParam == WM_LBUTTONDOWN)
         {
             MouseFunctions::Instance().setLeftMouseStatus(1);
@@ -173,6 +185,25 @@ void MouseFunctions::mouseEvent(char mouseButton, char mouseEvent)
             mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
         }
     }
+}
+
+void MouseFunctions::startRealTimePlay()
+{
+
+    osMouseClicksTimeStamps.clear();
+    osLeftClicksTimeStamps.clear();
+    osRightClicksTimeStamps.clear();
+    osThumbClicksTimeStamps.clear();
+    isRealTimeRunning = true;
+}
+
+std::vector<std::vector<double>> MouseFunctions::stopRealTimePlayAndReturnTimestamps()
+{
+    isRealTimeRunning = false;
+    osMouseClicksTimeStamps.push_back(osLeftClicksTimeStamps);
+    osMouseClicksTimeStamps.push_back(osRightClicksTimeStamps);
+    osMouseClicksTimeStamps.push_back(osThumbClicksTimeStamps);
+    return osMouseClicksTimeStamps;
 }
 
 #endif // !MouseFunction_CPP
