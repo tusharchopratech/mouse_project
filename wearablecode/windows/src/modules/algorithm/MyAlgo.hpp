@@ -26,11 +26,17 @@ private:
     int trainingWindowStartPointForFeatureConstruction = (int)(1 * GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD);
     int totalNumberOfTrainingDataSamples;
 
+    int bestAlgoModeLC, bestAlgoSignFlagLC;
+    int bestAlgoModeRC, bestAlgoSignFlagRC;
+
+    std::vector<std::vector<double>> threeSamplesRealTime;
+    std::vector<double> prevSampleRealTime, prevPrevSampleRealTime;
+
     // Reading Data From file
     std::vector<double> trainingDataChannel1, trainingDataChannel2, trainingDataChannel3, trainingDataChannel4;
     std::vector<int> trainingDataLeftClick, trainingDataRightClick, trainingDataThumbClick;
 
-    // Trying differeny signal types
+    // Trying different signal types
     std::vector<double> ch1_raw, ch1_tkeo, ch1_p3_tkeo, ch1_f_tkeo, ch1_p3_f_tkeo;
     std::vector<double> ch2_raw, ch2_tkeo, ch2_p3_tkeo, ch2_f_tkeo, ch2_p3_f_tkeo;
     std::vector<double> ch3_raw, ch3_tkeo, ch3_p3_tkeo, ch3_f_tkeo, ch3_p3_f_tkeo;
@@ -61,15 +67,15 @@ public:
     double getTkeoValue(double v1, double v2, double v3);
 
     void computeGlobalNoice(int algoMode, int signFlag);
-    void getEachChannelMaxValueForClickType(int *clickArray, int algoMode, int signFlag, double (&eachChannelMaxSample)[4]);
+    void getEachChannelMaxValueForClickType(std::vector<int> clickArray, int algoMode, int signFlag, double (&eachChannelMaxSample)[4]);
     double minOfThree(double x, double y, double z);
 
     void computeFeatures(int algoMode, int signFlag);
-    void getFeaturesForClickType(int *clickArray, int algoMode, int signFlag, std::vector<std::vector<double>> &featureVector);
+    void getFeaturesForClickType(std::vector<int> clickArray, int algoMode, int signFlag, std::vector<std::vector<double>> &featureVector);
 
     double getDistance(std::vector<double> sample, std::vector<double> mean, std::vector<std::vector<double>> cov);
     string predictCLickTypeFromOneSample(std::vector<double> sample);
-    string predictCLickTypeFromThreeSamples(std::vector<std::vector<double>> threeSamples);
+    string predictCLickTypeFromThreeSamples(std::vector<std::vector<double>> threeSamples, bool fireClicks);
 
     string predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, string filePath);
     string predictAndWriteResults();

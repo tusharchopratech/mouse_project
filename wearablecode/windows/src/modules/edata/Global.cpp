@@ -93,10 +93,10 @@ double **vectorTo2DArray(std::vector<std::vector<double>> &vals)
     int M = vals[0].size();
     double **temp;
     temp = new double *[N];
-    for (unsigned i = 0; (i < N); i++)
+    for (int i = 0; (i < N); i++)
     {
         temp[i] = new double[M];
-        for (unsigned j = 0; (j < M); j++)
+        for (int j = 0; (j < M); j++)
         {
             temp[i][j] = vals[i][j];
         }

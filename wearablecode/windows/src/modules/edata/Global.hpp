@@ -21,15 +21,18 @@ static const double GB_FILTER_LOW_FREQUENCY = 110;
 static const double GB_FILTER_HIGH_FREQUENCY = 250;
 static const int GB_FILTER_ORDER = 5;
 
+//DEBUGGING STAGE, No Hardware, Using Simulated Recordings 
 static const string GB_ENV_DEVELOPMENT = "development";
+//DEBUGGING STAGE, Using Hardware
 static const string GB_ENV_STAGING = "staging";
+//PRODUCTION STAGE, Using Hardware
 static const string GB_ENV_PRODUCTION = "production";
 
 static const string GB_IMPULSE_DIRECTORY = "C:/impulse_data";
 static const string GB_IMPULSE_DEV_DIRECTORY = "./../debug/dataset";
 
-static const double TRUE_POSTIVE_MILLISECONDS_CHECK = 300;
-static const double GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE = 300;
+static const double TRUE_POSTIVE_MILLISECONDS_CHECK = 200;
+static const double GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE = 200;
 
 
 string currentEnvirnoment; 

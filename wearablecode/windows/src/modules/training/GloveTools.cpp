@@ -26,9 +26,27 @@ int GloveTools::startRealTime()
 {
     isRealTimeRunning = true;
     MouseFunctions::Instance().startRealTimePlay();
-    std::thread newThread(&GloveTools::startRealTimeSampleCollections, this);
-
+    if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
+    {
+        std::thread newThread(&GloveTools::startRealTimeSampleCollections, this);
+    }
     return 1;
+}
+
+string GloveTools::stopRealTime()
+{
+    isRealTimeRunning = false;
+    Json finalJson;
+    finalJson["type"] = "real_time_results";
+    finalJson["os_left_clicks"] = MouseFunctions::Instance().getOsClickTimestamps().at(0);
+    finalJson["os_right_clicks"] = MouseFunctions::Instance().getOsClickTimestamps().at(1);
+    finalJson["os_thumb_clicks"] = MouseFunctions::Instance().getOsClickTimestamps().at(2);
+
+    finalJson["impulse_left_clicks"] = MouseFunctions::Instance().getImpulseClickTimestamps().at(0);
+    finalJson["impulse_right_clicks"] = MouseFunctions::Instance().getImpulseClickTimestamps().at(1);
+    finalJson["impulse_thumb_clicks"] = MouseFunctions::Instance().getImpulseClickTimestamps().at(2);
+    cout << finalJson.dump(4);
+    return finalJson.dump();
 }
 
 void GloveTools::setTrainingSettings(string pName, int trialNo, int noCh)
@@ -188,17 +206,17 @@ void GloveTools::startRealTimeSampleCollections()
     }
 }
 
-// double GloveTools::getTkeoValue(double sample1, double sample2, double sample3, int channelNumber)
-// {
-//     double v1 = filterTools.getFilteredValue(channelNumber, sample1);
-//     double v2 = filterTools.getFilteredValue(channelNumber, sample2);
-//     double v3 = filterTools.getFilteredValue(channelNumber, sample3);
-//     v1 = v1 * v1 * v1;
-//     v2 = v2 * v2 * v2;
-//     v3 = v3 * v3 * v3;
-//     double result = v2 * v2 - v1 * v3;
-//     return result;
-// }
+double GloveTools::getTkeoValue(double sample1, double sample2, double sample3, int channelNumber)
+{
+    double v1 = filterTools.getFilteredValue(channelNumber, sample1);
+    double v2 = filterTools.getFilteredValue(channelNumber, sample2);
+    double v3 = filterTools.getFilteredValue(channelNumber, sample3);
+    v1 = v1 * v1 * v1;
+    v2 = v2 * v2 * v2;
+    v3 = v3 * v3 * v3;
+    double result = v2 * v2 - v1 * v3;
+    return result;
+}
 
 void GloveTools::readDemoData()
 {
@@ -385,6 +403,7 @@ string GloveTools::getRealTimeDataWithTkeo()
     string chV1TkeoString = "", chV2TkeoString = "", chV3TkeoString = "", chV4TkeoString = "";
     string lCString = "", rCString = "";
     double ch1Tkeo, ch2Tkeo, ch3Tkeo, ch4Tkeo;
+    filterTools.resetFilters();
     for (int i = 0; i < GB_TOTAL_NUMBER_OF_SAMPLES; i++)
     {
         chV1[i] = mDaq.getChannelOneVoltage(i);

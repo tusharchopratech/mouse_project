@@ -161,13 +161,17 @@ void MouseFunctions::setupMouseMonitoring()
     CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)::startMouseRecording, NULL, NULL, &dwThread);
 }
 
-void MouseFunctions::mouseEvent(char mouseButton, char mouseEvent)
+void MouseFunctions::fireMouseEvent(char mouseButton, char mouseEvent)
 {
     if (mouseButton == 'l')
     {
         if (mouseEvent == 'd')
         {
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
+            if (isRealTimeRunning)
+            {
+                impulseLeftClicksTimeStamps.push_back(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+            }
         }
         else if (mouseEvent == 'u')
         {
@@ -179,6 +183,10 @@ void MouseFunctions::mouseEvent(char mouseButton, char mouseEvent)
         if (mouseEvent == 'd')
         {
             mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+            if (isRealTimeRunning)
+            {
+                impulseRightClicksTimeStamps.push_back(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+            }
         }
         else if (mouseEvent == 'u')
         {
@@ -189,21 +197,37 @@ void MouseFunctions::mouseEvent(char mouseButton, char mouseEvent)
 
 void MouseFunctions::startRealTimePlay()
 {
-
     osMouseClicksTimeStamps.clear();
     osLeftClicksTimeStamps.clear();
     osRightClicksTimeStamps.clear();
     osThumbClicksTimeStamps.clear();
+    impulseMouseClicksTimeStamps.clear();
+    impulseLeftClicksTimeStamps.clear();
+    impulseRightClicksTimeStamps.clear();
+    impulseThumbClicksTimeStamps.clear();
     isRealTimeRunning = true;
 }
 
-std::vector<std::vector<double>> MouseFunctions::stopRealTimePlayAndReturnTimestamps()
+void MouseFunctions::stopRealTimePlay()
 {
     isRealTimeRunning = false;
     osMouseClicksTimeStamps.push_back(osLeftClicksTimeStamps);
     osMouseClicksTimeStamps.push_back(osRightClicksTimeStamps);
     osMouseClicksTimeStamps.push_back(osThumbClicksTimeStamps);
+
+    impulseMouseClicksTimeStamps.push_back(impulseLeftClicksTimeStamps);
+    impulseMouseClicksTimeStamps.push_back(impulseRightClicksTimeStamps);
+    impulseMouseClicksTimeStamps.push_back(impulseThumbClicksTimeStamps);
+}
+
+std::vector<std::vector<double>> MouseFunctions::getOsClickTimestamps()
+{
     return osMouseClicksTimeStamps;
+}
+
+std::vector<std::vector<double>> MouseFunctions::getImpulseClickTimestamps()
+{
+    return impulseMouseClicksTimeStamps;
 }
 
 #endif // !MouseFunction_CPP

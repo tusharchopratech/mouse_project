@@ -12,6 +12,15 @@ void FilterTools::setupFilter()
     fCh4.setup(5, samplingrate, (lf + hf) / 2, (hf - lf));
 }
 
+void  FilterTools::resetFilters(){
+    fCh1.reset();
+    fCh2.reset();
+    fCh3.reset();
+    fCh4.reset();
+    setupFilter();
+}
+
+
 double FilterTools::getFilteredValue(int channelNumber, double value)
 {
     if (channelNumber == 1)

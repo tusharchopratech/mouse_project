@@ -131,8 +131,13 @@ void SocketServer::startListeningFromSocket()
         }
         else if (obj["type"] == "message" && obj["value"] == "start_real_time")
         {
-            gloveTools.startTraining();
+            gloveTools.startRealTime();
             finalSocketData = "{\"type\":\"start_real_time_success\"}";
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+        } 
+        else if (obj["type"] == "message" && obj["value"] == "stop_real_time")
+        {
+            finalSocketData = gloveTools.stopRealTime();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
     } while (iResult > 0);

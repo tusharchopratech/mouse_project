@@ -1,7 +1,6 @@
 #ifndef MouseFunction_HPP
 #define MouseFunction_HPP
-
-#define _WIN32_WINNT 0x0400
+// #define _WIN32_WINNT 0x0400
 #pragma comment(lib, "user32.lib")
 
 #include <windows.h>
@@ -17,21 +16,23 @@ using namespace std;
 class MouseFunctions
 {
 private:
-public:
-    HHOOK hMouseHook;
-    HANDLE hThread;
-    DWORD dwThread;
+    //First Left, then Right, then Thumb.
+    std::vector<std::vector<double>> osMouseClicksTimeStamps;
+    std::vector<double> osLeftClicksTimeStamps, osRightClicksTimeStamps, osThumbClicksTimeStamps;
+    std::vector<std::vector<double>> impulseMouseClicksTimeStamps;
+    std::vector<double> impulseLeftClicksTimeStamps, impulseRightClicksTimeStamps, impulseThumbClicksTimeStamps;
 
     int leftMouseStatus = 0;
     int rightMouseStatus = 0;
     int thumbMouseStatus = 0;
-    deque<int> leftMouseClickVector, rightMouseClickVector, thumbMouseClickVector;
 
     bool isRealTimeRunning;
-    std::vector<std::vector<double>> osMouseClicksTimeStamps;
-    std::vector<double> osLeftClicksTimeStamps;
-    std::vector<double> osRightClicksTimeStamps;
-    std::vector<double> osThumbClicksTimeStamps;
+
+public:
+    HHOOK hMouseHook;
+    HANDLE hThread;
+    DWORD dwThread;
+    deque<int> leftMouseClickVector, rightMouseClickVector, thumbMouseClickVector;
 
     //single ton
     static MouseFunctions &Instance()
@@ -67,9 +68,16 @@ public:
     void setupMouseMonitoring();
 
     void startRealTimePlay();
-    std::vector<std::vector<double>> stopRealTimePlayAndReturnTimestamps();
 
-    void mouseEvent(char mouseButton, char mouseEvent);
+    void stopRealTimePlay();
+
+    std::vector<std::vector<double>> getOsClickTimestamps();
+    
+    std::vector<std::vector<double>> getImpulseClickTimestamps();
+
+    void fireMouseEvent(char mouseButton, char mouseEvent);
+
+
 };
 
 #endif // !MouseFunction_HPP

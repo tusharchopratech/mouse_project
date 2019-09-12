@@ -44,6 +44,7 @@ public:
     GloveTools();
 
     int startRealTime();
+    string stopRealTime();
     void startRealTimeSampleCollections();
 
     int startTraining();

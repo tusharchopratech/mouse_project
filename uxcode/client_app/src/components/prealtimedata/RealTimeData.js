@@ -14,7 +14,8 @@ class RealTimeData extends Component {
             openLoadingDialog: true,
             buttonText: 'Start Real Time Play',
             openSnackBar: false,
-            snackBarText: 'Impulse started succesfully. Please start the game.'
+            snackBarText: 'Impulse started succesfully. Please start the game.',
+            realTimeResults: null
         }
     }
 
@@ -25,7 +26,6 @@ class RealTimeData extends Component {
     startRealTime = () => {
         const { ipcRenderer } = window.require("electron");
         ipcRenderer.send("socket_data_send", "start_real_time");
-
     };
 
     componentDidMount = () => {
@@ -35,6 +35,8 @@ class RealTimeData extends Component {
             if (jsonObject.type == "start_real_time_success") {
                 this.setState({ buttonText: 'Stop Real Time Play', snackBarText: 'Impulse started succesfully. Please start the game.', openSnackBar: true });
                 setTimeout(function () { this.setState({ openSnackBar: false }); }.bind(this), 4000);
+            } else if (jsonObject.type == "real_time_results") {
+                this.setState({ realTimeResults: jsonObject });
             }
         }.bind(this));
     };
@@ -57,6 +59,29 @@ class RealTimeData extends Component {
                         </Fab>
                     </div>
                 </div>
+
+                <div>
+                    <div>
+                        Actual Left Click Timestamps :
+                        <pre>{JSON.stringify(this.state.realTimeResults.os_left_clicks)}</pre>
+                    </div>
+                    <div>
+                        Actual Right Click Timestamps :
+                        <pre>{JSON.stringify(this.state.realTimeResults.os_right_clicks)}</pre>
+                    </div>
+
+                    <div>
+                        Impulse Left Click Timestamps :
+                        <pre>{JSON.stringify(this.state.realTimeResults.impulse_left_clicks)}</pre>
+                    </div>
+                    <div>
+                        Impulse Right Click Timestamps :
+                        <pre>{JSON.stringify(this.state.realTimeResults.impulse_right_clicks)}</pre>
+                    </div>
+                   
+                </div>
+
+
                 <Snackbar
                     anchorOrigin={{
                         vertical: 'bottom',

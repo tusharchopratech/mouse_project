@@ -22,6 +22,7 @@ public:
         setupFilter();
     }
     void setupFilter();
+    void  resetFilters();
     double getFilteredValue(int channelNumber, double value);
 };
 
