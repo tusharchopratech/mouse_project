@@ -137,6 +137,7 @@ void SocketServer::startListeningFromSocket()
         } 
         else if (obj["type"] == "message" && obj["value"] == "stop_real_time")
         {
+            cout<<"1"<<endl;
             finalSocketData = gloveTools.stopRealTime();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }

@@ -31,8 +31,8 @@ static const string GB_ENV_PRODUCTION = "production";
 static const string GB_IMPULSE_DIRECTORY = "C:/impulse_data";
 static const string GB_IMPULSE_DEV_DIRECTORY = "./../debug/dataset";
 
-static const double TRUE_POSTIVE_MILLISECONDS_CHECK = 200;
-static const double GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE = 200;
+static const double TRUE_POSTIVE_MILLISECONDS_CHECK = 100;
+static const double GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE = 100;
 
 
 string currentEnvirnoment; 

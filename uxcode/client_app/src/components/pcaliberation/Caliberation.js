@@ -40,8 +40,8 @@ class Caliberation extends Component {
         this.startRendering = true;
         this.tmp1 = [1];
         this.tmp2 = [2];
-        this.tmp3 = [9,8];
-        this.tmp4 = [4,3,3];
+        this.tmp3 = [9, 8];
+        this.tmp4 = [4, 3, 3];
         this.state = {
             first_plot_data: { labels: this.tmp1, datasets: [{ label: 'Channel 1', data: this.tmp1 }] },
             second_plot_data: { labels: this.tmp2, datasets: [{ label: 'Channel 2', data: this.tmp2 }] },
@@ -93,7 +93,7 @@ class Caliberation extends Component {
                 },
                 title: {
                     display: true,
-                    text: 'Channel Data'
+                    text: ''
                 }
             }
         };
@@ -131,7 +131,7 @@ class Caliberation extends Component {
 
         ipcRenderer.on('socket_data_received', function (event, data) {
             // console.log(String(data), " at ", new Date().getTime());
-            // console.log("New Data at ", new Date().getTime());
+            console.log("New Data at ", new Date().getTime());
             try {
                 var jsonObject = JSON.parse(String(data));
             } catch (e) {
@@ -452,25 +452,28 @@ class Caliberation extends Component {
                 <div style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center',
+                    justifyContent: 'start',
                     height: '100%',
                     padding: '5%',
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column' }}>
-
-                        <div style={{ flex: 1 }}>
-                            <Line data={this.state.first_plot_data} options={this.state.plot_options} height={60} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <Line data={this.state.second_plot_data} options={this.state.plot_options} height={60} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <Line data={this.state.third_plot_data} options={this.state.plot_options} height={60} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <Line data={this.state.fourth_plot_data} options={this.state.plot_options} height={60} />
+                        <div style={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'row' }}>
+                            <div style={{ flex: 1 }}>
+                                <Line data={this.state.first_plot_data} options={this.state.plot_options} height={100} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <Line data={this.state.second_plot_data} options={this.state.plot_options} height={100} />
+                            </div>
                         </div>
 
+                        <div style={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'row' }}>
+                            <div style={{ flex: 1 }}>
+                                <Line data={this.state.third_plot_data} options={this.state.plot_options} height={100} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <Line data={this.state.fourth_plot_data} options={this.state.plot_options} height={100} />
+                            </div>
+                        </div>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 30 }}>

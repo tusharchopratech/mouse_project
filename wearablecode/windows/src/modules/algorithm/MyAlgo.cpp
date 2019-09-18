@@ -41,7 +41,7 @@ string MyAlgo::predictAndWriteResults()
     bestAlgoModeRC = ALGO_MODE_F_TKEO;
     bestAlgoSignFlagRC = ALGO_SIGN_FLAG_BOTH;
 
-    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
     {
         cout << "For f_tkeo_sign_both" << endl;
         cout << "Left click TP/Actual Clicks : " << (double)((double)leftTotalTruePositives / (double)leftClickIndices.size()) << endl;
@@ -73,7 +73,7 @@ string MyAlgo::predictAndWriteResults()
         bestAlgoSignFlagRC = ALGO_SIGN_FLAG_BOTH;
     }
 
-    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
     {
         cout << "For p3_tkeo_sign_both" << endl;
         cout << "Left click TP/Actual Clicks : " << (double)((double)leftTotalTruePositives / (double)leftClickIndices.size()) << endl;
@@ -105,7 +105,7 @@ string MyAlgo::predictAndWriteResults()
         bestAlgoSignFlagRC = ALGO_SIGN_FLAG_BOTH;
     }
 
-    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
     {
         cout << "For tkeo_sign_both" << endl;
         cout << "Left click TP/Actual Clicks : " << (double)((double)leftTotalTruePositives / (double)leftClickIndices.size()) << endl;
@@ -136,8 +136,7 @@ string MyAlgo::predictAndWriteResults()
         bestAlgoModeRC = ALGO_MODE_P3_F_TKEO;
         bestAlgoSignFlagRC = ALGO_SIGN_FLAG_BOTH;
     }
-
-    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
     {
         cout << "For p3_f_tkeo_sign_both" << endl;
         cout << "Left click TP/Actual Clicks : " << (double)((double)leftTotalTruePositives / (double)leftClickIndices.size()) << endl;
@@ -146,9 +145,7 @@ string MyAlgo::predictAndWriteResults()
         cout << "Right click FP/Actual Clicks : " << (double)((double)bestAlgoModeJson["right_click"]["false_positives_indices"].size() / (double)rightClickIndices.size()) << endl
              << endl;
     }
-
     finalJson["results"] = tmp;
-
     return finalJson.dump();
 }
 
@@ -219,7 +216,7 @@ string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, st
     }
 
     // ofstream myfile(GB_IMPULSE_DIRECTORY + "/" + algoType + ".txt");
-    ofstream myfile(GB_IMPULSE_DIRECTORY + "/" + participantName + "_xxx_" + std::to_string(numberOfChannelesUsedForTraining) + "_channels_xxx_" + std::to_string(trialNumber) + "_xxx_" + algoType + ".txt");
+    ofstream myfile(GB_IMPULSE_DIRECTORY + "/data_" + participantName + std::to_string(trialNumber) + "_C" + std::to_string(numberOfChannelesUsedForTraining) + "_" + algoType + ".txt");
 
     for (int i = 2; i < ch1_tkeo.size(); i++)
     {
@@ -251,7 +248,7 @@ string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, st
 
         if (clickType == "left")
         {
-            if (i > nextLeftClickCheckAfterSampleNumber)
+            if (i > nextLeftClickCheckAfterSampleNumber && trainingDataLeftClick.at(i) != 1)
             {
                 myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
                        << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
@@ -278,7 +275,7 @@ string MyAlgo::predictAndWriteAlgoSpecificResults(int algoMode, int signFlag, st
         else if (clickType == "right")
         {
 
-            if (i > nextRightClickCheckAfterSampleNumber)
+            if (i > nextRightClickCheckAfterSampleNumber && trainingDataRightClick.at(i) != 1)
             {
                 myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i)
                        << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i)
@@ -428,6 +425,7 @@ string MyAlgo::predictCLickTypeFromThreeSamples(std::vector<std::vector<double>>
             MouseFunctions::Instance().fireMouseEvent('r', 'd');
         }
     }
+
     return finalClickType;
 }
 
@@ -885,7 +883,7 @@ void MyAlgo::readData()
     trainingDataRightClick.clear();
     trainingDataThumbClick.clear();
 
-    string file = GB_IMPULSE_DIRECTORY + "/" + participantName + "_xxx_" + std::to_string(numberOfChannelesUsedForTraining) + "_channels_xxx_" + std::to_string(trialNumber) + "_xxx_" + "data.txt";
+    string file = GB_IMPULSE_DIRECTORY + "/data_" + participantName + std::to_string(trialNumber) + "_C" + std::to_string(numberOfChannelesUsedForTraining) + ".txt";
 
     std::string line;
     std::ifstream infile(file);

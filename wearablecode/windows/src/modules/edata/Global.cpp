@@ -16,6 +16,11 @@ void gb_logTime()
          << duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count() << std::flush;
 }
 
+string gb_getCurrentTimeInMilliseconds()
+{
+    return to_string(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+}
+
 void gb_setCurrentEnvirnoment(string env)
 {
     currentEnvirnoment = env;

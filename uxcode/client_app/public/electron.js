@@ -16,11 +16,17 @@ let mainWindow
 var backEndPath;
 global.shared_object = { current_envirnoment: process.env.NODE_ENV };
 
-
+// For Dev, dummy data, start backend manually
 if (process.env.NODE_ENV == "dev") {
-  backEndPath = "./src/extra-resources/main.exe"; // For Dev
-} else {
-  backEndPath = "./resources/src/extra-resources/main.exe"; // For Prod
+  backEndPath = "./src/extra-resources/main.exe";
+}
+// For Stage, real time data, start backend manually 
+else if (process.env.NODE_ENV == "stage") {
+  backEndPath = "./src/extra-resources/main.exe";
+}
+// For Prod, real time data, start backend automatically
+else if (process.env.NODE_ENV == "prod"){
+  backEndPath = "./resources/src/extra-resources/main.exe";
 }
 
 
@@ -37,7 +43,6 @@ function createWindow() {
   mainWindow.on('closed', function () {
     mainWindow = null
   });
-  // connectSocket();
 }
 
 ipc.on('socket_data_send', (event, data) => {
@@ -62,7 +67,9 @@ ipc.on('internal_ipc', (event, data) => {
   if (data == "start_backend_and_socket") {
     if (process.env.NODE_ENV == "dev") {
       setTimeout(connectSocket, 3000);
-    } else {
+    } else if (process.env.NODE_ENV == "stage") {
+      setTimeout(connectSocket, 3000);
+    } else if (process.env.NODE_ENV == "prod") {
       for (var i = 0; i < process_to_kill.length; i++) {
         try {
           kill(process_to_kill[i]);
@@ -98,8 +105,6 @@ app.on('window-all-closed', function () {
   }
   process_to_kill = [];
 });
-
-
 
 function startBackend() {
   var error = false;

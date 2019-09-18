@@ -13,9 +13,13 @@ class RealTimeData extends Component {
         this.state = {
             openLoadingDialog: true,
             buttonText: 'Start Real Time Play',
+            buttonText2: 'Stop Real Time Play',
             openSnackBar: false,
             snackBarText: 'Impulse started succesfully. Please start the game.',
-            realTimeResults: null
+            osLeftClicks: [],
+            osRightClicks: [],
+            impulseLeftClicks: [],
+            impulseRightClicks: [],
         }
     }
 
@@ -28,6 +32,11 @@ class RealTimeData extends Component {
         ipcRenderer.send("socket_data_send", "start_real_time");
     };
 
+    stopRealTime = () => {
+        const { ipcRenderer } = window.require("electron");
+        ipcRenderer.send("socket_data_send", "stop_real_time");
+    };
+
     componentDidMount = () => {
         const { ipcRenderer } = window.require("electron");
         ipcRenderer.on('socket_data_received', function (event, data) {
@@ -36,7 +45,12 @@ class RealTimeData extends Component {
                 this.setState({ buttonText: 'Stop Real Time Play', snackBarText: 'Impulse started succesfully. Please start the game.', openSnackBar: true });
                 setTimeout(function () { this.setState({ openSnackBar: false }); }.bind(this), 4000);
             } else if (jsonObject.type == "real_time_results") {
-                this.setState({ realTimeResults: jsonObject });
+                this.setState({
+                    osLeftClicks: jsonObject.os_left_clicks,
+                    osRightClicks: jsonObject.os_right_clicks,
+                    impulseLeftClicks: jsonObject.impulse_left_clicks,
+                    impulseRightClicks: jsonObject.impulse_right_clicks,
+                });
             }
         }.bind(this));
     };
@@ -58,27 +72,33 @@ class RealTimeData extends Component {
                             {this.state.buttonText}
                         </Fab>
                     </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 20 }}>
+                        <Fab variant="extended" color="primary" aria-label="Add" onClick={this.stopRealTime} className={classes.margin}>
+                            <HandIconWhite className={classes.extendedIcon} />
+                            {this.state.buttonText2}
+                        </Fab>
+                    </div>
                 </div>
 
                 <div>
                     <div>
                         Actual Left Click Timestamps :
-                        <pre>{JSON.stringify(this.state.realTimeResults.os_left_clicks)}</pre>
+                        <pre>{JSON.stringify(this.state.osLeftClicks)}</pre>
                     </div>
                     <div>
                         Actual Right Click Timestamps :
-                        <pre>{JSON.stringify(this.state.realTimeResults.os_right_clicks)}</pre>
+                        <pre>{JSON.stringify(this.state.osRightClicks)}</pre>
                     </div>
 
                     <div>
                         Impulse Left Click Timestamps :
-                        <pre>{JSON.stringify(this.state.realTimeResults.impulse_left_clicks)}</pre>
+                        <pre>{JSON.stringify(this.state.impulseLeftClicks)}</pre>
                     </div>
                     <div>
                         Impulse Right Click Timestamps :
-                        <pre>{JSON.stringify(this.state.realTimeResults.impulse_right_clicks)}</pre>
+                        <pre>{JSON.stringify(this.state.impulseRightClicks)}</pre>
                     </div>
-                   
+
                 </div>
 
 

@@ -17,10 +17,8 @@ class MouseFunctions
 {
 private:
     //First Left, then Right, then Thumb.
-    std::vector<std::vector<double>> osMouseClicksTimeStamps;
-    std::vector<double> osLeftClicksTimeStamps, osRightClicksTimeStamps, osThumbClicksTimeStamps;
-    std::vector<std::vector<double>> impulseMouseClicksTimeStamps;
-    std::vector<double> impulseLeftClicksTimeStamps, impulseRightClicksTimeStamps, impulseThumbClicksTimeStamps;
+    std::vector<double> osLeftClicksTimeStamps, osRightClicksTimeStamps;
+    std::vector<double> impulseLeftClicksTimeStamps, impulseRightClicksTimeStamps;
 
     int leftMouseStatus = 0;
     int rightMouseStatus = 0;
@@ -71,13 +69,15 @@ public:
 
     void stopRealTimePlay();
 
-    std::vector<std::vector<double>> getOsClickTimestamps();
-    
-    std::vector<std::vector<double>> getImpulseClickTimestamps();
+    std::vector<double> getOSLeftClickTimestamps();
+
+    std::vector<double> getOSRightClickTimestamps();
+
+    std::vector<double> getImpulseLeftClickTimestamps();
+
+    std::vector<double> getImpulseRightClickTimestamps();
 
     void fireMouseEvent(char mouseButton, char mouseEvent);
-
-
 };
 
 #endif // !MouseFunction_HPP

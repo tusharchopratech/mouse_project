@@ -29,23 +29,28 @@ int GloveTools::startRealTime()
     if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
     {
         std::thread newThread(&GloveTools::startRealTimeSampleCollections, this);
+        newThread.detach();
     }
+    cout<<"Real Time Started!"<<endl;
     return 1;
 }
 
 string GloveTools::stopRealTime()
 {
+    cout<<"2"<<endl;
     isRealTimeRunning = false;
+    MouseFunctions::Instance().stopRealTimePlay();
+    cout<<"2.1"<<endl;
     Json finalJson;
     finalJson["type"] = "real_time_results";
-    finalJson["os_left_clicks"] = MouseFunctions::Instance().getOsClickTimestamps().at(0);
-    finalJson["os_right_clicks"] = MouseFunctions::Instance().getOsClickTimestamps().at(1);
-    finalJson["os_thumb_clicks"] = MouseFunctions::Instance().getOsClickTimestamps().at(2);
+    finalJson["os_left_clicks"] = MouseFunctions::Instance().getOSLeftClickTimestamps();
+    finalJson["os_right_clicks"] = MouseFunctions::Instance().getOSRightClickTimestamps();
 
-    finalJson["impulse_left_clicks"] = MouseFunctions::Instance().getImpulseClickTimestamps().at(0);
-    finalJson["impulse_right_clicks"] = MouseFunctions::Instance().getImpulseClickTimestamps().at(1);
-    finalJson["impulse_thumb_clicks"] = MouseFunctions::Instance().getImpulseClickTimestamps().at(2);
+    cout<<"3"<<endl;
+    finalJson["impulse_left_clicks"] = MouseFunctions::Instance().getImpulseLeftClickTimestamps();
+    finalJson["impulse_right_clicks"] = MouseFunctions::Instance().getImpulseRightClickTimestamps();
     cout << finalJson.dump(4);
+    cout<<"4"<<endl;
     return finalJson.dump();
 }
 
@@ -98,7 +103,7 @@ string GloveTools::stopTraining()
         trainingDataRightClick = demoTrainingDataRightClick;
         trainingDataThumbClick = demoTrainingDataThumbClick;
     }
-    string file = GB_IMPULSE_DIRECTORY + "/" + participantName + "_xxx_" + std::to_string(numberOfChannelesUsedForTraining) + "_channels_xxx_" + std::to_string(trialNumber) + "_xxx_" + "data.txt";
+    string file = GB_IMPULSE_DIRECTORY + "/data_" + participantName + std::to_string(trialNumber) + "_C" + std::to_string(numberOfChannelesUsedForTraining) + ".txt";
     ofstream myfile(file);
     if (myfile.fail())
     {
@@ -201,9 +206,11 @@ void GloveTools::startRealTimeSampleCollections()
         t3 = mDaq.getChannelThreeVoltage(0);
         t4 = mDaq.getChannelFourVoltage(0);
 
+        cout<<" new samples arrived "<<endl;
         myAlgo.fireImpulseClicks(realTimeDataChannel1, realTimeDataChannel2, realTimeDataChannel3, realTimeDataChannel4);
         // Perform Click
     }
+    cout<<"Real Time Stopped!"<<endl;
 }
 
 double GloveTools::getTkeoValue(double sample1, double sample2, double sample3, int channelNumber)
