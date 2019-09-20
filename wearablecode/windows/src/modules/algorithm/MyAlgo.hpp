@@ -21,9 +21,9 @@ class MyAlgo
 private:
     FilterTools filterTools;
 
-    int trainingWindowStartPointForNoise = (int)(2.2 * GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD);
-    int trainingWindowEndPointForNoise = (int)(1.8 * GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD);
-    int trainingWindowStartPointForFeatureConstruction = (int)(1 * GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD);
+    int trainingWindowStartPointForNoise = (int)(GB_TRAINING_WINDOW_INTERVAL_STARTING * GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD);
+    int trainingWindowEndPointForNoise = (int)(GB_TRAINING_WINDOW_INTERVAL_ENDING * GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD);
+    int trainingWindowStartPointForFeatureConstruction = (int)(GB_CLICK_DETECTION_INTERVAL_STARTING * GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD);
     int totalNumberOfTrainingDataSamples;
 
     int bestAlgoModeLC, bestAlgoSignFlagLC;

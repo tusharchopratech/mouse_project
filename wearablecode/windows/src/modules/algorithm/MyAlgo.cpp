@@ -27,7 +27,6 @@ string MyAlgo::predictAndWriteResults()
     finalJson["actual_right_click_indices"] = rightClickIndices;
 
     // ********************************************************************* f_tkeo_sign_both ********************************************************************************
-
     computeGlobalNoice(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     info = predictAndWriteAlgoSpecificResults(ALGO_MODE_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_f_tkeo_sign_both");
@@ -52,7 +51,6 @@ string MyAlgo::predictAndWriteResults()
     }
 
     // ********************************************************************* p3_tkeo_sign_both ********************************************************************************
-
     computeGlobalNoice(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH);
     info = predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_tkeo_sign_both");
@@ -84,7 +82,6 @@ string MyAlgo::predictAndWriteResults()
     }
 
     // ********************************************************************* tkeo_sign_both ********************************************************************************
-
     computeGlobalNoice(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH);
     info = predictAndWriteAlgoSpecificResults(ALGO_MODE_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_tkeo_sign_both");
@@ -116,7 +113,6 @@ string MyAlgo::predictAndWriteResults()
     }
 
     // ********************************************************************* p3_f_tkeo_sign_both ********************************************************************************
-
     computeGlobalNoice(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     computeFeatures(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH);
     info = predictAndWriteAlgoSpecificResults(ALGO_MODE_P3_F_TKEO, ALGO_SIGN_FLAG_BOTH, "data_result_algo_p3_f_tkeo_sign_both");
@@ -652,10 +648,18 @@ void MyAlgo::computeGlobalNoice(int algoMode, int signFlag)
     getEachChannelMaxValueForClickType(l_c, algoMode, signFlag, leftClickEachChannelMaxValue);  // Left Click
     getEachChannelMaxValueForClickType(r_c, algoMode, signFlag, rightClickEachChannelMaxValue); // Right Click
     getEachChannelMaxValueForClickType(t_c, algoMode, signFlag, thumbClickEachChannelMaxValue); // Thumb Click
+
+    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
+    {
+        cout << "Global Noise for below Algo Type : ";
+    }
     for (int i = 0; i < 4; i++)
     {
         globalChannelNoise[i] = minOfThree(leftClickEachChannelMaxValue[i], rightClickEachChannelMaxValue[i], thumbClickEachChannelMaxValue[i]);
-        // cout << globalChannelNoise[i] << " ";
+        if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
+        {
+            cout << globalChannelNoise[i] << " ";
+        }
     }
     cout << endl;
 }
@@ -789,15 +793,17 @@ void MyAlgo::getEachChannelMaxValueForClickType(std::vector<int> clickArray, int
 
 double MyAlgo::getTkeoValue(double v1, double v2, double v3)
 {
-    v1 = v1 * v1 * v1;
-    v2 = v2 * v2 * v2;
-    v3 = v3 * v3 * v3;
-    double result = ((v2 * v2) - (v1 * v3));
+    // v1 = v1 * v1 * v1;
+    // v2 = v2 * v2 * v2;
+    // v3 = v3 * v3 * v3;
+    // double result = ((v2 * v2) - (v1 * v3));
+    double result = v1 * v2 * v3;
     return result;
 }
 
 void MyAlgo::processData()
 {
+    std::vector<double> tmp1, tmp2, tmp3, tmp4;
     ch1_raw.clear();
     ch2_raw.clear();
     ch3_raw.clear();
@@ -847,15 +853,6 @@ void MyAlgo::processData()
     filterTools.resetFilters();
     for (int i = 2; i < trainingDataChannel1.size(); i++)
     {
-        ch1_p3_f_tkeo.push_back(getTkeoValue(filterTools.getFilteredValue(1, pow(trainingDataChannel1.at(i - 2), 3)), filterTools.getFilteredValue(1, pow(trainingDataChannel1.at(i - 1), 3)), filterTools.getFilteredValue(1, pow(trainingDataChannel1.at(i), 3))));
-        ch2_p3_f_tkeo.push_back(getTkeoValue(filterTools.getFilteredValue(2, pow(trainingDataChannel2.at(i - 2), 3)), filterTools.getFilteredValue(2, pow(trainingDataChannel2.at(i - 1), 3)), filterTools.getFilteredValue(2, pow(trainingDataChannel2.at(i), 3))));
-        ch3_p3_f_tkeo.push_back(getTkeoValue(filterTools.getFilteredValue(3, pow(trainingDataChannel3.at(i - 2), 3)), filterTools.getFilteredValue(3, pow(trainingDataChannel3.at(i - 1), 3)), filterTools.getFilteredValue(3, pow(trainingDataChannel3.at(i), 3))));
-        ch4_p3_f_tkeo.push_back(getTkeoValue(filterTools.getFilteredValue(4, pow(trainingDataChannel4.at(i - 2), 3)), filterTools.getFilteredValue(4, pow(trainingDataChannel4.at(i - 1), 3)), filterTools.getFilteredValue(4, pow(trainingDataChannel4.at(i), 3))));
-    }
-
-    filterTools.resetFilters();
-    for (int i = 2; i < trainingDataChannel1.size(); i++)
-    {
         ch1_p3_tkeo.push_back(getTkeoValue(pow(trainingDataChannel1.at(i - 2), 3), pow(trainingDataChannel1.at(i - 1), 3), pow(trainingDataChannel1.at(i), 3)));
         ch2_p3_tkeo.push_back(getTkeoValue(pow(trainingDataChannel2.at(i - 2), 3), pow(trainingDataChannel2.at(i - 1), 3), pow(trainingDataChannel2.at(i), 3)));
         ch3_p3_tkeo.push_back(getTkeoValue(pow(trainingDataChannel3.at(i - 2), 3), pow(trainingDataChannel3.at(i - 1), 3), pow(trainingDataChannel3.at(i), 3)));
@@ -863,14 +860,44 @@ void MyAlgo::processData()
     }
 
     filterTools.resetFilters();
-    for (int i = 2; i < trainingDataChannel1.size(); i++)
+    tmp1.clear();
+    tmp2.clear();
+    tmp3.clear();
+    tmp4.clear();
+    for (int i = 0; i < trainingDataChannel1.size(); i++)
     {
-        ch1_f_tkeo.push_back(getTkeoValue(filterTools.getFilteredValue(1, trainingDataChannel1.at(i - 2)), filterTools.getFilteredValue(1, trainingDataChannel1.at(i - 1)), filterTools.getFilteredValue(1, trainingDataChannel1.at(i))));
-        ch2_f_tkeo.push_back(getTkeoValue(filterTools.getFilteredValue(2, trainingDataChannel2.at(i - 2)), filterTools.getFilteredValue(2, trainingDataChannel2.at(i - 1)), filterTools.getFilteredValue(2, trainingDataChannel2.at(i))));
-        ch3_f_tkeo.push_back(getTkeoValue(filterTools.getFilteredValue(3, trainingDataChannel3.at(i - 2)), filterTools.getFilteredValue(3, trainingDataChannel3.at(i - 1)), filterTools.getFilteredValue(3, trainingDataChannel3.at(i))));
-        ch4_f_tkeo.push_back(getTkeoValue(filterTools.getFilteredValue(4, trainingDataChannel4.at(i - 2)), filterTools.getFilteredValue(4, trainingDataChannel4.at(i - 1)), filterTools.getFilteredValue(4, trainingDataChannel4.at(i))));
+        tmp1.push_back(pow(filterTools.getFilteredValue(1, trainingDataChannel1.at(i)), 3));
+        tmp2.push_back(pow(filterTools.getFilteredValue(2, trainingDataChannel2.at(i)), 3));
+        tmp3.push_back(pow(filterTools.getFilteredValue(3, trainingDataChannel3.at(i)), 3));
+        tmp4.push_back(pow(filterTools.getFilteredValue(4, trainingDataChannel4.at(i)), 3));
     }
+    for (int i = 2; i < tmp1.size(); i++)
+    {
+        ch1_p3_f_tkeo.push_back(getTkeoValue(tmp1.at(i - 2), tmp1.at(i - 1), tmp1.at(i)));
+        ch2_p3_f_tkeo.push_back(getTkeoValue(tmp2.at(i - 2), tmp2.at(i - 1), tmp2.at(i)));
+        ch3_p3_f_tkeo.push_back(getTkeoValue(tmp3.at(i - 2), tmp3.at(i - 1), tmp3.at(i)));
+        ch4_p3_f_tkeo.push_back(getTkeoValue(tmp4.at(i - 2), tmp4.at(i - 1), tmp4.at(i)));
+    }
+
     filterTools.resetFilters();
+    tmp1.clear();
+    tmp2.clear();
+    tmp3.clear();
+    tmp4.clear();
+    for (int i = 0; i < trainingDataChannel1.size(); i++)
+    {
+        tmp1.push_back(filterTools.getFilteredValue(1, trainingDataChannel1.at(i)));
+        tmp2.push_back(filterTools.getFilteredValue(2, trainingDataChannel2.at(i)));
+        tmp3.push_back(filterTools.getFilteredValue(3, trainingDataChannel3.at(i)));
+        tmp4.push_back(filterTools.getFilteredValue(4, trainingDataChannel4.at(i)));
+    }
+    for (int i = 2; i < tmp1.size(); i++)
+    {
+        ch1_f_tkeo.push_back(getTkeoValue(tmp1.at(i - 2), tmp1.at(i - 1), tmp1.at(i)));
+        ch2_f_tkeo.push_back(getTkeoValue(tmp2.at(i - 2), tmp2.at(i - 1), tmp2.at(i)));
+        ch3_f_tkeo.push_back(getTkeoValue(tmp3.at(i - 2), tmp3.at(i - 1), tmp3.at(i)));
+        ch4_f_tkeo.push_back(getTkeoValue(tmp4.at(i - 2), tmp4.at(i - 1), tmp4.at(i)));
+    }
 }
 
 void MyAlgo::readData()
