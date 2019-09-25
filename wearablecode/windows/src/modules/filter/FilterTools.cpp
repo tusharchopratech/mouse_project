@@ -6,10 +6,11 @@
 
 void FilterTools::setupFilter()
 {
-    fCh1.setup(5, samplingrate, (lf + hf) / 2, (hf - lf));
-    fCh2.setup(5, samplingrate, (lf + hf) / 2, (hf - lf));
-    fCh3.setup(5, samplingrate, (lf + hf) / 2, (hf - lf));
-    fCh4.setup(5, samplingrate, (lf + hf) / 2, (hf - lf));
+
+    fCh1.setup(GB_FILTER_ORDER, samplingrate, (lf + hf) / 2, (hf - lf));
+    fCh2.setup(GB_FILTER_ORDER, samplingrate, (lf + hf) / 2, (hf - lf));
+    fCh3.setup(GB_FILTER_ORDER, samplingrate, (lf + hf) / 2, (hf - lf));
+    fCh4.setup(GB_FILTER_ORDER, samplingrate, (lf + hf) / 2, (hf - lf));
 }
 
 void  FilterTools::resetFilters(){
