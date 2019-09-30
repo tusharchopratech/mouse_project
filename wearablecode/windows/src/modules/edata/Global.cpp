@@ -58,7 +58,7 @@ void computeCovarianceMatrix(std::vector<std::vector<double>> vec, std::vector<s
     }
 }
 
-double vectorMedian(std::vector<double> scores)
+double gb_vectorMedian(std::vector<double> scores)
 {
     size_t size = scores.size();
 
@@ -80,7 +80,7 @@ double vectorMedian(std::vector<double> scores)
     }
 }
 
-void print2DVector(std::vector<std::vector<double>> vec)
+void gb_print2DVector(std::vector<std::vector<double>> vec)
 {
     for (unsigned i = 0; i < vec.size(); i++)
     {
@@ -90,6 +90,15 @@ void print2DVector(std::vector<std::vector<double>> vec)
         }
         cout << endl;
     }
+}
+
+void gb_print1DVector(std::vector<double> vec)
+{
+    for (int i = 0; i < vec.size(); i++)
+    {
+        cout << vec.at(i) << " ";
+    }
+    cout << endl;
 }
 
 double **vectorTo2DArray(std::vector<std::vector<double>> &vals)
@@ -108,6 +117,16 @@ double **vectorTo2DArray(std::vector<std::vector<double>> &vals)
     }
 
     return temp;
+}
+
+double gb_minOfThree(double x, double y, double z)
+{
+    return x < y ? (x < z ? x : z) : (y < z ? y : z);
+}
+
+void test()
+{
+   
 }
 
 #endif // !Global

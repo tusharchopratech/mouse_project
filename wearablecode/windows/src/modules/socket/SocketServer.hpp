@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
-#include "..\training\GloveTools.cpp"
+#include "..\glove_tools\GloveTools.cpp"
 #include "..\edata\Global.cpp"
 #include "..\edata\json\json.hpp"
 

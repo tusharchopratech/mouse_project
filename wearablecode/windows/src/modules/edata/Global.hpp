@@ -1,8 +1,9 @@
 #ifndef Global_H
 #define Global_H
 #include <iostream>
+#include <iterator>
+#include <algorithm>
 #include "..\..\..\lib\dlib\all\source.cpp"
-using namespace dlib;
 
 using namespace std;
 
@@ -37,6 +38,8 @@ static const double GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE = 100;
 static const double GB_TRAINING_WINDOW_INTERVAL_STARTING = 0.75;
 static const double GB_TRAINING_WINDOW_INTERVAL_ENDING = 0.35;
 static const double GB_CLICK_DETECTION_INTERVAL_STARTING = 0.1;
+
+static const double GB_TRAINING_SAMPLE_TAKEN_FROM_CLASSIFICATION = 0.50;
 
 
 
