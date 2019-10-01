@@ -21,6 +21,12 @@ string gb_getCurrentTimeInMilliseconds()
     return to_string(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
 }
 
+double gb_getCurrentTimeInMillisecondsDouble()
+{   
+    string tt = to_string(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+    return  atof(tt.c_str());
+}
+
 void gb_setCurrentEnvirnoment(string env)
 {
     currentEnvirnoment = env;
@@ -126,7 +132,6 @@ double gb_minOfThree(double x, double y, double z)
 
 void test()
 {
-   
 }
 
 #endif // !Global

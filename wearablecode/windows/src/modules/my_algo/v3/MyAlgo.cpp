@@ -6,6 +6,7 @@
 #include "MyAlgo_LabelClickType.cpp"
 #include "MyAlgo_Train.cpp"
 #include "MyAlgo_Evaluate.cpp"
+#include "MyAlgo_RealTime_Play.cpp"
 
 string MyAlgo::getAlgoResults(string pName, int noCh, int trialNo)
 {
@@ -20,9 +21,7 @@ string MyAlgo::getAlgoResults(string pName, int noCh, int trialNo)
 string MyAlgo::startAnalysing()
 {
     // set parameters
-    int clickType = 1;                        // only two values: 1 is for left and 2 is for right
-    std::vector<int> channelIDRight{3, 3, 3}; // feature sequence: tko, p3tko, stko
-    std::vector<int> channelIDLeft{1, 1, 4};
+
     std::vector<std::vector<int>> channelID;
     channelID.push_back(channelIDLeft);
     channelID.push_back(channelIDRight);
@@ -75,6 +74,58 @@ string MyAlgo::startAnalysing()
     finalJson["average_lead"] = results.at(2);
     std::cout << finalJson.dump(4) << endl;
     return finalJson.dump();
+}
+
+bool MyAlgo::detectAndFireImpulseClicks(std::vector<std::vector<double>> raw_data_10_samples)
+{
+    bool isClickFired = false;
+    int i = 0;
+    std::vector<double> tmp;
+    if (prevSampleRealTime.size() == 0 && prevPrevSampleRealTime.size() == 0)
+    {
+        prevPrevSampleRealTime = raw_data_10_samples.at(0);
+        prevSampleRealTime = raw_data_10_samples.at(1);
+        i = 2;
+    }
+
+    while (i < GB_TOTAL_NUMBER_OF_SAMPLES)
+    {
+        tmp = raw_data_10_samples.at(i);
+        threeSamplesRealTime.push_back(prevPrevSampleRealTime);
+        threeSamplesRealTime.push_back(prevSampleRealTime);
+        threeSamplesRealTime.push_back(tmp);
+
+        /**
+         * For Left Click Detection
+        */
+        if (clickType == 1)
+        {
+            if (fnRealTime(threeSamplesRealTime, channelIDLeft, thresholdValues, 1))
+            {
+                MouseFunctions::Instance().fireMouseEvent('l', 'd');
+                isClickFired = true;
+            }
+        }
+        /**
+         * For Left Right Detection
+        */
+        else if (clickType == 2)
+        {
+      
+            if (fnRealTime(threeSamplesRealTime, channelIDRight, thresholdValues, 1))
+            {
+                MouseFunctions::Instance().fireMouseEvent('r', 'd');
+                  isClickFired = true;
+            }
+        }
+
+        prevPrevSampleRealTime = prevSampleRealTime;
+        prevSampleRealTime = tmp;
+        tmp.clear();
+        threeSamplesRealTime.clear();
+        i++;
+    }
+    return isClickFired;
 }
 
 #endif // !MyAlgo_CPP

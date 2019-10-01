@@ -38,6 +38,7 @@ private:
     char receivedMessageFromClient[DEFAULT_BUFLEN];
     int recvbuflen = DEFAULT_BUFLEN;
 
+
     GloveTools gloveTools;
 
 public:

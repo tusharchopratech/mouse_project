@@ -94,6 +94,7 @@ void SocketServer::startListeningFromSocket()
         string str(receivedMessageFromClient);
         str = str.substr(0, str.find("*****"));
         Json obj = Json::parse(str);
+        cout << obj.dump(2) << endl;
         if (obj["type"] == "message" && obj["value"] == "raw_real_time_data")
         {
             finalSocketData = "";
@@ -118,26 +119,23 @@ void SocketServer::startListeningFromSocket()
             finalSocketData = gloveTools.stopTraining();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
-        else if (obj["type"] == "message" && obj["value"] == "debugging_real_time_data")
-        {
-            finalSocketData = gloveTools.getRealTimeDataWithTkeo();
-            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
-        }
         else if (obj["type"] == "communication" && obj["value"] == "settings")
         {
-            gloveTools.setTrainingSettings(obj["participant_name"],obj["trail_no"],obj["no_of_channels"]);
+            gloveTools.setTrainingSettings(obj["participant_name"], obj["trail_no"], obj["no_of_channels"]);
             finalSocketData = "{\"type\":\"communication_success\", \"value\":\"settings_set\"}";
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
         else if (obj["type"] == "message" && obj["value"] == "start_real_time")
         {
             gloveTools.startRealTime();
-            finalSocketData = "{\"type\":\"start_real_time_success\"}";
+            Json f;
+            f["type"] = "start_real_time_success";
+            finalSocketData = f.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
-        } 
+        }
         else if (obj["type"] == "message" && obj["value"] == "stop_real_time")
         {
-            cout<<"1"<<endl;
+            cout << "1" << endl;
             finalSocketData = gloveTools.stopRealTime();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }

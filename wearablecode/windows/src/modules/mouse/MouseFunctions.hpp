@@ -20,11 +20,18 @@ private:
     std::vector<double> osLeftClicksTimeStamps, osRightClicksTimeStamps;
     std::vector<double> impulseLeftClicksTimeStamps, impulseRightClicksTimeStamps;
 
+    double lastLeftClickTimeStamp = 0.0, lastRightClickTimeStamp = 0.0;
+
     int leftMouseStatus = 0;
     int rightMouseStatus = 0;
     int thumbMouseStatus = 0;
 
     bool isRealTimeRunning;
+
+    double refractoryPeriodMs = 100.0;
+    double restPeriodMs = 200.0;
+
+    bool isLeftClickFiringAvaiable = true, isRightClickFiringAvaiable = true;
 
 public:
     HHOOK hMouseHook;
@@ -51,12 +58,6 @@ public:
 
     int getThumbMouseStatus();
 
-    int getLeftMouseStatusAtIndex(int index);
-
-    int getRightMouseStatusAtIndex(int index);
-
-    int getThumbMouseStatusAtIndex(int index);
-
     LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam);
 
     DWORD WINAPI MyMouseLogger(LPVOID lpParm);
@@ -69,15 +70,10 @@ public:
 
     void stopRealTimePlay();
 
-    std::vector<double> getOSLeftClickTimestamps();
-
-    std::vector<double> getOSRightClickTimestamps();
-
-    std::vector<double> getImpulseLeftClickTimestamps();
-
-    std::vector<double> getImpulseRightClickTimestamps();
-
     void fireMouseEvent(char mouseButton, char mouseEvent);
+
+    void unblockLeftClickFiring();
+    void unblockRightClickFiring();
 };
 
 #endif // !MouseFunction_HPP

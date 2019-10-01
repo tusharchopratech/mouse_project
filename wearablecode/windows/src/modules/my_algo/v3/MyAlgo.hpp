@@ -33,6 +33,10 @@ private:
     string participantName;
     int trialNumber, numberOfChannelesUsedForTraining;
 
+    int clickType = 1;                        // only two values: 1 is for left and 2 is for right
+    std::vector<int> channelIDRight{3, 3, 3}; // feature sequence: tko, p3tko, stko
+    std::vector<int> channelIDLeft{1, 1, 4};
+
 public:
     MyAlgo()
     {
@@ -53,6 +57,7 @@ public:
     std::vector<double> fnTrain(std::vector<std::vector<std::vector<double>>> featData, std::vector<std::vector<int>> channelID, std::vector<int> clickAssemble, int clickType);
     std::vector<double> fnEvaluate(std::vector<std::vector<std::vector<double>>> featData, std::vector<std::vector<int>> channelID, std::vector<double> thresholdValues, std::vector<int> clickAssemble, int clickType, int sampRate, double refractoryTime, int numV);
 
+    bool detectAndFireImpulseClicks(std::vector<std::vector<double>> raw_data_10_samples);
     bool fnRealTime(std::vector<std::vector<double>> rawdata, std::vector<int> channel, std::vector<double> thresholdValues, int vots);
 };
 

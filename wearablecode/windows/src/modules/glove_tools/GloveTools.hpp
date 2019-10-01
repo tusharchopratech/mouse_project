@@ -9,13 +9,15 @@
 #include "..\mouse\MouseFunctions.cpp"
 #include "..\my_algo\v3\MyAlgo.cpp"
 #include <filesystem>
+#include <fstream>
+
 using namespace std;
 
 class GloveTools
 {
 private:
 
-    std::vector<double> realTimeDataChannel1, realTimeDataChannel2, realTimeDataChannel3, realTimeDataChannel4;
+    // std::vector<double> realTimeDataChannel1, realTimeDataChannel2, realTimeDataChannel3, realTimeDataChannel4;
 
     std::vector<double> trainingDataChannel1, trainingDataChannel2, trainingDataChannel3, trainingDataChannel4;
     std::vector<int> trainingDataLeftClick, trainingDataRightClick, trainingDataThumbClick;
@@ -25,6 +27,11 @@ private:
     int demoDataIndex = 0;
     int start = 0;
     int last = 0;
+
+    int demoDataIndexRealTimePlay = 0;
+    int startRealTimePlay = 0;
+    int lastRealTimePlay = 0;
+
     double tmpCh1, tmpCh2, tmpCh3, tmpCh4;
     double tmpLC1, tmpRC1, tmpTC1;
 
@@ -46,17 +53,18 @@ public:
     int startRealTime();
     string stopRealTime();
     void startRealTimeSampleCollections();
+    void startDemoSampleCollections();
 
     int startTraining();
     void startTrainingRecording();
     string stopTraining();
 
-    string getRealTimeDataWithTkeo();
+  
     string getRealTimeRawDemoData();
     string getRealTimeRawData();
     void setTrainingSettings(string pName, int trialNo, int noCh);
     void readDemoData();
-    double getTkeoValue(double sample1, double sample2, double sample3, int channelNumber);
+  
 };
 
 #endif // ! GloveTools_HPP

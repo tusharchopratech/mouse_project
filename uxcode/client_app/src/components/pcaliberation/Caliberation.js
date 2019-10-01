@@ -122,7 +122,8 @@ class Caliberation extends Component {
     }
 
     componentWillUnmount = () => {
-
+        const { ipcRenderer } = window.require("electron");
+        ipcRenderer.send("socket_data_send", "stop_raw_real_time_data");
     }
 
     showRealTimeData = () => {

@@ -6,8 +6,22 @@ class Report extends Component {
     super(props);
     this.report = JSON.stringify(this.props.report, null, 2);
     console.log(this.props.report);
-    this.state = {};
+    this.state = {
+      truePositives: 0.0,
+      falsePositives: 0.0,
+      averageLead: 0.0
+    };
   }
+
+  componentDidMount = () => {
+    if (this.props.report != null) {
+      this.setState({
+        truePositives: this.props.report.true_positives,
+        falsePositives: this.props.report.false_positives,
+        averageLead: this.props.report.average_lead
+      });
+    }
+  };
 
   render() {
     return (
@@ -36,18 +50,9 @@ class Report extends Component {
           For {this.props.report.results[3].algo_type} :
          <pre>Impulse Left Click : {JSON.stringify(this.props.report.results[3].left_click)}<br />Impulse Right Click :{JSON.stringify(this.props.report.results[3].right_click)}</pre>
         </div> */}
-        <div>
-          True Positives :
-          <pre>{JSON.stringify(this.props.report.true_positives)}</pre>
-        </div>
-        <div>
-          False Positives :
-          <pre>{JSON.stringify(this.props.report.false_positives)}</pre>
-        </div>
-        <div>
-          Average Lead :
-          <pre>{JSON.stringify(this.props.report.average_lead)}</pre>
-        </div>
+        <div>True Positives : {this.state.truePositives}</div>
+        <div>False Positives : {this.state.falsePositives}</div>
+        <div>Average Lead : {this.state.averageLead}</div>
       </div>
     );
   }
