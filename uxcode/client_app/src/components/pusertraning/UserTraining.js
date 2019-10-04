@@ -335,7 +335,7 @@ class UserTraining extends Component {
               </div>
               <div style={{ flex: 1 }}>
                 <TextField
-                  label="Trail Number"
+                  label="Trial Number"
                   className={classes.textField}
                   margin="normal"
                   onChange={this.handleTfChange.bind(this, "tf_trail_no")}

@@ -1,9 +1,12 @@
-import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
+import React, {Component} from "react";
+import {withStyles} from "@material-ui/core/styles";
 import Fab from "@material-ui/core/Fab";
 import Button from "@material-ui/core/Button";
 import Snackbar from "@material-ui/core/Snackbar";
-import { ReactComponent as HandIconWhite } from "../../images/hand_white.svg";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import {ReactComponent as HandIconWhite} from "../../images/hand_white.svg";
 
 class RealTimeData extends Component {
   constructor(props) {
@@ -11,166 +14,109 @@ class RealTimeData extends Component {
     this.state = {
       openLoadingDialog: true,
       buttonText: "Start Real Time Play",
-      buttonText2: "Stop Real Time Play",
       openSnackBar: false,
       snackBarText: "Impulse started succesfully. Please start the game.",
-      osLeftClicks: [],
-      osRightClicks: [],
-      impulseLeftClicks: [],
-      impulseRightClicks: []
+      logs: []
     };
+
+    this.isRealTimeRunning = false;
   }
 
-  startCaliberation = () => {
-    this.props.callbackSetMainSection("caliberation");
-  };
-
-  startRealTime = () => {
-    const { ipcRenderer } = window.require("electron");
-    ipcRenderer.send("socket_data_send", "start_real_time");
-  };
-
-  stopRealTime = () => {
-    const { ipcRenderer } = window.require("electron");
-    ipcRenderer.send("socket_data_send", "stop_real_time");
+  toggleGamePlay = () => {
+    const {ipcRenderer} = window.require("electron");
+    if (this.isRealTimeRunning == false) {
+      ipcRenderer.send("socket_data_send", "start_real_time");
+      this.isRealTimeRunning = true;
+    } else if (this.isRealTimeRunning == true) {
+      ipcRenderer.send("socket_data_send", "stop_real_time");
+      this.isRealTimeRunning = false;
+    }
   };
 
   componentDidMount = () => {
-    const { ipcRenderer } = window.require("electron");
+    var tmp = [];
+    for(var i=0;i<20;i++){
+        tmp.push("--");
+    }
+    this.setState({logs: tmp});
+
+    const {ipcRenderer} = window.require("electron");
     ipcRenderer.on(
       "socket_data_received",
       function(event, data) {
         try {
           var jsonObject = JSON.parse(String(data));
-          if (jsonObject.type == "yoyo") {
-            console.log("\n" + jsonObject.time);
-            const { ipcRenderer } = window.require("electron");
-            var json = JSON.stringify({
-              type: "message",
-              value: "real_time_ack"
-            });
-            ipcRenderer.send("socket_data_send", json);
+          if (jsonObject.type == "start_real_time_success") {
+            this.setState({buttonText: "Stop Real Time Play", snackBarText: "Impulse started succesfully. Please start the game.", openSnackBar: true});
+            setTimeout(
+              function() {
+                this.setState({openSnackBar: false});
+              }.bind(this),
+              4000
+            );
+          } else if (jsonObject.type == "stop_real_time_success") {
+            console.log(String(data));
+            this.setState({buttonText: "Start Real Time Play", snackBarText: "Stopped succesfully!!.", openSnackBar: true});
+            setTimeout(
+              function() {
+                this.setState({openSnackBar: false});
+              }.bind(this),
+              4000
+            );
+          } else if (jsonObject.type == "real_time_logs") {
+            var jsonObject = JSON.parse(String(data));
+            var arrayTmp = this.state.logs;
+            arrayTmp = arrayTmp.concat(jsonObject.logs);
+            if (arrayTmp.length > 20) {
+              arrayTmp.splice(0, arrayTmp.length-20);
+            }
+            this.setState({logs: arrayTmp});
           }
         } catch (e) {
           console.log("Error in paring data ");
           console.log(data);
           console.log(e);
         }
-
-        if (jsonObject.type == "start_real_time_success") {
-          this.setState({
-            buttonText: "Stop Real Time Play",
-            snackBarText: "Impulse started succesfully. Please start the game.",
-            openSnackBar: true
-          });
-          setTimeout(
-            function() {
-              this.setState({ openSnackBar: false });
-            }.bind(this),
-            4000
-          );
-        } else if (jsonObject.type == "stop_real_time_success") {
-          console.log("Real Time STOPPED!!!!");
-        } else if (jsonObject.type == "real_time_results") {
-          this.setState({
-            osLeftClicks: jsonObject.os_left_clicks,
-            osRightClicks: jsonObject.os_right_clicks,
-            impulseLeftClicks: jsonObject.impulse_left_clicks,
-            impulseRightClicks: jsonObject.impulse_right_clicks
-          });
-        }
       }.bind(this)
     );
   };
 
   render() {
-    const { classes } = this.props;
+    const {classes} = this.props;
     return (
-      <div style={{ height: "100%", width: "100%" }}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "top",
-            height: "100%",
-            padding: "10%"
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              paddingBottom: 20
-            }}
-          >
-            <Fab
-              variant="extended"
-              color="primary"
-              aria-label="Add"
-              onClick={this.startRealTime}
-              className={classes.margin}
-            >
+      <div style={{height: "100%", width: "100%"}}>
+        <div style={{display: "flex", flexDirection: "column", justifyContent: "start", height: "100%", padding: "2%"}}>
+        <div style={{display: "flex", justifyContent: "center"}}>
+            <h4><u>Real Time Data</u></h4>
+          </div>
+         
+          <div style={{display: "flex", justifyContent: "flex-start", flexDirection: "column"}}>
+            <List dense className={classes.root}>
+              {this.state.logs.map((value) => {
+                return (
+                  <ListItem>
+                    <ListItemText primary={value} />
+                  </ListItem>
+                );
+              })}
+            </List>
+          </div>
+
+          <div style={{display: "flex", justifyContent: "center", paddingTop: 10}}>
+            <Fab variant="extended" color="primary" aria-label="Add" onClick={this.toggleGamePlay} className={classes.margin}>
               <HandIconWhite className={classes.extendedIcon} />
               {this.state.buttonText}
             </Fab>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              paddingBottom: 20
-            }}
-          >
-            <Fab
-              variant="extended"
-              color="primary"
-              aria-label="Add"
-              onClick={this.stopRealTime}
-              className={classes.margin}
-            >
-              <HandIconWhite className={classes.extendedIcon} />
-              {this.state.buttonText2}
-            </Fab>
-          </div>
         </div>
 
-        <div>
-          <div>
-            Actual Left Click Timestamps :
-            <pre>{JSON.stringify(this.state.osLeftClicks)}</pre>
-          </div>
-          <div>
-            Actual Right Click Timestamps :
-            <pre>{JSON.stringify(this.state.osRightClicks)}</pre>
-          </div>
-
-          <div>
-            Impulse Left Click Timestamps :
-            <pre>{JSON.stringify(this.state.impulseLeftClicks)}</pre>
-          </div>
-          <div>
-            Impulse Right Click Timestamps :
-            <pre>{JSON.stringify(this.state.impulseRightClicks)}</pre>
-          </div>
-        </div>
-
-        <Snackbar
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left"
-          }}
-          open={this.state.openSnackBar}
-          ContentProps={{
-            "aria-describedby": "message-id"
-          }}
-          message={<span id="message-id">{this.state.snackBarText}</span>}
-        />
+        <Snackbar anchorOrigin={{vertical: "bottom", horizontal: "left"}} open={this.state.openSnackBar} ContentProps={{"aria-describedby": "message-id"}} message={<span id="message-id">{this.state.snackBarText}</span>} />
       </div>
     );
   }
 }
 
-const styles = theme => ({
+const styles = (theme) => ({
   margin: {
     margin: theme.spacing.unit
   },
@@ -179,4 +125,4 @@ const styles = theme => ({
   }
 });
 
-export default withStyles(styles, { withTheme: true })(RealTimeData);
+export default withStyles(styles, {withTheme: true})(RealTimeData);

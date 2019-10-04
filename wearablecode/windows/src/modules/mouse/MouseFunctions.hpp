@@ -16,22 +16,24 @@ using namespace std;
 class MouseFunctions
 {
 private:
-    //First Left, then Right, then Thumb.
-    std::vector<double> osLeftClicksTimeStamps, osRightClicksTimeStamps;
-    std::vector<double> impulseLeftClicksTimeStamps, impulseRightClicksTimeStamps;
-
     double lastLeftClickTimeStamp = 0.0, lastRightClickTimeStamp = 0.0;
 
     int leftMouseStatus = 0;
     int rightMouseStatus = 0;
     int thumbMouseStatus = 0;
 
+    int leftDownClickFlag = 5;
+
     bool isRealTimeRunning;
 
     double refractoryPeriodMs = 100.0;
     double restPeriodMs = 200.0;
-
+    double fireUpClickAfterMs = 200.0;
+    
     bool isLeftClickFiringAvaiable = true, isRightClickFiringAvaiable = true;
+    std::vector<string> impulseLogs;
+    string lastActionPerformed = "os_left_down";
+    // double lastIpActionTimeStamp = 0.0;
 
 public:
     HHOOK hMouseHook;
@@ -72,8 +74,14 @@ public:
 
     void fireMouseEvent(char mouseButton, char mouseEvent);
 
+    std::vector<string> getImpulseLogs();
+    std::vector<string> getImpulseLeads();
+
     void unblockLeftClickFiring();
     void unblockRightClickFiring();
+
+    void checkAndFireLeftUpClick();
+    void checkAndFireRightUpClick();
 };
 
 #endif // !MouseFunction_HPP

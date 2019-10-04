@@ -12,13 +12,8 @@ using Json = nlohmann::json;
 
 int main()
 {
-	gb_setCurrentEnvirnoment(GB_ENV_DEVELOPMENT);
-	SocketServer socketServer;
-	// MyAlgo myAlgo;
-	// string result = myAlgo.getAlgoResults("Erik", 4, 14);
-	// cout << "\n\n"
-	// 	 << result;
-
-
+	gb_setCurrentEnvirnoment(GB_ENV_PRODUCTION);
+	SocketServer ss;
+	// SocketServer::Instance().startBackend();
 	return 0;
 }

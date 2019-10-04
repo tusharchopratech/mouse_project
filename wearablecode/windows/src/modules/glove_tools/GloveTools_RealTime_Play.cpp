@@ -99,14 +99,10 @@ void GloveTools::startDemoSampleCollections()
     }
 }
 
-string GloveTools::stopRealTime()
+void GloveTools::stopRealTime()
 {
     isRealTimeRunning = false;
     MouseFunctions::Instance().stopRealTimePlay();
-
-    Json finalJson;
-    finalJson["type"] = "stop_real_time_success";
-    return finalJson.dump();
 }
 
 #endif

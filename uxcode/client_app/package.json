@@ -34,8 +34,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "pre-build": "node setup_backend_directory.js",
-    "electron-dev": "SET NODE_ENV=dev&& npm run pre-build && concurrently \"SET BROWSER=none&&npm start\" \"wait-on http://localhost:3000 && electron .\"",
-    "electron-stage": "SET NODE_ENV=stage&& npm run pre-build && concurrently \"SET BROWSER=none&&npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-dev": "SET NODE_ENV=dev&& concurrently \"SET BROWSER=none&&npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-stage": "SET NODE_ENV=stage&& concurrently \"SET BROWSER=none&&npm start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-prod": "SET NODE_ENV=prod&& npm run pre-build && npm run build && build -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {

@@ -63,7 +63,6 @@ void GloveTools::startTrainingRecording()
 string GloveTools::stopTraining()
 {
     isTrainingRunning = false;
-    cout << "Stop Training 1" << endl;
     if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
     {
         cout << "Unable to delete folder : " << GB_IMPULSE_DIRECTORY << endl;
@@ -72,7 +71,6 @@ string GloveTools::stopTraining()
     {
         cout << "Unable to create folder : " << GB_IMPULSE_DIRECTORY << endl;
     }
-    cout << "Stop Training 2" << endl;
     if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
     {
         trainingDataChannel1.clear();
@@ -90,34 +88,25 @@ string GloveTools::stopTraining()
         trainingDataRightClick = demoTrainingDataRightClick;
         trainingDataThumbClick = demoTrainingDataThumbClick;
     }
-    cout << "Stop Training 3" << endl;
     string file = GB_IMPULSE_DIRECTORY + "/data_" + participantName + std::to_string(trialNumber) + "_C" + std::to_string(numberOfChannelesUsedForTraining) + ".txt";
     std::ofstream myfile(file);
     if (myfile.fail())
     {
         cout << "Unable to write file : " << file << endl;
     }
-    cout << "Stop Training 4" << endl;
     if (myfile.is_open())
     {
-        cout << "Stop Training 4.1 Data sizes : " << trainingDataChannel1.size() << " " << trainingDataChannel2.size() << " " << trainingDataChannel3.size() << " " << trainingDataChannel4.size() << " " << trainingDataLeftClick.size() << " " << trainingDataRightClick.size() << " " << trainingDataThumbClick.size() << endl;
         for (int i = 0; i < trainingDataChannel1.size(); i++)
         {
             myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i) << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i) << " " << trainingDataThumbClick.at(i) << endl;
         }
-
-        cout << "Stop Training 4.2" << endl;
-
         myfile.close();
-        cout << "Stop Training 4.3" << endl;
     }
     else
     {
         cout << "Error! File is not open.";
     }
-    cout << "Stop Training 5" << endl;
     string result = myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber);
-    cout << "Stop Training 6" << endl;
     return result;
 }
 

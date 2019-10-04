@@ -1,5 +1,14 @@
+#ifndef SocketServer_CPP
+#define SocketServer_CPP
+
 #include "SocketServer.hpp"
 #include <string.h>
+
+void SocketServer::startBackend()
+{
+    setupSocket();
+    startListeningFromSocket();
+}
 
 int __cdecl SocketServer::setupSocket()
 {
@@ -65,6 +74,7 @@ int __cdecl SocketServer::setupSocket()
     }
 
     // Accept a client socket
+
     if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
     {
         gloveTools.readDemoData();
@@ -94,7 +104,7 @@ void SocketServer::startListeningFromSocket()
         string str(receivedMessageFromClient);
         str = str.substr(0, str.find("*****"));
         Json obj = Json::parse(str);
-        cout << obj.dump(2) << endl;
+        // cout << obj.dump(2) << endl;
         if (obj["type"] == "message" && obj["value"] == "raw_real_time_data")
         {
             finalSocketData = "";
@@ -128,16 +138,42 @@ void SocketServer::startListeningFromSocket()
         else if (obj["type"] == "message" && obj["value"] == "start_real_time")
         {
             gloveTools.startRealTime();
+            isRealTimeRunning = true;
             Json f;
             f["type"] = "start_real_time_success";
             finalSocketData = f.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+            std::thread newThread(&SocketServer::sendRealTimeLogs, this);
+            newThread.detach();
         }
         else if (obj["type"] == "message" && obj["value"] == "stop_real_time")
         {
-            cout << "1" << endl;
-            finalSocketData = gloveTools.stopRealTime();
+            gloveTools.stopRealTime();
+            isRealTimeRunning = false;
+            Json f;
+            f["type"] = "stop_real_time_success";
+            finalSocketData = f.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
     } while (iResult > 0);
 }
+
+void SocketServer::sendRealTimeLogs()
+{
+    string finalSocketData;
+    while (isRealTimeRunning)
+    {
+        std::vector<string> logs = MouseFunctions::Instance().getImpulseLogs();
+        if (logs.size() > 0)
+        {
+            Json json;
+            json["type"] = "real_time_logs";
+            json["logs"] = logs;
+            finalSocketData = json.dump();
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+        }
+        Sleep(100);
+    }
+}
+
+#endif

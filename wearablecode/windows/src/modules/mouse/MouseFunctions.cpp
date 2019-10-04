@@ -11,14 +11,27 @@ void MouseFunctions::setLeftMouseStatus(int status)
     leftMouseStatus = status;
     if (status == 1)
     {
-        lastLeftClickTimeStamp = gb_getCurrentTimeInMillisecondsDouble();
         if (isRealTimeRunning)
         {
-            osLeftClicksTimeStamps.push_back(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
-            if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
+            double tmpCurrentTime = gb_getCurrentTimeInMillisecondsDouble();
+            cout << "OS Left Down Click at " << tmpCurrentTime << endl;
+            leftDownClickFlag++;
+            if (leftDownClickFlag == 2)
             {
-                cout << "OS Left Down Click at " << gb_getCurrentTimeInMilliseconds() << endl;
+                int lead = tmpCurrentTime - lastLeftClickTimeStamp;
+                impulseLogs.push_back("OS Left Down Click at " + std::to_string(tmpCurrentTime));
+                impulseLogs.push_back("Lead : " + std::to_string(lead));
+                impulseLogs.push_back("--");
+                cout << "Lead " << lead << endl;
+                cout << endl;
             }
+            else
+            {
+                impulseLogs.push_back("OS Left Down Click at " + std::to_string(tmpCurrentTime));
+            }
+
+            lastActionPerformed = "os_left_down";
+            lastLeftClickTimeStamp = tmpCurrentTime;
         }
     }
 }
@@ -31,15 +44,15 @@ int MouseFunctions::getLeftMouseStatus()
 void MouseFunctions::setRightMouseStatus(int status)
 {
     rightMouseStatus = status;
+
     if (status == 1)
     {
         lastRightClickTimeStamp = gb_getCurrentTimeInMillisecondsDouble();
         if (isRealTimeRunning)
         {
-            osRightClicksTimeStamps.push_back(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
             if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
             {
-                cout << "OS Right Down Click at " << gb_getCurrentTimeInMilliseconds() << endl;
+                // cout << "OS Right Down Click at " << gb_getCurrentTimeInMilliseconds() << endl;
             }
         }
     }

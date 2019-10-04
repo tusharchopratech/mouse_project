@@ -1,3 +1,6 @@
+#ifndef SocketServer_HPP
+#define SocketServer_HPP
+
 #undef UNICODE
 
 #define WIN32_LEAN_AND_MEAN
@@ -22,7 +25,7 @@ using namespace std;
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "27015"
 
-class SocketServer
+class SocketServer 
 {
 private:
     WSADATA wsaData;
@@ -37,16 +40,28 @@ private:
     int iSendResult;
     char receivedMessageFromClient[DEFAULT_BUFLEN];
     int recvbuflen = DEFAULT_BUFLEN;
-
-
+    
+    bool isRealTimeRunning = false;
     GloveTools gloveTools;
 
 public:
+
+    // static SocketServer &Instance()
+    // {
+    //     static SocketServer ss;
+    //     ss.startBackend();
+    //     return ss;
+    // }
+
     SocketServer()
     {     
         setupSocket();
         startListeningFromSocket();
     }
+    void startBackend();
     int __cdecl setupSocket();
     void startListeningFromSocket();
+    void sendRealTimeLogs();
 };
+
+#endif

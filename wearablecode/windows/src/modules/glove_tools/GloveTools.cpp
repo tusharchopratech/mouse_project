@@ -14,6 +14,7 @@ GloveTools::GloveTools()
         newThread.detach();
     }
     MouseFunctions::Instance().setupMouseMonitoring();
+  
     chV1 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
     chV2 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
     chV3 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];

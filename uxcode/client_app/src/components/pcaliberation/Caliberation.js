@@ -94,7 +94,8 @@ class Caliberation extends Component {
                 title: {
                     display: true,
                     text: ''
-                }
+                },
+                borderWidth:10
             }
         };
     };
@@ -276,6 +277,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: 'rgba(75,192,192,0.4)',
                         borderColor: 'rgba(75,192,192,1)',
+                        borderWidth: 1,
                         data: this.getChannelData(1)
                     },
                     {
@@ -283,6 +285,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99ff0000',
                         borderColor: '#ff0000',
+                        borderWidth: 1,
                         data: this.getClickData("left", 3)
                     },
                     {
@@ -290,6 +293,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99006600',
                         borderColor: '#006600',
+                        borderWidth: 1,
                         data: this.getClickData("right", 3)
                     },
                     {
@@ -297,6 +301,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99ff0000',
                         borderColor: '#ff0000',
+                        borderWidth: 1,
                         data: this.getClickData("thumb", 3)
                     },
                 ]
@@ -308,6 +313,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: 'rgba(75,192,192,0.4)',
                         borderColor: 'rgba(75,192,192,1)',
+                        borderWidth: 1,
                         data: this.getChannelData(2)
                     },
                     {
@@ -315,6 +321,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99ff0000',
                         borderColor: '#ff0000',
+                        borderWidth: 1,
                         data: this.getClickData("left", 3)
                     },
                     {
@@ -322,6 +329,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99006600',
                         borderColor: '#006600',
+                        borderWidth: 1,
                         data: this.getClickData("right", 3)
                     },
                     {
@@ -329,6 +337,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99ff0000',
                         borderColor: '#ff0000',
+                        borderWidth: 1,
                         data: this.getClickData("thumb", 3)
                     },
 
@@ -341,6 +350,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: 'rgba(75,192,192,0.4)',
                         borderColor: 'rgba(75,192,192,1)',
+                        borderWidth: 1,
                         data: this.getChannelData(3)
                     },
                     {
@@ -348,6 +358,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99ff0000',
                         borderColor: '#ff0000',
+                        borderWidth: 1,
                         data: this.getClickData("left", 3)
                     },
                     {
@@ -355,6 +366,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99006600',
                         borderColor: '#006600',
+                        borderWidth: 1,
                         data: this.getClickData("right", 3)
                     },
                     {
@@ -362,6 +374,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99ff0000',
                         borderColor: '#ff0000',
+                        borderWidth: 1,
                         data: this.getClickData("thumb", 3)
                     },
                 ]
@@ -372,6 +385,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: 'rgba(75,192,192,0.4)',
                         borderColor: 'rgba(75,192,192,1)',
+                        borderWidth: 1,
                         data: this.getChannelData(4)
                     },
                     {
@@ -379,6 +393,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99ff0000',
                         borderColor: '#ff0000',
+                        borderWidth: 1,
                         data: this.getClickData("left", 3)
                     },
                     {
@@ -386,6 +401,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99006600',
                         borderColor: '#006600',
+                        borderWidth: 1,
                         data: this.getClickData("right", 3)
                     },
                     {
@@ -393,6 +409,7 @@ class Caliberation extends Component {
                         fill: false,
                         backgroundColor: '#99ff0000',
                         borderColor: '#ff0000',
+                        borderWidth: 1,
                         data: this.getClickData("thumb", 3)
                     },
                 ]
@@ -406,7 +423,7 @@ class Caliberation extends Component {
     }
 
     getChannelData = (val) => {
-        var ar = [];
+    var ar = [];
         if (val == 1) {
             for (var i = 0; i < this.ch1Array.length; i++) {
                 ar.push(this.ch1Array[i])

@@ -7,14 +7,14 @@
 #include "..\m_daq\MDaq.cpp"
 #include "..\edata\Global.cpp"
 #include "..\mouse\MouseFunctions.cpp"
+#include "..\socket\SocketServer.cpp"
 #include "..\my_algo\v3\MyAlgo.cpp"
 #include <filesystem>
 #include <fstream>
 
 using namespace std;
 
-class GloveTools
-{
+class GloveTools {
 private:
 
     // std::vector<double> realTimeDataChannel1, realTimeDataChannel2, realTimeDataChannel3, realTimeDataChannel4;
@@ -51,14 +51,13 @@ public:
     GloveTools();
 
     int startRealTime();
-    string stopRealTime();
+    void stopRealTime();
     void startRealTimeSampleCollections();
     void startDemoSampleCollections();
 
     int startTraining();
     void startTrainingRecording();
     string stopTraining();
-
   
     string getRealTimeRawDemoData();
     string getRealTimeRawData();
