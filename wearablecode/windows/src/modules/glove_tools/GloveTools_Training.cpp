@@ -60,7 +60,37 @@ void GloveTools::startTrainingRecording()
     }
 }
 
-string GloveTools::stopTraining()
+Json GloveTools::getRealTimeTraingDataForDisplay()
+{
+    Json json;
+    std::vector<double> v1, v2, v3, v4, v5, v6, v7;
+    int size = trainingDataChannel1.size();
+
+    int start = realTimeTraingDataForDisplaySizeIndex;
+    int end = size;
+    for (int i = start; i < end; i++)
+    {
+        v1.push_back(trainingDataChannel1.at(i));
+        v2.push_back(trainingDataChannel2.at(i));
+        v3.push_back(trainingDataChannel3.at(i));
+        v4.push_back(trainingDataChannel4.at(i));
+        v5.push_back(trainingDataLeftClick.at(i));
+        v6.push_back(trainingDataRightClick.at(i));
+        v7.push_back(trainingDataThumbClick.at(i));
+    }
+    json["total_samples"] = v1.size();
+    json["ch_v1"] = v1;
+    json["ch_v2"] = v2;
+    json["ch_v3"] = v3;
+    json["ch_v4"] = v4;
+    json["left_click"] = v5;
+    json["right_click"] = v6;
+    json["thumb_click"] = v7;
+    realTimeTraingDataForDisplaySizeIndex = size;
+    return json;
+}
+
+Json GloveTools::stopTraining()
 {
     isTrainingRunning = false;
     if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
@@ -106,7 +136,7 @@ string GloveTools::stopTraining()
     {
         cout << "Error! File is not open.";
     }
-    string result = myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber);
+    Json result = myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber);
     return result;
 }
 

@@ -24,6 +24,9 @@ private:
 
     std::vector<double> demoTrainingDataChannel1, demoTrainingDataChannel2, demoTrainingDataChannel3, demoTrainingDataChannel4;
     std::vector<int> demoTrainingDataLeftClick, demoTrainingDataRightClick, demoTrainingDataThumbClick;
+
+    std::vector<std::vector<double>> raw_data_n_samples;
+
     int demoDataIndex = 0;
     int start = 0;
     int last = 0;
@@ -31,6 +34,8 @@ private:
     int demoDataIndexRealTimePlay = 0;
     int startRealTimePlay = 0;
     int lastRealTimePlay = 0;
+
+    int realTimeTraingDataForDisplaySizeIndex = 0;
 
     double tmpCh1, tmpCh2, tmpCh3, tmpCh4;
     double tmpLC1, tmpRC1, tmpTC1;
@@ -52,12 +57,14 @@ public:
 
     int startRealTime();
     void stopRealTime();
-    void startRealTimeSampleCollections();
+    void startRealTimeSampleCollectionsForRealTimePlay();
+    void writeRealTimeData();
     void startDemoSampleCollections();
 
     int startTraining();
     void startTrainingRecording();
-    string stopTraining();
+    Json getRealTimeTraingDataForDisplay();
+    Json stopTraining();
   
     string getRealTimeRawDemoData();
     string getRealTimeRawData();

@@ -42,7 +42,7 @@ public:
     {
     }
 
-    string getAlgoResults(string pName, int noCh, int trialNo);
+    Json getAlgoResults(string pName, int noCh, int trialNo);
 
     void readData();
     void processData();
@@ -51,7 +51,7 @@ public:
     std::vector<std::vector<double>> tkoTime(std::vector<std::vector<double>> signal, int p);
     double getTkeoValue(double v1, double v2, double v3);
 
-    string startAnalysing();
+    Json startAnalysing();
 
     std::vector<int> labelClickType(std::vector<std::vector<int>> clicks, int t1, int t2);
     std::vector<double> fnTrain(std::vector<std::vector<std::vector<double>>> featData, std::vector<std::vector<int>> channelID, std::vector<int> clickAssemble, int clickType);

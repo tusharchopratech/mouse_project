@@ -52,6 +52,12 @@ string GloveTools::getRealTimeRawData()
             tCString = tCString + "," + to_string(tc);
         }
     }
+    // Json json;
+    // json["type"]="real_time_raw_data";
+    // json["total_samples"]= to_string(GB_TOTAL_NUMBER_OF_SAMPLES);
+    // json["ch_v1"]="real_time_raw_data";
+    // json["type"]="real_time_raw_data";
+    // json["type"]="real_time_raw_data";
     string data = "{\"type\":\"real_time_raw_data\", \"total_samples\": " + to_string(GB_TOTAL_NUMBER_OF_SAMPLES) + ", \"ch_v1\": [" + chV1String + "]" + ", \"ch_v2\":[" + chV2String + "]" + ", \"ch_v3\":[" + chV3String + "]" + ", \"ch_v4\":[" + chV4String + "]" + ", \"left_click\": [" + lCString + "]" + ", \"right_click\": [" + rCString + "]" + ", \"thumb_click\": [" + tCString + "]" + "}";
     return data;
 }
@@ -111,11 +117,6 @@ void GloveTools::readDemoData()
         // std::cout << s << std::endl;
         demoTrainingDataThumbClick.push_back(std::stoi(s));
     }
-
-    // std::vector<double> tmp;
-    // tmp = demoTrainingDataChannel3;
-    // demoTrainingDataChannel3 = demoTrainingDataChannel4;
-    // demoTrainingDataChannel4 = tmp;
 }
 
 string GloveTools::getRealTimeRawDemoData()

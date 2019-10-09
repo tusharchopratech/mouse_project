@@ -41,7 +41,8 @@ private:
     char receivedMessageFromClient[DEFAULT_BUFLEN];
     int recvbuflen = DEFAULT_BUFLEN;
     
-    bool isRealTimeRunning = false;
+    bool isRealTimeRunning = false; 
+    bool isTrainingRunning = false;
     GloveTools gloveTools;
 
 public:
@@ -62,6 +63,7 @@ public:
     int __cdecl setupSocket();
     void startListeningFromSocket();
     void sendRealTimeLogs();
+    void sendRealTimeTrainingData();
 };
 
 #endif

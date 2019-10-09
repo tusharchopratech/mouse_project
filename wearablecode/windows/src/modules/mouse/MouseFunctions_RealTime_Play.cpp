@@ -9,19 +9,18 @@ void MouseFunctions::fireMouseEvent(char mouseButton, char mouseEvent)
     {
         if (mouseEvent == 'd')
         {
-            if (isRealTimeRunning == true && getLeftMouseStatus() == 0 && isLeftClickFiringAvaiable == true && (gb_getCurrentTimeInMillisecondsDouble() - lastLeftClickTimeStamp) > refractoryPeriodMs)
+            if (isRealTimeRunning == true && getLeftMouseStatus() == 0 && isLeftClickFiringAvaiable == true && (gb_getCurrentTimeInMillisecondsDouble() - lastLeftUpClickTimeStamp) > refractoryPeriodMs)
             {
-                cout << endl;
-                 cout << "IP Left Down Click at " << gb_getCurrentTimeInMilliseconds() << endl;
+
                 impulseLogs.push_back("--");
                 impulseLogs.push_back("IP Left Down Click at " + gb_getCurrentTimeInMilliseconds());
+                lastClickAction = "ip_left_down";
+                setImpulseLeftClickStatus(1);
 
-                leftDownClickFlag = 0;
-                lastActionPerformed = "ip_left_down";
+                isNextLeftClickDownIsFromImpulse = true;
                 mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                
+
                 isLeftClickFiringAvaiable = false;
-                leftDownClickFlag = 1;
                 std::thread newThread(&MouseFunctions::unblockLeftClickFiring, this);
                 newThread.detach();
                 std::thread newThread2(&MouseFunctions::checkAndFireLeftUpClick, this);
@@ -40,23 +39,6 @@ void MouseFunctions::fireMouseEvent(char mouseButton, char mouseEvent)
             if (isRealTimeRunning)
             {
                 mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-                if (getRightMouseStatus() == 0 && isRightClickFiringAvaiable == true && (gb_getCurrentTimeInMillisecondsDouble() - lastRightClickTimeStamp) > refractoryPeriodMs)
-                {
-
-                    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
-                    {
-                        cout << "IP Right Down Click at " << gb_getCurrentTimeInMilliseconds() << endl;
-                    }
-                    else
-                    {
-                        // mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-                    }
-                    isRightClickFiringAvaiable = false;
-                    std::thread newThread(&MouseFunctions::unblockRightClickFiring, this);
-                    newThread.detach();
-                    // std::thread newThread2(&MouseFunctions::checkAndFireRightUpClick, this);
-                    // newThread2.detach();
-                }
             }
         }
         else if (mouseEvent == 'u')
@@ -68,9 +50,8 @@ void MouseFunctions::fireMouseEvent(char mouseButton, char mouseEvent)
 
 void MouseFunctions::startRealTimePlay()
 {
+    lastLeftUpClickTimeStamp = 0.0;
     impulseLogs.clear();
-    lastLeftClickTimeStamp = 0.0;
-    lastRightClickTimeStamp = 0.0;
     isRealTimeRunning = true;
 }
 
@@ -94,23 +75,15 @@ void MouseFunctions::checkAndFireLeftUpClick()
     while (gb_getCurrentTimeInMillisecondsDouble() - currentTime < fireUpClickAfterMs)
     {
     }
-    if (leftDownClickFlag == 1)
+
+    int ss = getCurrentLeftMouseStatus();
+    if (lastClickAction == "ip_left_down" && getImpulseLeftClickStatus() == 1)
     {
         fireMouseEvent('l', 'u');
-        leftDownClickFlag = 5;
-
-        if (lastActionPerformed == "ip_left_down")
-        {
-            impulseLogs.push_back("Impulse click!");
-        }
-
-        lastActionPerformed = "ip_left_up";
-        // lastIpActionTimeStamp = gb_getCurrentTimeInMillisecondsDouble();
-
+        setImpulseLeftClickStatus(0);
+        isNextLeftClickDownIsFromImpulse = false;
         impulseLogs.push_back("IP Left UP Click at " + gb_getCurrentTimeInMilliseconds());
         impulseLogs.push_back("--");
-        cout << "IP Left UP Click at " << gb_getCurrentTimeInMilliseconds() << endl;
-        cout << endl;
     }
 }
 

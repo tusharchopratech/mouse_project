@@ -8,7 +8,7 @@
 #include "MyAlgo_Evaluate.cpp"
 #include "MyAlgo_RealTime_Play.cpp"
 
-string MyAlgo::getAlgoResults(string pName, int noCh, int trialNo)
+Json MyAlgo::getAlgoResults(string pName, int noCh, int trialNo)
 {
     participantName = pName;
     trialNumber = trialNo;
@@ -18,7 +18,7 @@ string MyAlgo::getAlgoResults(string pName, int noCh, int trialNo)
     return startAnalysing();
 }
 
-string MyAlgo::startAnalysing()
+Json MyAlgo::startAnalysing()
 {
     // set parameters
 
@@ -60,20 +60,12 @@ string MyAlgo::startAnalysing()
     int numV = 1;
     std::vector<double> results = fnEvaluate(featData, channelID, thresholdValues, clickLabel, clickType, sampRate, refractoryTime, numV);
 
-    // **************RealTime Test************************
-    // if it is not within click and not in the refractory time (refractoryTime after the last detected click), start detection
-    // input is the rawdata with only three samples
-    // bool clickDetected = fnRealTime(d_rawdata, channelID.at(clickType-1), thresholdValues, numV);
-    // return if the click is deteced or not
-    //**********************
-
     Json finalJson;
-    finalJson["type"] = "algo_outputs";
     finalJson["true_positives"] = results.at(0);
     finalJson["false_positives"] = results.at(1);
     finalJson["average_lead"] = results.at(2);
     std::cout << finalJson.dump(4) << endl;
-    return finalJson.dump();
+    return finalJson;
 }
 
 bool MyAlgo::detectAndFireImpulseClicks(std::vector<std::vector<double>> raw_data_10_samples)
@@ -111,11 +103,11 @@ bool MyAlgo::detectAndFireImpulseClicks(std::vector<std::vector<double>> raw_dat
         */
         else if (clickType == 2)
         {
-      
+
             if (fnRealTime(threeSamplesRealTime, channelIDRight, thresholdValues, 1))
             {
                 MouseFunctions::Instance().fireMouseEvent('r', 'd');
-                  isClickFired = true;
+                isClickFired = true;
             }
         }
 

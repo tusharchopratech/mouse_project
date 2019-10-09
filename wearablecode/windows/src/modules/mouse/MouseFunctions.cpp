@@ -8,31 +8,37 @@ using namespace std;
 
 void MouseFunctions::setLeftMouseStatus(int status)
 {
+
     leftMouseStatus = status;
     if (status == 1)
     {
         if (isRealTimeRunning)
         {
-            double tmpCurrentTime = gb_getCurrentTimeInMillisecondsDouble();
-            cout << "OS Left Down Click at " << tmpCurrentTime << endl;
-            leftDownClickFlag++;
-            if (leftDownClickFlag == 2)
+            if (isNextLeftClickDownIsFromImpulse)
             {
-                int lead = tmpCurrentTime - lastLeftClickTimeStamp;
-                impulseLogs.push_back("OS Left Down Click at " + std::to_string(tmpCurrentTime));
-                impulseLogs.push_back("Lead : " + std::to_string(lead));
-                impulseLogs.push_back("--");
-                cout << "Lead " << lead << endl;
-                cout << endl;
+                lastImpulseLeftClickTimeStamp = gb_getCurrentTimeInMillisecondsDouble();
+                leftMouseStatus = 0;
             }
             else
             {
+                double tmpCurrentTime = gb_getCurrentTimeInMillisecondsDouble();
+                lastClickAction = "os_left_down";
                 impulseLogs.push_back("OS Left Down Click at " + std::to_string(tmpCurrentTime));
-            }
 
-            lastActionPerformed = "os_left_down";
-            lastLeftClickTimeStamp = tmpCurrentTime;
+                if (getImpulseLeftClickStatus() == 1)
+                {
+                    int lead = tmpCurrentTime - lastImpulseLeftClickTimeStamp;
+                    impulseLogs.push_back("Lead : " + std::to_string(lead));
+                    impulseLogs.push_back("--");
+                }
+            }
+            isNextLeftClickDownIsFromImpulse = false;
         }
+    }
+    else
+    {
+        lastLeftUpClickTimeStamp = gb_getCurrentTimeInMillisecondsDouble();
+         setImpulseLeftClickStatus(0);
     }
 }
 
@@ -41,26 +47,36 @@ int MouseFunctions::getLeftMouseStatus()
     return leftMouseStatus;
 }
 
+int MouseFunctions::getCurrentLeftMouseStatus()
+{
+    if ((GetKeyState(VK_LBUTTON) & 0x80) != 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 void MouseFunctions::setRightMouseStatus(int status)
 {
     rightMouseStatus = status;
 
     if (status == 1)
     {
-        lastRightClickTimeStamp = gb_getCurrentTimeInMillisecondsDouble();
-        if (isRealTimeRunning)
-        {
-            if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
-            {
-                // cout << "OS Right Down Click at " << gb_getCurrentTimeInMilliseconds() << endl;
-            }
-        }
     }
 }
 
 int MouseFunctions::getRightMouseStatus()
 {
     return rightMouseStatus;
+}
+
+int MouseFunctions::getCurrentRightMouseStatus()
+{
+    if ((GetKeyState(VK_RBUTTON) & 0x80) != 0)
+    {
+        return 1;
+    }
+    return 0;
 }
 
 void MouseFunctions::setThumbMouseStatus(int status)
@@ -71,6 +87,16 @@ void MouseFunctions::setThumbMouseStatus(int status)
 int MouseFunctions::getThumbMouseStatus()
 {
     return thumbMouseStatus;
+}
+
+void MouseFunctions::setImpulseLeftClickStatus(int status)
+{
+    impulseLeftClickStatus = status;
+}
+
+int MouseFunctions::getImpulseLeftClickStatus()
+{
+    return impulseLeftClickStatus;
 }
 
 LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)

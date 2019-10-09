@@ -16,13 +16,17 @@ using namespace std;
 class MouseFunctions
 {
 private:
-    double lastLeftClickTimeStamp = 0.0, lastRightClickTimeStamp = 0.0;
+    double lastLeftUpClickTimeStamp = 0.0;
+    double lastImpulseLeftClickTimeStamp = 0.0;
+    string lastClickAction = "os_left_down";
 
     int leftMouseStatus = 0;
     int rightMouseStatus = 0;
     int thumbMouseStatus = 0;
 
-    int leftDownClickFlag = 5;
+    int impulseLeftClickStatus=0;
+
+    bool isNextLeftClickDownIsFromImpulse = false;
 
     bool isRealTimeRunning;
 
@@ -32,7 +36,7 @@ private:
     
     bool isLeftClickFiringAvaiable = true, isRightClickFiringAvaiable = true;
     std::vector<string> impulseLogs;
-    string lastActionPerformed = "os_left_down";
+    // string lastActionPerformed = "os_left_down";
     // double lastIpActionTimeStamp = 0.0;
 
 public:
@@ -51,14 +55,20 @@ public:
     void setLeftMouseStatus(int status);
 
     int getLeftMouseStatus();
+    int getCurrentLeftMouseStatus();
 
     void setRightMouseStatus(int status);
 
     int getRightMouseStatus();
+    int getCurrentRightMouseStatus();
 
     void setThumbMouseStatus(int status);
 
     int getThumbMouseStatus();
+
+    void setImpulseLeftClickStatus(int status);
+
+    int getImpulseLeftClickStatus();
 
     LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam);
 

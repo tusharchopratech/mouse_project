@@ -120,28 +120,39 @@ void SocketServer::startListeningFromSocket()
         }
         else if (obj["type"] == "message" && obj["value"] == "start_training")
         {
+            isTrainingRunning = true;
             gloveTools.startTraining();
-            finalSocketData = "{\"type\":\"start_training_success\"}";
+            Json json;
+            json["type"] = "start_training_success";
+            finalSocketData = json.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+            std::thread newThread(&SocketServer::sendRealTimeTrainingData, this);
+            newThread.detach();
         }
         else if (obj["type"] == "message" && obj["value"] == "stop_training")
         {
-            finalSocketData = gloveTools.stopTraining();
+            isTrainingRunning = false;
+            Json json = gloveTools.stopTraining();
+            json["type"] = "algo_outputs";
+            finalSocketData = json.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
         else if (obj["type"] == "communication" && obj["value"] == "settings")
         {
             gloveTools.setTrainingSettings(obj["participant_name"], obj["trail_no"], obj["no_of_channels"]);
-            finalSocketData = "{\"type\":\"communication_success\", \"value\":\"settings_set\"}";
+            Json json;
+            json["type"] = "communication_success";
+            json["value"] = "settings_set";
+            finalSocketData = json.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
         else if (obj["type"] == "message" && obj["value"] == "start_real_time")
         {
             gloveTools.startRealTime();
             isRealTimeRunning = true;
-            Json f;
-            f["type"] = "start_real_time_success";
-            finalSocketData = f.dump();
+            Json json;
+            json["type"] = "start_real_time_success";
+            finalSocketData = json.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
             std::thread newThread(&SocketServer::sendRealTimeLogs, this);
             newThread.detach();
@@ -150,9 +161,9 @@ void SocketServer::startListeningFromSocket()
         {
             gloveTools.stopRealTime();
             isRealTimeRunning = false;
-            Json f;
-            f["type"] = "stop_real_time_success";
-            finalSocketData = f.dump();
+            Json json;
+            json["type"] = "stop_real_time_success";
+            finalSocketData = json.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
     } while (iResult > 0);
@@ -173,6 +184,21 @@ void SocketServer::sendRealTimeLogs()
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
         Sleep(100);
+    }
+}
+
+void SocketServer::sendRealTimeTrainingData()
+{
+    string finalSocketData;
+    while (isTrainingRunning)
+    {
+
+        Json json = gloveTools.getRealTimeTraingDataForDisplay();
+        json["type"] = "real_time_training_data";
+        finalSocketData = json.dump();
+        send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+
+        Sleep(300);
     }
 }
 

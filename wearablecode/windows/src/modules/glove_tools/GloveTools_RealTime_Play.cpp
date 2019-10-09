@@ -2,16 +2,20 @@
 #define GloveTools_RealTime_Play_HPP
 
 #include "GloveTools.hpp"
+#include <exception>
 
 int GloveTools::startRealTime()
 {
 
     isRealTimeRunning = true;
+    raw_data_n_samples.clear();
     MouseFunctions::Instance().startRealTimePlay();
     if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
     {
-        std::thread newThread(&GloveTools::startRealTimeSampleCollections, this);
+        std::thread newThread(&GloveTools::startRealTimeSampleCollectionsForRealTimePlay, this);
         newThread.detach();
+        std::thread newThread2(&GloveTools::writeRealTimeData, this);
+        newThread2.detach();
     }
     else if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
     {
@@ -23,12 +27,13 @@ int GloveTools::startRealTime()
     return 1;
 }
 
-void GloveTools::startRealTimeSampleCollections()
+void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
 {
     double t1 = 0.0, t2 = 0.0, t3 = 0.0, t4 = 0.0;
 
     std::vector<std::vector<double>> raw_data_10_samples;
     std::vector<double> tmp;
+    // int yo = 0;
     while (isRealTimeRunning)
     {
         tmp.clear();
@@ -43,6 +48,21 @@ void GloveTools::startRealTimeSampleCollections()
             }
         }
 
+        int lc = MouseFunctions::Instance().getLeftMouseStatus();
+        int rc = MouseFunctions::Instance().getRightMouseStatus();
+        int tc = MouseFunctions::Instance().getThumbMouseStatus();
+        int ilc = MouseFunctions::Instance().getImpulseLeftClickStatus();
+
+        // if (yo == 0)
+        // {
+        //     cout << lc << " " << ilc << endl;
+        // }
+        // yo++;
+        // if (yo == 3)
+        // {
+        //     yo = 0;
+        // }
+
         for (int i = 0; i < GB_TOTAL_NUMBER_OF_SAMPLES; i++)
         {
             tmp.push_back(mDaq.getChannelOneVoltage(i));
@@ -50,6 +70,11 @@ void GloveTools::startRealTimeSampleCollections()
             tmp.push_back(mDaq.getChannelThreeVoltage(i));
             tmp.push_back(mDaq.getChannelFourVoltage(i));
             raw_data_10_samples.push_back(tmp);
+            tmp.push_back(lc);
+            tmp.push_back(rc);
+            tmp.push_back(tc);
+            tmp.push_back(ilc);
+            raw_data_n_samples.push_back(tmp);
             tmp.clear();
         }
 
@@ -60,6 +85,49 @@ void GloveTools::startRealTimeSampleCollections()
 
         myAlgo.detectAndFireImpulseClicks(raw_data_10_samples);
     }
+}
+
+void GloveTools::writeRealTimeData()
+{
+    try
+    {
+        string file = GB_IMPULSE_DIRECTORY + "/data_real_time_play_" + participantName + std::to_string(trialNumber) + "_C" + std::to_string(numberOfChannelesUsedForTraining) + ".txt";
+        std::ofstream myfile(file, std::ios::app);
+        if (myfile.fail())
+        {
+            cout << "Unable to write file : " << file << endl;
+        }
+        else
+        {
+            if (myfile.is_open())
+            {
+                for (int i = 0; i < raw_data_n_samples.size(); i++)
+                {
+                    myfile << raw_data_n_samples.at(i).at(0) << " " << raw_data_n_samples.at(i).at(1) << " " << raw_data_n_samples.at(i).at(2) << " " << raw_data_n_samples.at(i).at(3) << " "
+                           << raw_data_n_samples.at(i).at(4) << " " << raw_data_n_samples.at(i).at(5) << " " << raw_data_n_samples.at(i).at(6) << " " << raw_data_n_samples.at(i).at(7)
+                           << endl;
+                }
+            }
+            else
+            {
+                cout << "Error! File is not open.";
+            }
+        }
+        myfile.close();
+    }
+    catch (exception &e)
+    {
+        cout << e.what() << '\n';
+    }
+}
+
+void GloveTools::stopRealTime()
+{
+    isRealTimeRunning = false;
+    MouseFunctions::Instance().stopRealTimePlay();
+    cout << "Writing Real Time Data!" << endl;
+    writeRealTimeData();
+    raw_data_n_samples.clear();
     cout << "Real Time Stopped!" << endl;
 }
 
@@ -97,12 +165,6 @@ void GloveTools::startDemoSampleCollections()
         raw_data_10_samples.clear();
         demoDataIndexRealTimePlay = lastRealTimePlay;
     }
-}
-
-void GloveTools::stopRealTime()
-{
-    isRealTimeRunning = false;
-    MouseFunctions::Instance().stopRealTimePlay();
 }
 
 #endif

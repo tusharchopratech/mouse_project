@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
+import React, {Component} from "react";
+import {withStyles} from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -34,32 +34,24 @@ export class HomeScreen extends Component {
       current_screen: "",
       openLoadingDialog: true,
       openLoadingDialogPercentage: 27,
-      openLoadingDialogText: ""
+      openLoadingDialogText: "Loading..."
     };
   }
 
-  setMainSection = val => {
-    this.setState({ current_screen: val });
+  setMainSection = (val) => {
+    this.setState({current_screen: val});
   };
 
   setMainSectionWithData = (val, data) => {
     this.report = data;
-    this.setState({ current_screen: val });
+    this.setState({current_screen: val});
   };
 
-  getMainSectionComponent = val => {
+  getMainSectionComponent = (val) => {
     if (val === "caliberation") {
       return <Caliberation callbackSetMainSection={this.setMainSection} />;
     } else if (val === "user_training") {
-      return (
-        <UserTraining
-          myTop={this.top}
-          myBottom={this.bottom}
-          myLeft={this.left}
-          myRight={this.right}
-          callbackSetMainSection={this.setMainSectionWithData}
-        />
-      );
+      return <UserTraining myTop={this.top} myBottom={this.bottom} myLeft={this.left} myRight={this.right} callbackSetMainSection={this.setMainSectionWithData} />;
     } else if (val === "real_time_data") {
       return <RealTimeData />;
     } else if (val === "report") {
@@ -74,15 +66,11 @@ export class HomeScreen extends Component {
     this.right = this.left + this.containerRef.current.offsetWidth;
     this.top = 0;
     this.bottom = this.top + this.containerRef.current.offsetHeight;
-    this.setState({ current_screen: "welcome" });
+    this.setState({current_screen: "welcome"});
     console.log("Homescreen mounted");
-    console.log(
-      "Current Envirnoment : " +
-        window.require("electron").remote.getGlobal("shared_object")
-          .current_envirnoment
-    );
+    console.log("Current Envirnoment : " + window.require("electron").remote.getGlobal("shared_object").current_envirnoment);
 
-    const { ipcRenderer } = window.require("electron");
+    const {ipcRenderer} = window.require("electron");
     ipcRenderer.send("internal_ipc", "start_backend_and_socket");
     ipcRenderer.on(
       "internal_ipc",
@@ -90,28 +78,19 @@ export class HomeScreen extends Component {
         console.log(data);
         try {
           var jsonObject = JSON.parse(String(data));
-          if (
-            jsonObject.type == "status" &&
-            jsonObject.value == "backend_disconnected"
-          ) {
+          if (jsonObject.type == "status" && jsonObject.value == "backend_disconnected") {
             this.setState({
               openLoadingDialogPercentage: 63,
               openLoadingDialog: true
             });
-          } else if (
-            jsonObject.type == "status" &&
-            jsonObject.value == "socket_connected"
-          ) {
+          } else if (jsonObject.type == "status" && jsonObject.value == "socket_connected") {
             this.setState({
               openLoadingDialogPercentage: 100,
               openLoadingDialog: false
             });
-          } else if (
-            jsonObject.type == "status" &&
-            jsonObject.value == "socket_disconnected"
-          ) {
+          } else if (jsonObject.type == "status" && jsonObject.value == "socket_disconnected") {
             this.setState({
-              openLoadingDialogText: "Please press Ctrl + R",
+              openLoadingDialogText: "Press Ctrl + R",
               openLoadingDialog: true
             });
           }
@@ -133,7 +112,7 @@ export class HomeScreen extends Component {
   };
 
   render() {
-    const { classes } = this.props;
+    const {classes} = this.props;
     return (
       <div className={classes.root}>
         {/* <IOHook/> */}
@@ -150,13 +129,7 @@ export class HomeScreen extends Component {
         {/* <div ref={this.containerRef} > */}
         <main ref={this.containerRef} className={classes.content}>
           <div className={classes.toolbar} />
-          <Grid
-            container
-            direction="column"
-            alignItems="center"
-            justify="center"
-            className={classes.main_content}
-          >
+          <Grid container direction="column" alignItems="center" justify="center" className={classes.main_content}>
             {this.getMainSectionComponent(this.state.current_screen)}
           </Grid>
         </main>
@@ -169,19 +142,20 @@ export class HomeScreen extends Component {
           aria-describedby="alert-dialog-description"
           disableBackdropClick={true}
           disableEscapeKeyDown={true}
-        >
-          <DialogTitle id="alert-dialog-title">
-            {"Setting Up Please Wait.."}
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              {" "}
-              {this.state.openLoadingDialogText}
-            </DialogContentText>
-            <LinearProgress
-              variant="determinate"
-              value={this.state.openLoadingDialogPercentage}
-            />
+          style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
+
+          <div style={{display: "flex", justifyContent: "center"}}>
+            <DialogTitle id="alert-dialog-title">{"Impulse Message."}</DialogTitle>
+          </div>
+          <DialogContent style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
+            <div>
+              <div style={{display: "flex", justifyContent: "center"}}>
+                <CircularProgress className={classes.progress} />
+              </div>
+              <div style={{display: "flex", justifyContent: "center", paddingTop: 15}}>
+                <DialogContentText id="alert-dialog-description"> {this.state.openLoadingDialogText}</DialogContentText>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
@@ -189,7 +163,7 @@ export class HomeScreen extends Component {
   }
 }
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: "flex"
   },
@@ -210,4 +184,4 @@ const styles = theme => ({
   }
 });
 
-export default withStyles(styles, { withTheme: true })(HomeScreen);
+export default withStyles(styles, {withTheme: true})(HomeScreen);
