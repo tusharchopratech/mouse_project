@@ -23,8 +23,9 @@ string gb_getCurrentTimeInMilliseconds()
 
 double gb_getCurrentTimeInMillisecondsDouble()
 {   
-    string tt = to_string(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
-    return  atof(tt.c_str());
+    // string tt = to_string(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
+    // return  atof(tt.c_str());
+    return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
 void gb_setCurrentEnvirnoment(string env)

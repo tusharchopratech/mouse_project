@@ -87,6 +87,48 @@ void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
     }
 }
 
+Json GloveTools::getRealTimeGamePlayDataForDisplay()
+{
+    Json json;
+    try
+    {
+        std::vector<double> v1, v2, v3, v4, v5, v6, v7, v8;
+        int size = raw_data_n_samples.size();
+        std::vector<string> logs = MouseFunctions::Instance().getImpulseLogs();
+
+        int start = realTimeGamePlayDataForDisplaySizeIndex;
+        int end = size;
+        for (int i = start; i < end; i++)
+        {
+            v1.push_back(raw_data_n_samples.at(i).at(0));
+            v2.push_back(raw_data_n_samples.at(i).at(1));
+            v3.push_back(raw_data_n_samples.at(i).at(2));
+            v4.push_back(raw_data_n_samples.at(i).at(3));
+            v5.push_back(raw_data_n_samples.at(i).at(4));
+            v6.push_back(raw_data_n_samples.at(i).at(5));
+            v7.push_back(raw_data_n_samples.at(i).at(6));
+            v8.push_back(raw_data_n_samples.at(i).at(7));
+        }
+        json["logs"] = logs;
+        json["total_samples"] = v1.size();
+        json["ch_v1"] = v1;
+        json["ch_v2"] = v2;
+        json["ch_v3"] = v3;
+        json["ch_v4"] = v4;
+        json["left_click"] = v5;
+        json["right_click"] = v6;
+        json["thumb_click"] = v7;
+        json["impulse_click"] = v8;
+
+        realTimeGamePlayDataForDisplaySizeIndex = size;
+    }
+    catch (exception &e)
+    {
+        cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
+    }
+    return json;
+}
+
 void GloveTools::writeRealTimeData()
 {
     try
@@ -117,7 +159,7 @@ void GloveTools::writeRealTimeData()
     }
     catch (exception &e)
     {
-        cout << e.what() << '\n';
+        cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
     }
 }
 

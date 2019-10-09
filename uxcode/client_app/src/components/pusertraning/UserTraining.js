@@ -26,7 +26,7 @@ class UserTraining extends Component {
     this.clickSequence = [];
 
     this.tfNoClicks = 5;
-    this.tfPName = "Ning";
+    this.tfPName = "GI Joe";
     this.tfnoChannels = 4;
     this.tfTrainNo = 1;
 
@@ -242,6 +242,12 @@ class UserTraining extends Component {
         }
       }.bind(this)
     );
+  };
+
+  componentWillUnmount = () => {
+    console.log("User Training  Component Unmounted!!");
+    const {ipcRenderer} = window.require("electron");
+    ipcRenderer.removeAllListeners("socket_data_received");
   };
 
   shuffleArray = (arra1) => {

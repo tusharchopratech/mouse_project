@@ -12,10 +12,13 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import SignalComponent from "../psignalscomp/SignalsComp";
 
 class RealTimeData extends Component {
   constructor(props) {
     super(props);
+    this.signalComponentRef = React.createRef();
+    this.numberOfLogs = 45;
     this.state = {
       openLoadingDialog: true,
       buttonText: "Start Real Time Play",
@@ -42,8 +45,8 @@ class RealTimeData extends Component {
 
   componentDidMount = () => {
     var tmp = [];
-    for (var i = 0; i < 20; i++) {
-      tmp.push("--");
+    for (var i = 0; i < this.numberOfLogs; i++) {
+      tmp.push("-");
     }
     this.setState({logs: tmp});
 
@@ -70,14 +73,17 @@ class RealTimeData extends Component {
               }.bind(this),
               4000
             );
-          } else if (jsonObject.type == "real_time_logs") {
+          } else if (jsonObject.type == "real_time_logs_and_signals_data") {
             var jsonObject = JSON.parse(String(data));
-            var arrayTmp = this.state.logs;
-            arrayTmp = arrayTmp.concat(jsonObject.logs);
-            if (arrayTmp.length > 20) {
-              arrayTmp.splice(0, arrayTmp.length - 20);
+            if (jsonObject.logs.length > 0) {
+              var arrayTmp = this.state.logs;
+              arrayTmp = arrayTmp.concat(jsonObject.logs);
+              if (arrayTmp.length > this.numberOfLogs) {
+                arrayTmp.splice(0, arrayTmp.length - this.numberOfLogs);
+              }
+              this.setState({logs: arrayTmp});
             }
-            this.setState({logs: arrayTmp});
+            this.signalComponentRef.addPoints(jsonObject);
           }
         } catch (e) {
           console.log("Error in paring data ");
@@ -92,30 +98,42 @@ class RealTimeData extends Component {
     const {classes} = this.props;
     return (
       <div style={{height: "100%", width: "100%"}}>
-        <div style={{display: "flex", flexDirection: "column", justifyContent: "start", height: "100%", padding: "2%"}}>
-          <div style={{display: "flex", justifyContent: "center"}}>
-            <h4>
-              <u>Real Time Data</u>
-            </h4>
-          </div>
+        <div style={{display: "flex", height: "100%", alignItems: "center", flexDirection: "row"}}>
+          <div style={{flex: 2, display: "flex", height: "100%", alignItems: "center"}}>
+            <div id="test-section-div" style={{textAlign: "center", width: "100%"}}>
+              <div style={{display: "flex", flexDirection: "column", justifyContent: "start", height: "100%", padding: "2%"}}>
+                <div style={{display: "flex", justifyContent: "center"}}>
+                  <h4>
+                    <u>Real Time Data</u>
+                  </h4>
+                </div>
 
-          <div style={{display: "flex", justifyContent: "flex-start", flexDirection: "column"}}>
-            <List dense className={classes.root}>
-              {this.state.logs.map((value) => {
-                return (
-                  <ListItem>
-                    <ListItemText primary={value} />
-                  </ListItem>
-                );
-              })}
-            </List>
-          </div>
+                <div style={{display: "flex", justifyContent: "flex-start", flexDirection: "column"}}>
+                  <List dense className={classes.root}>
+                    {this.state.logs.map((value) => {
+                      return (
+                        <ListItem className={classes.listItemContainer}>
+                          <ListItemText className={classes.listItemText} primary={value} />
+                        </ListItem>
+                      );
+                    })}
+                  </List>
+                </div>
 
-          <div style={{display: "flex", justifyContent: "center", paddingTop: 10}}>
-            <Fab variant="extended" color="primary" aria-label="Add" onClick={this.toggleGamePlay} className={classes.margin}>
-              <HandIconWhite className={classes.extendedIcon} />
-              {this.state.buttonText}
-            </Fab>
+                <div style={{display: "flex", justifyContent: "center", paddingTop: 10}}>
+                  <Fab variant="extended" color="primary" aria-label="Add" onClick={this.toggleGamePlay} className={classes.margin}>
+                    <HandIconWhite className={classes.extendedIcon} />
+                    {this.state.buttonText}
+                  </Fab>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="signal-section-div" style={{flex: 1, display: "flex", height: "100%", alignItems: "center", borderLeft: "1px solid #dcdcdc", padding: "10px"}}>
+            <div style={{display: "flex", flexDirection: "column", width: "100%", alignItems: "center"}}>
+              <h5 style={{paddingBottom: "10px"}}>Real Time Signals</h5>
+              <SignalComponent onRef={(ref) => (this.signalComponentRef = ref)} parentComponentName={"real_time_game_play"} />
+            </div>
           </div>
         </div>
 
@@ -154,6 +172,12 @@ const styles = (theme) => ({
   },
   extendedIcon: {
     marginRight: theme.spacing.unit
+  },
+  listItemText: {
+    fontSize: "0.8em" //Insert your required size
+  },
+  listItemContainer: {
+    height: 12
   }
 });
 

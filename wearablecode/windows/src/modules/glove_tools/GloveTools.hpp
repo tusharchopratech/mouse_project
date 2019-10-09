@@ -36,6 +36,7 @@ private:
     int lastRealTimePlay = 0;
 
     int realTimeTraingDataForDisplaySizeIndex = 0;
+    int realTimeGamePlayDataForDisplaySizeIndex = 0;
 
     double tmpCh1, tmpCh2, tmpCh3, tmpCh4;
     double tmpLC1, tmpRC1, tmpTC1;
@@ -68,6 +69,7 @@ public:
   
     string getRealTimeRawDemoData();
     string getRealTimeRawData();
+    Json getRealTimeGamePlayDataForDisplay();
     void setTrainingSettings(string pName, int trialNo, int noCh);
     void readDemoData();
   

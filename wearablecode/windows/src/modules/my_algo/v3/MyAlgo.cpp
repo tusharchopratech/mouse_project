@@ -52,7 +52,6 @@ Json MyAlgo::startAnalysing()
     clickLabel = labelClickType(d_clicks, captureRangeBefore, captureRangeAfter); // 0: rest, 1,2,3 before right, left and thumb click, 4 within click
 
     // Training
-
     thresholdValues = fnTrain(featData, channelID, clickLabel, clickType);
 
     // Testing on the training data

@@ -93,48 +93,55 @@ Json GloveTools::getRealTimeTraingDataForDisplay()
 Json GloveTools::stopTraining()
 {
     isTrainingRunning = false;
-    if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
+    try
     {
-        cout << "Unable to delete folder : " << GB_IMPULSE_DIRECTORY << endl;
-    }
-    if (!CreateDirectoryA(GB_IMPULSE_DIRECTORY.c_str(), NULL))
-    {
-        cout << "Unable to create folder : " << GB_IMPULSE_DIRECTORY << endl;
-    }
-    if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
-    {
-        trainingDataChannel1.clear();
-        trainingDataChannel2.clear();
-        trainingDataChannel3.clear();
-        trainingDataChannel4.clear();
-        trainingDataLeftClick.clear();
-        trainingDataRightClick.clear();
-        trainingDataThumbClick.clear();
-        trainingDataChannel1 = demoTrainingDataChannel1;
-        trainingDataChannel2 = demoTrainingDataChannel2;
-        trainingDataChannel3 = demoTrainingDataChannel3;
-        trainingDataChannel4 = demoTrainingDataChannel4;
-        trainingDataLeftClick = demoTrainingDataLeftClick;
-        trainingDataRightClick = demoTrainingDataRightClick;
-        trainingDataThumbClick = demoTrainingDataThumbClick;
-    }
-    string file = GB_IMPULSE_DIRECTORY + "/data_" + participantName + std::to_string(trialNumber) + "_C" + std::to_string(numberOfChannelesUsedForTraining) + ".txt";
-    std::ofstream myfile(file);
-    if (myfile.fail())
-    {
-        cout << "Unable to write file : " << file << endl;
-    }
-    if (myfile.is_open())
-    {
-        for (int i = 0; i < trainingDataChannel1.size(); i++)
+        if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
         {
-            myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i) << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i) << " " << trainingDataThumbClick.at(i) << endl;
+            cout << "Unable to delete folder : " << GB_IMPULSE_DIRECTORY << endl;
         }
-        myfile.close();
+        if (!CreateDirectoryA(GB_IMPULSE_DIRECTORY.c_str(), NULL))
+        {
+            cout << "Unable to create folder : " << GB_IMPULSE_DIRECTORY << endl;
+        }
+        if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+        {
+            trainingDataChannel1.clear();
+            trainingDataChannel2.clear();
+            trainingDataChannel3.clear();
+            trainingDataChannel4.clear();
+            trainingDataLeftClick.clear();
+            trainingDataRightClick.clear();
+            trainingDataThumbClick.clear();
+            trainingDataChannel1 = demoTrainingDataChannel1;
+            trainingDataChannel2 = demoTrainingDataChannel2;
+            trainingDataChannel3 = demoTrainingDataChannel3;
+            trainingDataChannel4 = demoTrainingDataChannel4;
+            trainingDataLeftClick = demoTrainingDataLeftClick;
+            trainingDataRightClick = demoTrainingDataRightClick;
+            trainingDataThumbClick = demoTrainingDataThumbClick;
+        }
+        string file = GB_IMPULSE_DIRECTORY + "/data_" + participantName + std::to_string(trialNumber) + "_C" + std::to_string(numberOfChannelesUsedForTraining) + ".txt";
+        std::ofstream myfile(file);
+        if (myfile.fail())
+        {
+            cout << "Unable to write file : " << file << endl;
+        }
+        if (myfile.is_open())
+        {
+            for (int i = 0; i < trainingDataChannel1.size(); i++)
+            {
+                myfile << trainingDataChannel1.at(i) << " " << trainingDataChannel2.at(i) << " " << trainingDataChannel3.at(i) << " " << trainingDataChannel4.at(i) << " " << trainingDataLeftClick.at(i) << " " << trainingDataRightClick.at(i) << " " << trainingDataThumbClick.at(i) << endl;
+            }
+            myfile.close();
+        }
+        else
+        {
+            cout << "Error! File is not open.";
+        }
     }
-    else
+    catch (exception &e)
     {
-        cout << "Error! File is not open.";
+        cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
     }
     Json result = myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber);
     return result;

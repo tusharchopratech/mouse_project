@@ -8,7 +8,6 @@ class SignalsComp extends Component {
     super(props);
 
     this.parentComponentName = this.props.parentComponentName;
-
     this.totalSamplesOnChart = 2048 * 2;
 
     this.ch1Array = [];
@@ -18,6 +17,7 @@ class SignalsComp extends Component {
     this.lCArray = [];
     this.rCArray = [];
     this.tCArray = [];
+    this.iCArray = [];
 
     this.ch1ArrayTemp = [];
     this.ch2ArrayTemp = [];
@@ -26,16 +26,8 @@ class SignalsComp extends Component {
     this.lCArrayTemp = [];
     this.rCArrayTemp = [];
     this.tCArrayTemp = [];
+    this.iCArrayTemp = [];
 
-    this.ch1Temp = 0.0;
-    this.ch2Temp = 0.0;
-    this.ch3Temp = 0.0;
-    this.ch4Temp = 0.0;
-    this.lCTemp = 0;
-    this.rCTemp = 0;
-    this.tCTemp = 0;
-
-    this.startRendering = true;
     this.tmp1 = [1];
     this.tmp2 = [2];
     this.tmp3 = [9, 8];
@@ -46,60 +38,38 @@ class SignalsComp extends Component {
       third_plot_data: {labels: this.tmp3, datasets: [{label: "Channel 3", data: this.tmp3}]},
       fourth_plot_data: {labels: this.tmp4, datasets: [{label: "Channel 4", data: this.tmp4}]},
       plot_options: {
-        elements: {
-          point: {
-            radius: 0
-          }
-        },
-        animation: {
-          duration: 0
-        },
+        elements: {point: {radius: 0}},
+        animation: {duration: 0},
         responsive: true,
-        legend: {
-          position: "bottom"
-        },
-        hover: {
-          mode: "label"
-        },
+        legend: {position: "bottom"},
+        hover: {mode: "label"},
         scales: {
           xAxes: [
             {
-              gridLines: {
-                color: "rgba(0, 0, 0, 0)"
-              },
+              gridLines: {color: "rgba(0, 0, 0, 0)"},
               display: true,
-              scaleLabel: {
-                display: true,
-                labelString: "Time"
-              },
-              ticks: {
-                display: false
-              }
+              scaleLabel: {display: true, labelString: "Time"},
+              ticks: {display: false}
             }
           ],
           yAxes: [
             {
               display: true,
-              scaleLabel: {
-                display: true,
-                labelString: "Voltage"
-              },
-              ticks: {
-                min: -4,
-                beginAtZero: true,
-                steps: 0.00001,
-                max: 4
-              }
+              scaleLabel: {display: true, labelString: "Voltage"},
+              ticks: {min: -4, beginAtZero: true, steps: 0.00001, max: 4}
             }
           ]
         },
-        title: {
-          display: true,
-          text: ""
-        },
+        title: {display: true, text: ""},
         borderWidth: 10
       }
     };
+    this.fourthLabel = "Thumb Click";
+    this.fourthMultiplier = 3;
+    if (this.parentComponentName == "real_time_game_play") {
+      this.fourthLabel = "Impulse Click";
+      this.fourthMultiplier = 4;
+    }
   }
 
   componentDidMount = () => {
@@ -114,6 +84,7 @@ class SignalsComp extends Component {
       this.lCArray.push(0.0);
       this.rCArray.push(0.0);
       this.tCArray.push(0.0);
+      this.iCArray.push(0.0);
     }
     this.setDataToChart();
     setInterval(this.renderGraphs, 600);
@@ -133,6 +104,9 @@ class SignalsComp extends Component {
       this.lCArrayTemp.push(jsonObject.left_click[index]);
       this.rCArrayTemp.push(jsonObject.right_click[index]);
       this.tCArrayTemp.push(jsonObject.thumb_click[index]);
+      if (this.parentComponentName == "real_time_game_play") {
+        this.iCArrayTemp.push(jsonObject.impulse_click[index]);
+      }
     }
   };
 
@@ -147,6 +121,9 @@ class SignalsComp extends Component {
       this.lCArray = this.lCArray.concat(this.lCArrayTemp.splice(0, size));
       this.rCArray = this.rCArray.concat(this.rCArrayTemp.splice(0, size));
       this.tCArray = this.tCArray.concat(this.tCArrayTemp.splice(0, size));
+      if (this.parentComponentName == "real_time_game_play") {
+        this.iCArray = this.iCArray.concat(this.iCArrayTemp.splice(0, size));
+      }
 
       this.ch1Array.splice(0, size);
       this.ch2Array.splice(0, size);
@@ -155,6 +132,9 @@ class SignalsComp extends Component {
       this.lCArray.splice(0, size);
       this.rCArray.splice(0, size);
       this.tCArray.splice(0, size);
+      if (this.parentComponentName == "real_time_game_play") {
+        this.iCArray.splice(0, size);
+      }
       this.setDataToChart();
     }
   };
@@ -163,145 +143,61 @@ class SignalsComp extends Component {
     this.setState({
       first_plot_data: {
         datasets: [
+          {label: "Channel 1", fill: false, backgroundColor: "#99000000", borderColor: "#4bc0c0", borderWidth: 1, data: this.getChannelData(1)},
+          {label: "Left Click", fill: false, backgroundColor: "#99000000", borderColor: "#ff0000", borderWidth: 1, data: this.getClickData("left", 3)},
+          {label: "Right Click", fill: false, backgroundColor: "#99000000", borderColor: "#006600", borderWidth: 1, data: this.getClickData("right", 3)},
           {
-            label: "Channel 1",
+            label: this.fourthLabel,
             fill: false,
-            backgroundColor: "rgba(75,192,192,0.4)",
-            borderColor: "rgba(75,192,192,1)",
+            backgroundColor: "#99000000",
+            borderColor: "#00468b",
             borderWidth: 1,
-            data: this.getChannelData(1)
-          },
-          {
-            label: "Left Click",
-            fill: false,
-            backgroundColor: "#99ff0000",
-            borderColor: "#ff0000",
-            borderWidth: 1,
-            data: this.getClickData("left", 3)
-          },
-          {
-            label: "Right Click",
-            fill: false,
-            backgroundColor: "#99006600",
-            borderColor: "#006600",
-            borderWidth: 1,
-            data: this.getClickData("right", 3)
-          },
-          {
-            label: "Thumb Click",
-            fill: false,
-            backgroundColor: "#99ff0000",
-            borderColor: "#ff0000",
-            borderWidth: 1,
-            data: this.getClickData("thumb", 3)
+            data: this.getClickData("fourth", this.fourthMultiplier)
           }
         ]
       },
       second_plot_data: {
         datasets: [
+          {label: "Channel 2", fill: false, backgroundColor: "#99000000", borderColor: "#4bc0c0", borderWidth: 1, data: this.getChannelData(2)},
+          {label: "Left Click", fill: false, backgroundColor: "#99ff0000", borderColor: "#ff0000", borderWidth: 1, data: this.getClickData("left", 3)},
+          {label: "Right Click", fill: false, backgroundColor: "#99006600", borderColor: "#006600", borderWidth: 1, data: this.getClickData("right", 3)},
           {
-            label: "Channel 2",
+            label: this.fourthLabel,
             fill: false,
-            backgroundColor: "rgba(75,192,192,0.4)",
-            borderColor: "rgba(75,192,192,1)",
+            backgroundColor: "#99000000",
+            borderColor: "#00468b",
             borderWidth: 1,
-            data: this.getChannelData(2)
-          },
-          {
-            label: "Left Click",
-            fill: false,
-            backgroundColor: "#99ff0000",
-            borderColor: "#ff0000",
-            borderWidth: 1,
-            data: this.getClickData("left", 3)
-          },
-          {
-            label: "Right Click",
-            fill: false,
-            backgroundColor: "#99006600",
-            borderColor: "#006600",
-            borderWidth: 1,
-            data: this.getClickData("right", 3)
-          },
-          {
-            label: "Thumb Click",
-            fill: false,
-            backgroundColor: "#99ff0000",
-            borderColor: "#ff0000",
-            borderWidth: 1,
-            data: this.getClickData("thumb", 3)
+            data: this.getClickData("fourth", this.fourthMultiplier)
           }
         ]
       },
       third_plot_data: {
         datasets: [
+          {label: "Channel 3", fill: false, backgroundColor: "#99000000", borderColor: "#4bc0c0", borderWidth: 1, data: this.getChannelData(3)},
+          {label: "Left Click", fill: false, backgroundColor: "#99ff0000", borderColor: "#ff0000", borderWidth: 1, data: this.getClickData("left", 3)},
+          {label: "Right Click", fill: false, backgroundColor: "#99006600", borderColor: "#006600", borderWidth: 1, data: this.getClickData("right", 3)},
           {
-            label: "Channel 3",
+            label: this.fourthLabel,
             fill: false,
-            backgroundColor: "rgba(75,192,192,0.4)",
-            borderColor: "rgba(75,192,192,1)",
+            backgroundColor: "#99000000",
+            borderColor: "#00468b",
             borderWidth: 1,
-            data: this.getChannelData(3)
-          },
-          {
-            label: "Left Click",
-            fill: false,
-            backgroundColor: "#99ff0000",
-            borderColor: "#ff0000",
-            borderWidth: 1,
-            data: this.getClickData("left", 3)
-          },
-          {
-            label: "Right Click",
-            fill: false,
-            backgroundColor: "#99006600",
-            borderColor: "#006600",
-            borderWidth: 1,
-            data: this.getClickData("right", 3)
-          },
-          {
-            label: "Thumb Click",
-            fill: false,
-            backgroundColor: "#99ff0000",
-            borderColor: "#ff0000",
-            borderWidth: 1,
-            data: this.getClickData("thumb", 3)
+            data: this.getClickData("fourth", this.fourthMultiplier)
           }
         ]
       },
       fourth_plot_data: {
         datasets: [
+          {label: "Channel 4", fill: false, backgroundColor: "#99000000", borderColor: "#4bc0c0", borderWidth: 1, data: this.getChannelData(4)},
+          {label: "Left Click", fill: false, backgroundColor: "#99ff0000", borderColor: "#ff0000", borderWidth: 1, data: this.getClickData("left", 3)},
+          {label: "Right Click", fill: false, backgroundColor: "#99006600", borderColor: "#006600", borderWidth: 1, data: this.getClickData("right", 3)},
           {
-            label: "Channel 4",
+            label: this.fourthLabel,
             fill: false,
-            backgroundColor: "rgba(75,192,192,0.4)",
-            borderColor: "rgba(75,192,192,1)",
+            backgroundColor: "#99000000",
+            borderColor: "#00468b",
             borderWidth: 1,
-            data: this.getChannelData(4)
-          },
-          {
-            label: "Left Click",
-            fill: false,
-            backgroundColor: "#99ff0000",
-            borderColor: "#ff0000",
-            borderWidth: 1,
-            data: this.getClickData("left", 3)
-          },
-          {
-            label: "Right Click",
-            fill: false,
-            backgroundColor: "#99006600",
-            borderColor: "#006600",
-            borderWidth: 1,
-            data: this.getClickData("right", 3)
-          },
-          {
-            label: "Thumb Click",
-            fill: false,
-            backgroundColor: "#99ff0000",
-            borderColor: "#ff0000",
-            borderWidth: 1,
-            data: this.getClickData("thumb", 3)
+            data: this.getClickData("fourth", this.fourthMultiplier)
           }
         ]
       }
@@ -340,9 +236,15 @@ class SignalsComp extends Component {
       for (var i = 0; i < this.lCArray.length; i++) {
         ar6.push(this.lCArray[i] * amplitudeMultiplier);
       }
-    } else if (val == "thumb") {
-      for (var i = 0; i < this.tCArray.length; i++) {
-        ar6.push(this.tCArray[i] * amplitudeMultiplier);
+    } else if (val == "fourth") {
+      if (this.parentComponentName == "real_time_game_play") {
+        for (var i = 0; i < this.tCArray.length; i++) {
+          ar6.push(this.iCArray[i] * amplitudeMultiplier);
+        }
+      } else {
+        for (var i = 0; i < this.tCArray.length; i++) {
+          ar6.push(this.tCArray[i] * amplitudeMultiplier);
+        }
       }
     }
     return ar6;

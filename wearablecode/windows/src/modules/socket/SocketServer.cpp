@@ -174,15 +174,11 @@ void SocketServer::sendRealTimeLogs()
     string finalSocketData;
     while (isRealTimeRunning)
     {
-        std::vector<string> logs = MouseFunctions::Instance().getImpulseLogs();
-        if (logs.size() > 0)
-        {
-            Json json;
-            json["type"] = "real_time_logs";
-            json["logs"] = logs;
-            finalSocketData = json.dump();
-            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
-        }
+        Json json = gloveTools.getRealTimeGamePlayDataForDisplay();
+        json["type"] = "real_time_logs_and_signals_data";
+        finalSocketData = json.dump();
+        // cout<<finalSocketData<<endl;
+        send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         Sleep(100);
     }
 }
@@ -192,12 +188,10 @@ void SocketServer::sendRealTimeTrainingData()
     string finalSocketData;
     while (isTrainingRunning)
     {
-
         Json json = gloveTools.getRealTimeTraingDataForDisplay();
         json["type"] = "real_time_training_data";
         finalSocketData = json.dump();
         send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
-
         Sleep(300);
     }
 }
