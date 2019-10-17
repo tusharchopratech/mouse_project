@@ -139,7 +139,7 @@ void SocketServer::startListeningFromSocket()
         }
         else if (obj["type"] == "communication" && obj["value"] == "settings")
         {
-            gloveTools.setTrainingSettings(obj["participant_name"], obj["trail_no"], obj["no_of_channels"]);
+            gloveTools.setTrainingSettings(obj["participant_name"], obj["trail_no"], obj["no_of_channels"], obj["click_type"]);
             Json json;
             json["type"] = "communication_success";
             json["value"] = "settings_set";
@@ -148,7 +148,7 @@ void SocketServer::startListeningFromSocket()
         }
         else if (obj["type"] == "message" && obj["value"] == "start_real_time")
         {
-            gloveTools.startRealTime();
+            gloveTools.startRealTime(obj["threshold_percentage"]);
             isRealTimeRunning = true;
             Json json;
             json["type"] = "start_real_time_success";

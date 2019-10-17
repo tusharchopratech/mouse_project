@@ -13,12 +13,14 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import SignalComponent from "../psignalscomp/SignalsComp";
+import Slider from "@material-ui/core/Slider";
 
 class RealTimeData extends Component {
   constructor(props) {
     super(props);
     this.signalComponentRef = React.createRef();
     this.numberOfLogs = 45;
+    this.thresholdPercentage = 50;
     this.state = {
       openLoadingDialog: true,
       buttonText: "Start Real Time Play",
@@ -34,13 +36,19 @@ class RealTimeData extends Component {
   toggleGamePlay = () => {
     const {ipcRenderer} = window.require("electron");
     if (this.isRealTimeRunning == false) {
-      ipcRenderer.send("socket_data_send", "start_real_time");
+      const {ipcRenderer} = window.require("electron");
+      var s = JSON.stringify({type: "message", value: "start_real_time", threshold_percentage: this.thresholdPercentage});
+      ipcRenderer.send("socket_data_send", s);
       this.isRealTimeRunning = true;
     } else if (this.isRealTimeRunning == true) {
       this.setState({openLoadingDialog: true});
       ipcRenderer.send("socket_data_send", "stop_real_time");
       this.isRealTimeRunning = false;
     }
+  };
+
+  setSliderValue = (value) => {
+    this.thresholdPercentage = 100 - value;
   };
 
   componentDidMount = () => {
@@ -131,7 +139,11 @@ class RealTimeData extends Component {
           </div>
           <div id="signal-section-div" style={{flex: 1, display: "flex", height: "100%", alignItems: "center", borderLeft: "1px solid #dcdcdc", padding: "10px"}}>
             <div style={{display: "flex", flexDirection: "column", width: "100%", alignItems: "center"}}>
-              <h5 style={{paddingBottom: "10px"}}>Real Time Signals</h5>
+              <h5 style={{paddingBottom: "30px"}}>Real Time Signals</h5>
+              <div style={{width: "60%"}}>
+                <Slider defaultValue={this.thresholdPercentage} getAriaValueText={this.setSliderValue} aria-labelledby="discrete-slider-always" step={1} valueLabelDisplay="on" />
+              </div>
+              <p>Click Sensitivity</p>
               <SignalComponent onRef={(ref) => (this.signalComponentRef = ref)} parentComponentName={"real_time_game_play"} />
             </div>
           </div>

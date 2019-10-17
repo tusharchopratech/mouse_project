@@ -47,13 +47,6 @@ private:
 
 public:
 
-    // static SocketServer &Instance()
-    // {
-    //     static SocketServer ss;
-    //     ss.startBackend();
-    //     return ss;
-    // }
-
     SocketServer()
     {     
         setupSocket();

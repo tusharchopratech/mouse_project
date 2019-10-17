@@ -26,6 +26,7 @@ private:
     std::vector<double> prevSampleRealTime, prevPrevSampleRealTime;
 
     std::vector<double> thresholdValues;
+    std::vector<double> backupThresholdValues;
 
     std::vector<std::vector<double>> d_emg, d_tkeo, d_p3_tkeo, d_f_tkeo, d_f_p3_tkeo, d_training_data;
     std::vector<std::vector<int>> d_clicks;
@@ -42,7 +43,7 @@ public:
     {
     }
 
-    Json getAlgoResults(string pName, int noCh, int trialNo);
+    Json getAlgoResults(string pName, int noCh, int trialNo, int cType);
 
     void readData();
     void processData();
@@ -57,6 +58,7 @@ public:
     std::vector<double> fnTrain(std::vector<std::vector<std::vector<double>>> featData, std::vector<std::vector<int>> channelID, std::vector<int> clickAssemble, int clickType);
     std::vector<double> fnEvaluate(std::vector<std::vector<std::vector<double>>> featData, std::vector<std::vector<int>> channelID, std::vector<double> thresholdValues, std::vector<int> clickAssemble, int clickType, int sampRate, double refractoryTime, int numV);
 
+    void setThresholdValues(double thresholdPrecentage);
     bool detectAndFireImpulseClicks(std::vector<std::vector<double>> raw_data_10_samples);
     bool fnRealTime(std::vector<std::vector<double>> rawdata, std::vector<int> channel, std::vector<double> thresholdValues, int vots);
 };

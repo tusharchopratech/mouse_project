@@ -8,7 +8,6 @@ using namespace std;
 
 void MouseFunctions::setLeftMouseStatus(int status)
 {
-
     leftMouseStatus = status;
     if (status == 1)
     {
@@ -22,7 +21,7 @@ void MouseFunctions::setLeftMouseStatus(int status)
             else
             {
                 double tmpCurrentTime = gb_getCurrentTimeInMillisecondsDouble();
-                lastClickAction = "os_left_down";
+                lastLeftClickAction = "os_left_down";
                 impulseLogs.push_back("OS Left Down Click at " + std::to_string(tmpCurrentTime));
 
                 if (getImpulseLeftClickStatus() == 1)
@@ -38,7 +37,7 @@ void MouseFunctions::setLeftMouseStatus(int status)
     else
     {
         lastLeftUpClickTimeStamp = gb_getCurrentTimeInMillisecondsDouble();
-         setImpulseLeftClickStatus(0);
+        setImpulseLeftClickStatus(0);
     }
 }
 
@@ -47,36 +46,44 @@ int MouseFunctions::getLeftMouseStatus()
     return leftMouseStatus;
 }
 
-int MouseFunctions::getCurrentLeftMouseStatus()
-{
-    if ((GetKeyState(VK_LBUTTON) & 0x80) != 0)
-    {
-        return 1;
-    }
-    return 0;
-}
-
 void MouseFunctions::setRightMouseStatus(int status)
 {
     rightMouseStatus = status;
-
     if (status == 1)
     {
+        if (isRealTimeRunning)
+        {
+            if (isNextRightClickDownIsFromImpulse)
+            {
+                lastImpulseRightClickTimeStamp = gb_getCurrentTimeInMillisecondsDouble();
+                rightMouseStatus = 0;
+            }
+            else
+            {
+                double tmpCurrentTime = gb_getCurrentTimeInMillisecondsDouble();
+                lastRightClickAction = "os_right_down";
+                impulseLogs.push_back("OS Right Down Click at " + std::to_string(tmpCurrentTime));
+
+                if (getImpulseRightClickStatus() == 1)
+                {
+                    int lead = tmpCurrentTime - lastImpulseRightClickTimeStamp;
+                    impulseLogs.push_back("Lead : " + std::to_string(lead));
+                    impulseLogs.push_back("--");
+                }
+            }
+            isNextRightClickDownIsFromImpulse = false;
+        }
+    }
+    else
+    {
+        lastRightUpClickTimeStamp = gb_getCurrentTimeInMillisecondsDouble();
+        setImpulseRightClickStatus(0);
     }
 }
 
 int MouseFunctions::getRightMouseStatus()
 {
     return rightMouseStatus;
-}
-
-int MouseFunctions::getCurrentRightMouseStatus()
-{
-    if ((GetKeyState(VK_RBUTTON) & 0x80) != 0)
-    {
-        return 1;
-    }
-    return 0;
 }
 
 void MouseFunctions::setThumbMouseStatus(int status)
@@ -97,6 +104,15 @@ void MouseFunctions::setImpulseLeftClickStatus(int status)
 int MouseFunctions::getImpulseLeftClickStatus()
 {
     return impulseLeftClickStatus;
+}
+
+void MouseFunctions::setImpulseRightClickStatus(int status)
+{
+    impulseRightClickStatus = status;
+}
+int MouseFunctions::getImpulseRightClickStatus()
+{
+    return impulseRightClickStatus;
 }
 
 LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam)

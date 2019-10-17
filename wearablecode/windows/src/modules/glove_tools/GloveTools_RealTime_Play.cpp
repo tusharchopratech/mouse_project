@@ -4,11 +4,12 @@
 #include "GloveTools.hpp"
 #include <exception>
 
-int GloveTools::startRealTime()
+int GloveTools::startRealTime(double thresholdPrecentage)
 {
 
     isRealTimeRunning = true;
     raw_data_n_samples.clear();
+    myAlgo.setThresholdValues(thresholdPrecentage);
     MouseFunctions::Instance().startRealTimePlay();
     if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
     {
@@ -51,17 +52,16 @@ void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
         int lc = MouseFunctions::Instance().getLeftMouseStatus();
         int rc = MouseFunctions::Instance().getRightMouseStatus();
         int tc = MouseFunctions::Instance().getThumbMouseStatus();
-        int ilc = MouseFunctions::Instance().getImpulseLeftClickStatus();
+        int ilc;
 
-        // if (yo == 0)
-        // {
-        //     cout << lc << " " << ilc << endl;
-        // }
-        // yo++;
-        // if (yo == 3)
-        // {
-        //     yo = 0;
-        // }
+        if (clickType == 1)
+        {
+            ilc = MouseFunctions::Instance().getImpulseLeftClickStatus();
+        }
+        if (clickType == 2)
+        {
+            ilc = MouseFunctions::Instance().getImpulseRightClickStatus();
+        }
 
         for (int i = 0; i < GB_TOTAL_NUMBER_OF_SAMPLES; i++)
         {

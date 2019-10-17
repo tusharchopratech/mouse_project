@@ -16,26 +16,30 @@ using namespace std;
 class MouseFunctions
 {
 private:
-    double lastLeftUpClickTimeStamp = 0.0;
-    double lastImpulseLeftClickTimeStamp = 0.0;
-    string lastClickAction = "os_left_down";
-
     int leftMouseStatus = 0;
     int rightMouseStatus = 0;
     int thumbMouseStatus = 0;
 
-    int impulseLeftClickStatus=0;
-
-    bool isNextLeftClickDownIsFromImpulse = false;
-
     bool isRealTimeRunning;
-
     double refractoryPeriodMs = 100.0;
     double restPeriodMs = 200.0;
     double fireUpClickAfterMs = 200.0;
-    
-    bool isLeftClickFiringAvaiable = true, isRightClickFiringAvaiable = true;
     std::vector<string> impulseLogs;
+
+    string lastLeftClickAction = "os_left_down";
+    int impulseLeftClickStatus = 0;
+    double lastLeftUpClickTimeStamp = 0.0;
+    double lastImpulseLeftClickTimeStamp = 0.0;
+    bool isNextLeftClickDownIsFromImpulse = false;
+    bool isLeftClickFiringAvaiable = true;
+
+    string lastRightClickAction = "os_right_down";
+    int impulseRightClickStatus = 0;
+    double lastRightUpClickTimeStamp = 0.0;
+    double lastImpulseRightClickTimeStamp = 0.0;
+    bool isNextRightClickDownIsFromImpulse = false;
+    bool isRightClickFiringAvaiable = true;
+
     // string lastActionPerformed = "os_left_down";
     // double lastIpActionTimeStamp = 0.0;
 
@@ -53,33 +57,28 @@ public:
     }
 
     void setLeftMouseStatus(int status);
-
     int getLeftMouseStatus();
-    int getCurrentLeftMouseStatus();
 
     void setRightMouseStatus(int status);
-
     int getRightMouseStatus();
-    int getCurrentRightMouseStatus();
 
     void setThumbMouseStatus(int status);
-
     int getThumbMouseStatus();
 
     void setImpulseLeftClickStatus(int status);
-
     int getImpulseLeftClickStatus();
+
+    void setImpulseRightClickStatus(int status);
+    int getImpulseRightClickStatus();
 
     LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam);
 
     DWORD WINAPI MyMouseLogger(LPVOID lpParm);
 
     void startMouseRecording();
-
     void setupMouseMonitoring();
 
     void startRealTimePlay();
-
     void stopRealTimePlay();
 
     void fireMouseEvent(char mouseButton, char mouseEvent);

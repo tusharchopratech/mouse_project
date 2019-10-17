@@ -14,7 +14,7 @@ void MouseFunctions::fireMouseEvent(char mouseButton, char mouseEvent)
 
                 impulseLogs.push_back("--");
                 impulseLogs.push_back("IP Left Down Click at " + gb_getCurrentTimeInMilliseconds());
-                lastClickAction = "ip_left_down";
+                lastLeftClickAction = "ip_left_down";
                 setImpulseLeftClickStatus(1);
 
                 isNextLeftClickDownIsFromImpulse = true;
@@ -36,9 +36,23 @@ void MouseFunctions::fireMouseEvent(char mouseButton, char mouseEvent)
     {
         if (mouseEvent == 'd')
         {
-            if (isRealTimeRunning)
+
+            if (isRealTimeRunning == true && getRightMouseStatus() == 0 && isRightClickFiringAvaiable == true && (gb_getCurrentTimeInMillisecondsDouble() - lastRightUpClickTimeStamp) > refractoryPeriodMs)
             {
+
+                impulseLogs.push_back("--");
+                impulseLogs.push_back("IP Right Down Click at " + gb_getCurrentTimeInMilliseconds());
+                lastRightClickAction = "ip_right_down";
+                setImpulseRightClickStatus(1);
+
+                isNextRightClickDownIsFromImpulse = true;
                 mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+
+                isRightClickFiringAvaiable = false;
+                std::thread newThread3(&MouseFunctions::unblockRightClickFiring, this);
+                newThread3.detach();
+                std::thread newThread4(&MouseFunctions::checkAndFireRightUpClick, this);
+                newThread4.detach();
             }
         }
         else if (mouseEvent == 'u')
@@ -76,8 +90,8 @@ void MouseFunctions::checkAndFireLeftUpClick()
     {
     }
 
-    int ss = getCurrentLeftMouseStatus();
-    if (lastClickAction == "ip_left_down" && getImpulseLeftClickStatus() == 1)
+    int ss = getLeftMouseStatus();
+    if (lastLeftClickAction == "ip_left_down" && getImpulseLeftClickStatus() == 1)
     {
         fireMouseEvent('l', 'u');
         setImpulseLeftClickStatus(0);
@@ -102,10 +116,15 @@ void MouseFunctions::checkAndFireRightUpClick()
     while (gb_getCurrentTimeInMillisecondsDouble() - currentTime < fireUpClickAfterMs)
     {
     }
-    if (getRightMouseStatus() == 0)
+
+    int ss = getRightMouseStatus();
+    if (lastRightClickAction == "ip_right_down" && getImpulseRightClickStatus() == 1)
     {
-        mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-        cout << "IP Right UP Click at " << gb_getCurrentTimeInMilliseconds() << endl;
+        fireMouseEvent('r', 'u');
+        setImpulseRightClickStatus(0);
+        isNextRightClickDownIsFromImpulse = false;
+        impulseLogs.push_back("IP Right UP Click at " + gb_getCurrentTimeInMilliseconds());
+        impulseLogs.push_back("--");
     }
 }
 

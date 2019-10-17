@@ -46,6 +46,7 @@ private:
 
     string participantName;
     int trialNumber, numberOfChannelesUsedForTraining;
+    int clickType = 1;                        // only two values: 1 is for left and 2 is for right
 
     double *chV1, *chV2, *chV3, *chV4;
     int *lC, *rC, *tC;
@@ -56,7 +57,7 @@ private:
 public:
     GloveTools();
 
-    int startRealTime();
+    int startRealTime(double thresholdPrecentage);
     void stopRealTime();
     void startRealTimeSampleCollectionsForRealTimePlay();
     void writeRealTimeData();
@@ -70,7 +71,7 @@ public:
     string getRealTimeRawDemoData();
     string getRealTimeRawData();
     Json getRealTimeGamePlayDataForDisplay();
-    void setTrainingSettings(string pName, int trialNo, int noCh);
+    void setTrainingSettings(string pName, int trialNo, int noCh, string cType);
     void readDemoData();
   
 };

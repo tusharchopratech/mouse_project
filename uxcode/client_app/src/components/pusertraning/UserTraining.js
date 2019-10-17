@@ -13,7 +13,10 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import TextField from "@material-ui/core/TextField";
 import Snackbar from "@material-ui/core/Snackbar";
 import SignalComponent from "../psignalscomp/SignalsComp";
-import {Line} from "react-chartjs-2";
+import Select from "@material-ui/core/Select";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
 
 class UserTraining extends Component {
   constructor(props) {
@@ -26,9 +29,10 @@ class UserTraining extends Component {
     this.clickSequence = [];
 
     this.tfNoClicks = 5;
-    this.tfPName = "GI Joe";
+    this.tfPName = "I love chicken";
     this.tfnoChannels = 4;
     this.tfTrainNo = 1;
+    this.tfClickType = "left";
 
     this.currentClickType = "left";
     this.leftClickId = 0;
@@ -117,6 +121,9 @@ class UserTraining extends Component {
     if (name == "tf_trail_no") {
       this.tfTrainNo = event.target.value;
     }
+    if (name == "select_click_type") {
+      this.tfClickType = event.target.value;
+    }
   };
 
   sendSettings = (event) => {
@@ -124,12 +131,14 @@ class UserTraining extends Component {
     var pName = this.tfPName;
     var noChannels = this.tfnoChannels;
     var trainNo = this.tfTrainNo;
+    var clickType = this.tfClickType;
     if (isNaN(noClicks) == false && parseInt(noClicks) >= 5 && parseInt(noClicks) <= 50) {
       if (pName != "") {
         if (isNaN(noChannels) == false && parseInt(noChannels) >= 1 && parseInt(noChannels) <= 4) {
           if (isNaN(trainNo) == false && parseInt(trainNo) >= 1) {
             const {ipcRenderer} = window.require("electron");
-            var json = JSON.stringify({type: "communication", value: "settings", participant_name: pName, no_of_channels: parseInt(noChannels), trail_no: parseInt(trainNo)});
+            var json = JSON.stringify({type: "communication", value: "settings", participant_name: pName, no_of_channels: parseInt(noChannels), trail_no: parseInt(trainNo), click_type: clickType});
+            console.log(json);
             ipcRenderer.send("socket_data_send", json);
 
             for (var i = 0; i < this.tfNoClicks; i++) {
@@ -319,6 +328,16 @@ class UserTraining extends Component {
               </div>
               <div style={{flex: 1}}>
                 <TextField type="number" value={this.tfTrainNo} label="Trial Number" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_trail_no")} variant="outlined" />
+              </div>
+              <div style={{flex: 1, width: "100%"}}>
+                <FormControl className={classes.formControl} style={{width: "100%"}}>
+                  <InputLabel>Click Type</InputLabel>
+                  <Select onChange={this.handleTfChange.bind(this, "select_click_type")} value={"left"}>
+                    <MenuItem value={"left"}>Left</MenuItem>
+                    <MenuItem value={"right"}>Right</MenuItem>
+                    {/* <MenuItem value={"both"}>Both</MenuItem> */}
+                  </Select>
+                </FormControl>
               </div>
 
               <div style={{display: "flex", justifyContent: "center", paddingTop: 15}}>

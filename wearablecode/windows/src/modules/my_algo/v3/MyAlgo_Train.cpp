@@ -3,7 +3,6 @@
 
 #include "MyAlgo.hpp"
 
-
 std::vector<double> MyAlgo::fnTrain(std::vector<std::vector<std::vector<double>>> featData, std::vector<std::vector<int>> channelID, std::vector<int> clickAssemble, int clickType)
 {
     std::vector<double> thresholdAssemble;
@@ -27,6 +26,14 @@ std::vector<double> MyAlgo::fnTrain(std::vector<std::vector<std::vector<double>>
     }
 
     return thresholdAssemble;
+}
+
+void MyAlgo::setThresholdValues(double thresholdPercentage)
+{
+    for (int i = 0; i < thresholdValues.size(); i++)
+    {
+        thresholdValues.at(i) = ((2 * backupThresholdValues.at(i)) * thresholdPercentage) / 100;
+    }
 }
 
 #endif

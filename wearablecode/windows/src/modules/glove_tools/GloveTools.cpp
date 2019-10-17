@@ -14,7 +14,7 @@ GloveTools::GloveTools()
         newThread.detach();
     }
     MouseFunctions::Instance().setupMouseMonitoring();
-  
+
     chV1 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
     chV2 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
     chV3 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
@@ -24,11 +24,23 @@ GloveTools::GloveTools()
     tC = new int[GB_TOTAL_NUMBER_OF_SAMPLES];
 }
 
-void GloveTools::setTrainingSettings(string pName, int trialNo, int noCh)
+void GloveTools::setTrainingSettings(string pName, int trialNo, int noCh, string cType)
 {
     participantName = pName;
     trialNumber = trialNo;
     numberOfChannelesUsedForTraining = noCh;
+    if (cType == "left")
+    {
+        clickType = 1;
+    }
+    else if (cType == "right")
+    {
+        clickType = 2;
+    }
+    else if (cType == "both")
+    {
+        clickType = 3;
+    }
 }
 
 #endif // ! GloveTools_CPP

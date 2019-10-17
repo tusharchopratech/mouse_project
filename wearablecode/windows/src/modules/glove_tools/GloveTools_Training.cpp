@@ -143,7 +143,7 @@ Json GloveTools::stopTraining()
     {
         cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
     }
-    Json result = myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber);
+    Json result = myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber, clickType);
     return result;
 }
 

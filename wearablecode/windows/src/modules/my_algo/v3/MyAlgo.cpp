@@ -8,8 +8,9 @@
 #include "MyAlgo_Evaluate.cpp"
 #include "MyAlgo_RealTime_Play.cpp"
 
-Json MyAlgo::getAlgoResults(string pName, int noCh, int trialNo)
+Json MyAlgo::getAlgoResults(string pName, int noCh, int trialNo, int cType)
 {
+    clickType = cType;
     participantName = pName;
     trialNumber = trialNo;
     numberOfChannelesUsedForTraining = noCh;
@@ -53,6 +54,7 @@ Json MyAlgo::startAnalysing()
 
     // Training
     thresholdValues = fnTrain(featData, channelID, clickLabel, clickType);
+    backupThresholdValues = thresholdValues;
 
     // Testing on the training data
     double refractoryTime = 0.1;
@@ -105,6 +107,7 @@ bool MyAlgo::detectAndFireImpulseClicks(std::vector<std::vector<double>> raw_dat
 
             if (fnRealTime(threeSamplesRealTime, channelIDRight, thresholdValues, 1))
             {
+
                 MouseFunctions::Instance().fireMouseEvent('r', 'd');
                 isClickFired = true;
             }

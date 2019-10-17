@@ -38,7 +38,6 @@ bool MyAlgo::fnRealTime(std::vector<std::vector<double>> rawdata3Samples, std::v
     // majority vote
     if (f1 + f2 + f3 > vots)
     {
-        // cout << "Fire" << endl;
         return true;
     }
     else
