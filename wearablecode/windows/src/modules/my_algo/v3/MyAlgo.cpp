@@ -22,6 +22,9 @@ Json MyAlgo::getAlgoResults(string pName, int noCh, int trialNo, int cType)
 Json MyAlgo::startAnalysing()
 {
     // set parameters
+    Json finalJson;
+    Json tmp;
+    std::vector<double> results;
 
     std::vector<std::vector<int>> channelID;
     channelID.push_back(channelIDLeft);
@@ -43,7 +46,6 @@ Json MyAlgo::startAnalysing()
     d_feat.clear();
     d_feat = tkoSpatial(d_emg, 1);
     featData.push_back(d_feat);
-
     // Label the click of the timing
     int sampRate = GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD;
     //  int rangeBeforeClick = -0.1;
@@ -53,18 +55,49 @@ Json MyAlgo::startAnalysing()
     clickLabel = labelClickType(d_clicks, captureRangeBefore, captureRangeAfter); // 0: rest, 1,2,3 before right, left and thumb click, 4 within click
 
     // Training
-    thresholdValues = fnTrain(featData, channelID, clickLabel, clickType);
-    backupThresholdValues = thresholdValues;
+    if (clickType == 1)
+    {
+        thresholdValues = fnTrain(featData, channelID, clickLabel, clickType);
+        backupThresholdValues = thresholdValues;
+        results = fnEvaluate(featData, channelID, thresholdValues, clickLabel, clickType, sampRate, refractoryTime, numV);
+        tmp["true_positives"] = results.at(0);
+        tmp["false_positives"] = results.at(1);
+        tmp["average_lead"] = results.at(2);
+        finalJson["left_click"] = tmp;
+    }
+    else if (clickType == 2)
+    {
+        thresholdValues = fnTrain(featData, channelID, clickLabel, clickType);
+        backupThresholdValues = thresholdValues;
+        results = fnEvaluate(featData, channelID, thresholdValues, clickLabel, clickType, sampRate, refractoryTime, numV);
+        tmp["true_positives"] = results.at(0);
+        tmp["false_positives"] = results.at(1);
+        tmp["average_lead"] = results.at(2);
+        finalJson["right_click"] = tmp;
+    }
+    else if (clickType == 3)
+    {
+        // For Left Click
+        thresholdValuesLeftClick = fnTrainBothClicks(featData, clickLabel, channelIDLeft, 1);
+        backupThresholdValuesLeftClick = thresholdValuesLeftClick;
+        // For Right Click
+        thresholdValuesRightClick = fnTrainBothClicks(featData, clickLabel, channelIDRight, 2);
+        backupThresholdValuesRightClick = thresholdValuesRightClick;
 
-    // Testing on the training data
-    double refractoryTime = 0.1;
-    int numV = 1;
-    std::vector<double> results = fnEvaluate(featData, channelID, thresholdValues, clickLabel, clickType, sampRate, refractoryTime, numV);
+        // For Left Click
+        results = fnEvaluateBothClicks(featData, channelIDLeft, thresholdValuesLeftClick, clickLabel, 1, sampRate, refractoryTime, numV);
+        tmp["true_positives"] = results.at(0);
+        tmp["false_positives"] = results.at(1);
+        tmp["average_lead"] = results.at(2);
+        finalJson["left_click"] = tmp;
+        // For Right Click
+        results = fnEvaluateBothClicks(featData, channelIDRight, thresholdValuesRightClick, clickLabel, 2, sampRate, refractoryTime, numV);
+        tmp["true_positives"] = results.at(0);
+        tmp["false_positives"] = results.at(1);
+        tmp["average_lead"] = results.at(2);
+        finalJson["right_click"] = tmp;
+    }
 
-    Json finalJson;
-    finalJson["true_positives"] = results.at(0);
-    finalJson["false_positives"] = results.at(1);
-    finalJson["average_lead"] = results.at(2);
     std::cout << finalJson.dump(4) << endl;
     return finalJson;
 }
@@ -100,7 +133,7 @@ bool MyAlgo::detectAndFireImpulseClicks(std::vector<std::vector<double>> raw_dat
             }
         }
         /**
-         * For Left Right Detection
+         * For Right Click Detection
         */
         else if (clickType == 2)
         {
@@ -111,6 +144,27 @@ bool MyAlgo::detectAndFireImpulseClicks(std::vector<std::vector<double>> raw_dat
                 MouseFunctions::Instance().fireMouseEvent('r', 'd');
                 isClickFired = true;
             }
+        }
+        /**
+         * For Both Click Detection
+        */
+        else if (clickType == 3)
+        {
+            string s = fnRealTimeBoth(threeSamplesRealTime, 1);
+            if (s == "left")
+            {
+                MouseFunctions::Instance().fireMouseEvent('l', 'd');
+            }
+            else if (s == "right")
+            {
+                MouseFunctions::Instance().fireMouseEvent('r', 'd');
+            }
+            else if (s == "both")
+            {
+                MouseFunctions::Instance().fireMouseEvent('l', 'd');
+                MouseFunctions::Instance().fireMouseEvent('r', 'd');
+            }
+            isClickFired = true;
         }
 
         prevPrevSampleRealTime = prevSampleRealTime;

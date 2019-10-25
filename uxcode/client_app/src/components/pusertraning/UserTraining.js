@@ -29,12 +29,12 @@ class UserTraining extends Component {
     this.clickSequence = [];
 
     this.tfNoClicks = 5;
-    this.tfPName = "I love chicken";
+    this.tfPName = "tushar";
     this.tfnoChannels = 4;
     this.tfTrainNo = 1;
-    this.tfClickType = "left";
+    this.tfClickType = "both";
 
-    this.currentClickType = "left";
+    this.currentClickType = "both";
     this.leftClickId = 0;
     this.rightClickId = 2;
     this.thumb1ClickId = 3;
@@ -332,9 +332,10 @@ class UserTraining extends Component {
               <div style={{flex: 1, width: "100%"}}>
                 <FormControl className={classes.formControl} style={{width: "100%"}}>
                   <InputLabel>Click Type</InputLabel>
-                  <Select onChange={this.handleTfChange.bind(this, "select_click_type")} value={"left"}>
+                  <Select onChange={this.handleTfChange.bind(this, "select_click_type")} value={"both"}>
                     <MenuItem value={"left"}>Left</MenuItem>
                     <MenuItem value={"right"}>Right</MenuItem>
+                    <MenuItem value={"both"}>Both</MenuItem>
                     {/* <MenuItem value={"both"}>Both</MenuItem> */}
                   </Select>
                 </FormControl>

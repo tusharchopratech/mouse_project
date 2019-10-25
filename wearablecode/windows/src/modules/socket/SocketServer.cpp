@@ -148,7 +148,7 @@ void SocketServer::startListeningFromSocket()
         }
         else if (obj["type"] == "message" && obj["value"] == "start_real_time")
         {
-            gloveTools.startRealTime(obj["threshold_percentage"]);
+            gloveTools.startRealTime(obj["left_threshold_percentage"], obj["right_threshold_percentage"]);
             isRealTimeRunning = true;
             Json json;
             json["type"] = "start_real_time_success";

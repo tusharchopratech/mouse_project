@@ -46,4 +46,75 @@ bool MyAlgo::fnRealTime(std::vector<std::vector<double>> rawdata3Samples, std::v
     }
 }
 
+string MyAlgo::fnRealTimeBoth(std::vector<std::vector<double>> rawdata3Samples, int vots)
+{
+    // left, right, both
+    string fireClick = "none";
+    std::vector<std::vector<double>> d_feat;
+    int f1_l = 0, f2_l = 0, f3_l = 0, f1_r = 0, f2_r = 0, f3_r = 0;
+    int fireLeftClick = 0;
+    int fireRightClick = 0;
+
+    // feature extraction for Left Click and Right
+    d_feat.clear();
+    d_feat = tkoTime(rawdata3Samples, 1); // TKO feature extraction
+    if (d_feat.at(0).at(channelIDLeft.at(0) - 1) > thresholdValuesLeftClick.at(0))
+    {
+        f1_l = 1;
+    }
+    if (d_feat.at(0).at(channelIDRight.at(0) - 1) > thresholdValuesRightClick.at(0))
+    {
+        f1_r = 1;
+    }
+
+    d_feat.clear();
+    d_feat = tkoTime(rawdata3Samples, 3);
+    if (d_feat.at(0).at(channelIDLeft.at(1) - 1) > thresholdValuesLeftClick.at(1))
+    {
+        f2_l = 1;
+    }
+    if (d_feat.at(0).at(channelIDRight.at(1) - 1) > thresholdValuesRightClick.at(1))
+    {
+        f2_r = 1;
+    }
+
+    d_feat.clear();
+    d_feat = tkoSpatial(rawdata3Samples, 1);
+    if (d_feat.at(0).at(channelIDLeft.at(2) - 1) > thresholdValuesLeftClick.at(2))
+    {
+        f1_l = 1;
+    }
+    if (d_feat.at(0).at(channelIDRight.at(2) - 1) > thresholdValuesRightClick.at(2))
+    {
+        f2_r = 1;
+    }
+
+ 
+    // majority vote for Left Click
+    if (f1_l + f2_l + f3_l > vots)
+    {
+        fireLeftClick = 1;
+    }
+    // majority vote for Right Click
+    if (f1_r + f2_r + f3_r > vots)
+    {
+        fireRightClick = 1;
+    }
+
+    if (fireLeftClick == 1 && fireRightClick == 1)
+    {
+        fireClick = "both";
+    }
+    else if (fireLeftClick == 1 && fireRightClick == 0)
+    {
+        fireClick = "left";
+    }
+    else if (fireLeftClick == 0 && fireRightClick == 1)
+    {
+        fireClick = "right";
+    }
+
+    return fireClick;
+}
+
 #endif

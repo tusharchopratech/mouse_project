@@ -4,12 +4,12 @@
 #include "GloveTools.hpp"
 #include <exception>
 
-int GloveTools::startRealTime(double thresholdPrecentage)
+int GloveTools::startRealTime(double thresholdPrecentageLeft, double thresholdPrecentageRight)
 {
 
     isRealTimeRunning = true;
     raw_data_n_samples.clear();
-    myAlgo.setThresholdValues(thresholdPrecentage);
+    myAlgo.setThresholdValues(thresholdPrecentageLeft, thresholdPrecentageRight);
     MouseFunctions::Instance().startRealTimePlay();
     if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
     {
@@ -52,15 +52,22 @@ void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
         int lc = MouseFunctions::Instance().getLeftMouseStatus();
         int rc = MouseFunctions::Instance().getRightMouseStatus();
         int tc = MouseFunctions::Instance().getThumbMouseStatus();
-        int ilc;
+        int ilc, irc;
 
         if (clickType == 1)
         {
             ilc = MouseFunctions::Instance().getImpulseLeftClickStatus();
+            irc = -1;
         }
-        if (clickType == 2)
+        else if (clickType == 2)
         {
-            ilc = MouseFunctions::Instance().getImpulseRightClickStatus();
+            irc = MouseFunctions::Instance().getImpulseRightClickStatus();
+            ilc = -1;
+        }
+        else if (clickType == 3)
+        {
+            ilc = MouseFunctions::Instance().getImpulseLeftClickStatus();
+            irc = MouseFunctions::Instance().getImpulseRightClickStatus();
         }
 
         for (int i = 0; i < GB_TOTAL_NUMBER_OF_SAMPLES; i++)
@@ -73,7 +80,21 @@ void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
             tmp.push_back(lc);
             tmp.push_back(rc);
             tmp.push_back(tc);
-            tmp.push_back(ilc);
+
+            if (clickType == 1)
+            {
+                tmp.push_back(ilc);
+            }
+            else if (clickType == 2)
+            {
+                tmp.push_back(ilc);
+            }
+            else if (clickType == 3)
+            {
+                tmp.push_back(ilc);
+                tmp.push_back(irc);
+            }
+
             raw_data_n_samples.push_back(tmp);
             tmp.clear();
         }
@@ -92,7 +113,7 @@ Json GloveTools::getRealTimeGamePlayDataForDisplay()
     Json json;
     try
     {
-        std::vector<double> v1, v2, v3, v4, v5, v6, v7, v8;
+        std::vector<double> v1, v2, v3, v4, v5, v6, v7, v8, v9;
         int size = raw_data_n_samples.size();
         std::vector<string> logs = MouseFunctions::Instance().getImpulseLogs();
 
@@ -108,6 +129,7 @@ Json GloveTools::getRealTimeGamePlayDataForDisplay()
             v6.push_back(raw_data_n_samples.at(i).at(5));
             v7.push_back(raw_data_n_samples.at(i).at(6));
             v8.push_back(raw_data_n_samples.at(i).at(7));
+            v9.push_back(raw_data_n_samples.at(i).at(8));
         }
         json["logs"] = logs;
         json["total_samples"] = v1.size();
@@ -118,7 +140,8 @@ Json GloveTools::getRealTimeGamePlayDataForDisplay()
         json["left_click"] = v5;
         json["right_click"] = v6;
         json["thumb_click"] = v7;
-        json["impulse_click"] = v8;
+        json["impulse_left_click"] = v8;
+        json["impulse_right_click"] = v9;
 
         realTimeGamePlayDataForDisplaySizeIndex = size;
     }

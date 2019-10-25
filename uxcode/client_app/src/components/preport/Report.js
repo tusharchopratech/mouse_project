@@ -7,18 +7,24 @@ class Report extends Component {
     this.report = JSON.stringify(this.props.report, null, 2);
     console.log(this.props.report);
     this.state = {
-      truePositives: 0.0,
-      falsePositives: 0.0,
-      averageLead: 0.0
+      leftTruePositives: 0.0,
+      leftFalsePositives: 0.0,
+      leftAverageLead: 0.0,
+      rightTruePositives: 0.0,
+      rightFalsePositives: 0.0,
+      rightAverageLead: 0.0
     };
   }
 
   componentDidMount = () => {
     if (this.props.report != null) {
       this.setState({
-        truePositives: this.props.report.true_positives,
-        falsePositives: this.props.report.false_positives,
-        averageLead: this.props.report.average_lead
+        leftTruePositives: this.props.report.left_click.true_positives,
+        leftFalsePositives: this.props.report.left_click.false_positives,
+        leftAverageLead: this.props.report.left_click.average_lead,
+        rightTruePositives: this.props.report.right_click.true_positives,
+        rightFalsePositives: this.props.report.right_click.false_positives,
+        rightAverageLead: this.props.report.right_click.average_lead
       });
     }
   };
@@ -50,9 +56,15 @@ class Report extends Component {
           For {this.props.report.results[3].algo_type} :
          <pre>Impulse Left Click : {JSON.stringify(this.props.report.results[3].left_click)}<br />Impulse Right Click :{JSON.stringify(this.props.report.results[3].right_click)}</pre>
         </div> */}
-        <div>True Positives : {this.state.truePositives}</div>
-        <div>False Positives : {this.state.falsePositives}</div>
-        <div>Average Lead : {this.state.averageLead}</div>
+        <h5>For Left Click</h5>
+        <div>True Positives : {this.state.leftTruePositives}</div>
+        <div>False Positives : {this.state.leftFalsePositives}</div>
+        <div>Average Lead : {this.state.leftAverageLead}</div>
+        <br></br>
+        <h5>For Right Click</h5>
+        <div>True Positives : {this.state.rightTruePositives}</div>
+        <div>False Positives : {this.state.rightFalsePositives}</div>
+        <div>Average Lead : {this.state.rightAverageLead}</div>
       </div>
     );
   }

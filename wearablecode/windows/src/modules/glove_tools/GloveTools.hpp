@@ -14,9 +14,9 @@
 
 using namespace std;
 
-class GloveTools {
+class GloveTools
+{
 private:
-
     // std::vector<double> realTimeDataChannel1, realTimeDataChannel2, realTimeDataChannel3, realTimeDataChannel4;
 
     std::vector<double> trainingDataChannel1, trainingDataChannel2, trainingDataChannel3, trainingDataChannel4;
@@ -46,7 +46,7 @@ private:
 
     string participantName;
     int trialNumber, numberOfChannelesUsedForTraining;
-    int clickType = 1;                        // only two values: 1 is for left and 2 is for right
+    int clickType = 1; // only two values: 1 is for left and 2 is for right
 
     double *chV1, *chV2, *chV3, *chV4;
     int *lC, *rC, *tC;
@@ -57,7 +57,7 @@ private:
 public:
     GloveTools();
 
-    int startRealTime(double thresholdPrecentage);
+    int startRealTime(double thresholdPrecentageLeft, double thresholdPrecentageRight);
     void stopRealTime();
     void startRealTimeSampleCollectionsForRealTimePlay();
     void writeRealTimeData();
@@ -67,13 +67,12 @@ public:
     void startTrainingRecording();
     Json getRealTimeTraingDataForDisplay();
     Json stopTraining();
-  
+
     string getRealTimeRawDemoData();
     string getRealTimeRawData();
     Json getRealTimeGamePlayDataForDisplay();
     void setTrainingSettings(string pName, int trialNo, int noCh, string cType);
     void readDemoData();
-  
 };
 
 #endif // ! GloveTools_HPP
