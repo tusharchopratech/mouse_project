@@ -60,7 +60,6 @@ void MyAlgo::setThresholdValues(double thresholdPercentageLeft, double threshold
     {
         thresholdValuesLeftClick.at(i) = ((2 * backupThresholdValuesLeftClick.at(i)) * thresholdPercentageLeft) / 100;
     }
-
     for (int i = 0; i < thresholdValuesRightClick.size(); i++)
     {
         thresholdValuesRightClick.at(i) = ((2 * backupThresholdValuesRightClick.at(i)) * thresholdPercentageRight) / 100;

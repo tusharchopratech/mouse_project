@@ -13,7 +13,7 @@ using Json = nlohmann::json;
  
 int main()
 {
-	gb_setCurrentEnvirnoment(GB_ENV_PRODUCTION);
+	gb_setCurrentEnvirnoment(GB_ENV_STAGING);
 	SocketServer ss;
 	return 0;
 }

@@ -10,6 +10,10 @@ class SignalsComp extends Component {
     this.parentComponentName = this.props.parentComponentName;
     this.totalSamplesOnChart = 2048 * 2;
 
+    this.rms1 = 0;
+    this.rms2 = 0;
+    this.rms3 = 0;
+    this.rms4 = 0;
     this.ch1Array = [];
     this.ch2Array = [];
     this.ch3Array = [];
@@ -35,6 +39,10 @@ class SignalsComp extends Component {
     this.tmp3 = [9, 8];
     this.tmp4 = [4, 3, 3];
     this.state = {
+      rms1: 0.0,
+      rms2: 0.0,
+      rms3: 0.0,
+      rms4: 0.0,
       first_plot_data: {labels: this.tmp1, datasets: [{label: "Channel 1", data: this.tmp1}]},
       second_plot_data: {labels: this.tmp2, datasets: [{label: "Channel 2", data: this.tmp2}]},
       third_plot_data: {labels: this.tmp3, datasets: [{label: "Channel 3", data: this.tmp3}]},
@@ -67,6 +75,13 @@ class SignalsComp extends Component {
       }
     };
   }
+
+  rms = (arr) => {
+    let Squares = arr.map((val) => val * val);
+    let Sum = Squares.reduce((acum, val) => acum + val);
+    let Mean = Sum / arr.length;
+    return Math.sqrt(Mean).toFixed(3);
+  };
 
   componentDidMount = () => {
     this.props.onRef(this);
@@ -136,6 +151,12 @@ class SignalsComp extends Component {
         this.iRCArray.splice(0, size);
       }
       this.setDataToChart();
+      this.setState({
+        rms1: this.rms(this.ch1Array),
+        rms2: this.rms(this.ch2Array),
+        rms3: this.rms(this.ch3Array),
+        rms4: this.rms(this.ch4Array)
+      });
     }
   };
 
@@ -330,18 +351,22 @@ class SignalsComp extends Component {
               <div style={{display: "flex", justifyContent: "flex-start", flexDirection: "row"}}>
                 <div style={{flex: 1}}>
                   <Line data={this.state.first_plot_data} options={this.state.plot_options} height={100} />
+                  {this.state.rms1}
                 </div>
                 <div style={{flex: 1}}>
                   <Line data={this.state.second_plot_data} options={this.state.plot_options} height={100} />
+                  {this.state.rms2}
                 </div>
               </div>
 
               <div style={{display: "flex", justifyContent: "flex-start", flexDirection: "row"}}>
                 <div style={{flex: 1}}>
                   <Line data={this.state.third_plot_data} options={this.state.plot_options} height={100} />
+                  {this.state.rms3}
                 </div>
                 <div style={{flex: 1}}>
                   <Line data={this.state.fourth_plot_data} options={this.state.plot_options} height={100} />
+                  {this.state.rms4}
                 </div>
               </div>
             </div>

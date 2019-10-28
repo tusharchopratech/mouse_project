@@ -28,6 +28,11 @@ int GloveTools::startRealTime(double thresholdPrecentageLeft, double thresholdPr
     return 1;
 }
 
+void GloveTools::setThresholds(double thresholdPrecentageLeft, double thresholdPrecentageRight)
+{
+    myAlgo.setThresholdValues(thresholdPrecentageLeft, thresholdPrecentageRight);
+}
+
 void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
 {
     double t1 = 0.0, t2 = 0.0, t3 = 0.0, t4 = 0.0;

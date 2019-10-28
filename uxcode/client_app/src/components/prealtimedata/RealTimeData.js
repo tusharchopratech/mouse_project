@@ -49,12 +49,18 @@ class RealTimeData extends Component {
     }
   };
 
-  setLeftSliderValue = (value) => {
+  setLeftSliderValue = (event, value) => {
     this.leftThresholdPercentage = 100 - value;
+    const {ipcRenderer} = window.require("electron");
+    var s = JSON.stringify({type: "communication", value: "set_thresholds", left_threshold_percentage: this.leftThresholdPercentage, right_threshold_percentage: this.rightThresholdPercentage});
+    ipcRenderer.send("socket_data_send", s);
   };
 
-  setRightSliderValue = (value) => {
+  setRightSliderValue = (event, value) => {
     this.rightThresholdPercentage = 100 - value;
+    const {ipcRenderer} = window.require("electron");
+    var s = JSON.stringify({type: "communication", value: "set_thresholds", left_threshold_percentage: this.leftThresholdPercentage, right_threshold_percentage: this.rightThresholdPercentage});
+    ipcRenderer.send("socket_data_send", s);
   };
 
   componentDidMount = () => {
@@ -147,11 +153,11 @@ class RealTimeData extends Component {
             <div style={{display: "flex", flexDirection: "column", width: "100%", alignItems: "center"}}>
               <h5 style={{paddingBottom: "35px"}}>Real Time Signals</h5>
               <div style={{width: "60%"}}>
-                <Slider defaultValue={this.leftThresholdPercentage} getAriaValueText={this.setLeftSliderValue} aria-labelledby="discrete-slider-always" step={1} valueLabelDisplay="on" />
+                <Slider defaultValue={this.leftThresholdPercentage} onChangeCommitted={this.setLeftSliderValue} aria-labelledby="discrete-slider-always" step={1} valueLabelDisplay="on" />
               </div>
               <p>Left Click Sensitivity</p>
               <div style={{paddingTop: "30px", width: "60%"}}>
-                <Slider defaultValue={this.rightThresholdPercentage} getAriaValueText={this.setRightSliderValue} aria-labelledby="discrete-slider-always" step={1} valueLabelDisplay="on" />
+                <Slider defaultValue={this.rightThresholdPercentage} onChangeCommitted={this.setRightSliderValue} aria-labelledby="discrete-slider-always" step={1} valueLabelDisplay="on" />
               </div>
               <p>Right Click Sensitivity</p>
               <SignalComponent onRef={(ref) => (this.signalComponentRef = ref)} parentComponentName={"real_time_game_play"} />

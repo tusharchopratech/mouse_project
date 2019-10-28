@@ -58,6 +58,7 @@ public:
     GloveTools();
 
     int startRealTime(double thresholdPrecentageLeft, double thresholdPrecentageRight);
+    void setThresholds(double thresholdPrecentageLeft, double thresholdPrecentageRight);
     void stopRealTime();
     void startRealTimeSampleCollectionsForRealTimePlay();
     void writeRealTimeData();

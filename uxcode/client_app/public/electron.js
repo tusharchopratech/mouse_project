@@ -1,5 +1,5 @@
-const electron = require('electron')
-const { app, BrowserWindow } = require("electron");
+const electron = require("electron");
+const {app, BrowserWindow} = require("electron");
 const ipc = require("electron").ipcMain;
 var process = require("process");
 const path = require("path");
@@ -13,7 +13,7 @@ var process_to_kill = [];
 var startReceivingRealTimeData = false;
 let mainWindow;
 
-global.shared_object = { current_envirnoment: process.env.NODE_ENV };
+global.shared_object = {current_envirnoment: process.env.NODE_ENV};
 
 // For Prod, real time data, start backend automatically
 var backEndPath = "./resources/src/extra-resources/main.exe";
@@ -28,8 +28,8 @@ else if (process.env.NODE_ENV == "stage") {
 }
 
 function createWindow() {
-  const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize
-  height2 = height-5;
+  const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize;
+  height2 = height - 5;
   mainWindow = new BrowserWindow({
     minWidth: width,
     minHeight: height,
@@ -38,15 +38,11 @@ function createWindow() {
     title: "Desktop App",
     webPreferences: {
       nodeIntegration: true
-    },
+    }
     // resizable: false,
   });
   // mainWindow.maximize();
-  mainWindow.loadURL(
-    isDev
-      ? "http://localhost:3000"
-      : `file://${path.join(__dirname, "../build/index.html")}`
-  );
+  mainWindow.loadURL(isDev ? "http://localhost:3000" : `file://${path.join(__dirname, "../build/index.html")}`);
   mainWindow.on("closed", function() {
     mainWindow = null;
   });
@@ -76,27 +72,17 @@ app.on("window-all-closed", function() {
 ipc.on("socket_data_send", (event, data) => {
   if (data == "start_raw_real_time_data") {
     startReceivingRealTimeData = true;
-    client.write(
-      JSON.stringify({ type: "message", value: "raw_real_time_data" }) + "*****"
-    );
+    client.write(JSON.stringify({type: "message", value: "raw_real_time_data"}) + "*****");
   } else if (data == "stop_raw_real_time_data") {
     startReceivingRealTimeData = false;
   } else if (data == "start_training") {
-    client.write(
-      JSON.stringify({ type: "message", value: "start_training" }) + "*****"
-    );
+    client.write(JSON.stringify({type: "message", value: "start_training"}) + "*****");
   } else if (data == "stop_training") {
-    client.write(
-      JSON.stringify({ type: "message", value: "stop_training" }) + "*****"
-    );
+    client.write(JSON.stringify({type: "message", value: "stop_training"}) + "*****");
   } else if (data == "start_real_time") {
-    client.write(
-      JSON.stringify({ type: "message", value: "start_real_time" }) + "*****"
-    );
-  }else if (data == "stop_real_time") {
-    client.write(
-      JSON.stringify({ type: "message", value: "stop_real_time" }) + "*****"
-    );
+    client.write(JSON.stringify({type: "message", value: "start_real_time"}) + "*****");
+  } else if (data == "stop_real_time") {
+    client.write(JSON.stringify({type: "message", value: "stop_real_time"}) + "*****");
   } else {
     client.write(data + "*****");
   }
@@ -126,10 +112,7 @@ function startBackend() {
   var error = false;
   var processData = child(backEndPath, function(err, data) {
     if (err) {
-      mainWindow.webContents.send(
-        "internal_ipc_error",
-        JSON.stringify({ type: "error", value: err })
-      );
+      mainWindow.webContents.send("internal_ipc_error", JSON.stringify({type: "error", value: err}));
       error = true;
     } else {
       error = false;
@@ -137,15 +120,9 @@ function startBackend() {
   });
 
   if (error) {
-    mainWindow.webContents.send(
-      "internal_ipc",
-      JSON.stringify({ type: "status", value: "backend_connection_error" })
-    );
+    mainWindow.webContents.send("internal_ipc", JSON.stringify({type: "status", value: "backend_connection_error"}));
   } else {
-    mainWindow.webContents.send(
-      "internal_ipc",
-      JSON.stringify({ type: "status", value: "backend_connected" })
-    );
+    mainWindow.webContents.send("internal_ipc", JSON.stringify({type: "status", value: "backend_connected"}));
     process_to_kill.push(processData.pid);
     setTimeout(connectSocket, 3000);
   }
@@ -155,10 +132,7 @@ function connectSocket() {
   client = null;
   client = new net.Socket();
   client.connect(27015, "localhost", function() {
-    mainWindow.webContents.send(
-      "internal_ipc",
-      JSON.stringify({ type: "status", value: "socket_connected" })
-    );
+    mainWindow.webContents.send("internal_ipc", JSON.stringify({type: "status", value: "socket_connected"}));
     mainWindow.webContents.send(
       "internal_ipc",
       JSON.stringify({
@@ -172,26 +146,17 @@ function connectSocket() {
     // console.log(String(data), " at ", new Date().getTime());
     if (startReceivingRealTimeData) {
       // client.write('raw_real_time_data' + '*****');
-      client.write(
-        JSON.stringify({ type: "message", value: "raw_real_time_data" }) +
-          "*****"
-      );
+      client.write(JSON.stringify({type: "message", value: "raw_real_time_data"}) + "*****");
     }
     if (mainWindow != null) {
-      mainWindow.webContents.send(
-        "socket_data_received",
-        new Buffer(data).toString("ascii")
-      );
+      mainWindow.webContents.send("socket_data_received", new Buffer(data).toString("ascii"));
     }
   });
 
   client.on("close", function() {
     isSocketConnect = false;
     if (mainWindow != null) {
-      mainWindow.webContents.send(
-        "internal_ipc",
-        JSON.stringify({ type: "status", value: "socket_disconnected" })
-      );
+      mainWindow.webContents.send("internal_ipc", JSON.stringify({type: "status", value: "socket_disconnected"}));
     }
   });
 
