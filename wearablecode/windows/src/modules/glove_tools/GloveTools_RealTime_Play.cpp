@@ -49,8 +49,17 @@ void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
         }
         else
         {
-            while (t1 == mDaq.getChannelOneVoltage(0) || t2 == mDaq.getChannelTwoVoltage(0) || t3 == mDaq.getChannelThreeVoltage(0) || t4 == mDaq.getChannelFourVoltage(0))
+            if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
             {
+                while (t1 == mDaq.getChannelOneVoltage(0) || t2 == mDaq.getChannelTwoVoltage(0) || t3 == mDaq.getChannelThreeVoltage(0) || t4 == mDaq.getChannelFourVoltage(0))
+                {
+                }
+            }
+            else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+            {
+                while (t1 == stm32.getChannelOneVoltage(0) || t2 == stm32.getChannelTwoVoltage(0) || t3 == stm32.getChannelThreeVoltage(0) || t4 == stm32.getChannelFourVoltage(0))
+                {
+                }
             }
         }
 
@@ -77,10 +86,20 @@ void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
 
         for (int i = 0; i < GB_TOTAL_NUMBER_OF_SAMPLES; i++)
         {
-            tmp.push_back(mDaq.getChannelOneVoltage(i));
-            tmp.push_back(mDaq.getChannelTwoVoltage(i));
-            tmp.push_back(mDaq.getChannelThreeVoltage(i));
-            tmp.push_back(mDaq.getChannelFourVoltage(i));
+            if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
+            {
+                tmp.push_back(mDaq.getChannelOneVoltage(i));
+                tmp.push_back(mDaq.getChannelTwoVoltage(i));
+                tmp.push_back(mDaq.getChannelThreeVoltage(i));
+                tmp.push_back(mDaq.getChannelFourVoltage(i));
+            }
+            else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+            {
+                tmp.push_back(stm32.getChannelOneVoltage(i));
+                tmp.push_back(stm32.getChannelTwoVoltage(i));
+                tmp.push_back(stm32.getChannelThreeVoltage(i));
+                tmp.push_back(stm32.getChannelFourVoltage(i));
+            }
             raw_data_10_samples.push_back(tmp);
             tmp.push_back(lc);
             tmp.push_back(rc);

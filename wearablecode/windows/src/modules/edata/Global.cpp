@@ -23,19 +23,23 @@ string gb_getCurrentTimeInMilliseconds()
 
 double gb_getCurrentTimeInMillisecondsDouble()
 {   
-    // string tt = to_string(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count());
-    // return  atof(tt.c_str());
     return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 }
 
-void gb_setCurrentEnvirnoment(string env)
+void gb_setCurrentEnvirnoment(string envirnomentName, string hardwareType)
 {
-    currentEnvirnoment = env;
+    currentEnvirnoment = envirnomentName;
+    currentHardwareType = hardwareType;
 }
 
 string gb_getCurrentEnvirnoment()
 {
     return currentEnvirnoment;
+}
+
+string gb_getCurrentHardwareType()
+{
+    return currentHardwareType;
 }
 
 double computeCovarianceVector(std::vector<double> v1, std::vector<double> v2)

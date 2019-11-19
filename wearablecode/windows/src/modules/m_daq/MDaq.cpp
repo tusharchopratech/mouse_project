@@ -43,6 +43,18 @@ void MDaq::setupDaqCard()
     HighResAD = FALSE;
     Options = SCALEDATA;
 
+    for (int i = 0; i < 8; i++)
+    {
+        f_n[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, (double)(60.0 * (i + 1)), 15.0);
+    }
+    double lf = 50;
+    double hf = 70;
+    f_bs.setup(GB_FILTER_ORDER, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, (lf + hf) / 2, (hf - lf));
+
+    lf = 20;
+    hf = 500;
+    f_bp.setup(6, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, (lf + hf) / 2, (hf - lf));
+
     cbDeclareRevision(&RevLevel);
     cbErrHandling(PRINTALL, DONTSTOP);
     cbGetConfig(BOARDINFO, BoardNum, 0, BIADRES, &ADRes);
@@ -56,6 +68,14 @@ double MDaq::getChannelOneVoltage(int samplePosition)
 
 double MDaq::getChannelTwoVoltage(int samplePosition)
 {
+    // double tmp = channelVoltage2[samplePosition];
+    // double tmp = f_bp.filter(channelVoltage2[samplePosition]);
+    // for (int i = 0; i < 8; i++)
+    // {
+    //     tmp = f_n[i].filter(tmp);
+    // }
+    // // tmp = f_bp.filter(tmp);
+    // return tmp;
     return channelVoltage2[samplePosition];
 }
 

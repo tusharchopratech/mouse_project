@@ -30,6 +30,10 @@ private:
     double *ADData;
     double *channelVoltage1, *channelVoltage2, *channelVoltage3, *channelVoltage4;
 
+    Iir::RBJ::IIRNotch f_n[8];
+	Iir::Butterworth::BandStop<GB_FILTER_ORDER> f_bs;
+    Iir::Butterworth::BandPass<6> f_bp;
+
 public:
     MDaq()
     {

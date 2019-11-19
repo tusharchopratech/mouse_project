@@ -5,6 +5,7 @@
 #include <list>
 #include "..\filter\FilterTools.cpp"
 #include "..\m_daq\MDaq.cpp"
+#include "..\stm32\STM32.cpp"
 #include "..\edata\Global.cpp"
 #include "..\mouse\MouseFunctions.cpp"
 #include "..\socket\SocketServer.cpp"
@@ -26,6 +27,8 @@ private:
     std::vector<int> demoTrainingDataLeftClick, demoTrainingDataRightClick, demoTrainingDataThumbClick;
 
     std::vector<std::vector<double>> raw_data_n_samples;
+
+     std::vector<std::vector<double>> rawDataVectorForSTM32;
 
     int demoDataIndex = 0;
     int start = 0;
@@ -52,6 +55,7 @@ private:
     int *lC, *rC, *tC;
     FilterTools filterTools;
     MDaq mDaq;
+    STM32 stm32;
     MyAlgo myAlgo;
 
 public:

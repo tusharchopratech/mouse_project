@@ -7,10 +7,10 @@
 
 using namespace std;
 
-static const int N=4;
+static const int N = 4;
 
 // Global Configurations
-static const double GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD = 2048;
+static const double GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD = 2048.0;
 static const int GB_TOTAL_NUMBER_OF_SAMPLES = 10;
 
 // DAQ card configurations
@@ -22,12 +22,17 @@ static const double GB_FILTER_LOW_FREQUENCY = 110;
 static const double GB_FILTER_HIGH_FREQUENCY = 250;
 static const int GB_FILTER_ORDER = 3;
 
-//DEBUGGING STAGE, No Hardware, Using Simulated Recordings 
+//DEBUGGING STAGE, No Hardware, Using Simulated Recordings
 static const string GB_ENV_DEVELOPMENT = "development";
 //DEBUGGING STAGE, Using Hardware
 static const string GB_ENV_STAGING = "staging";
 //PRODUCTION STAGE, Using Hardware
 static const string GB_ENV_PRODUCTION = "production";
+
+static const string GB_HARDWARE_MDAQ = "mdaq";
+static const string GB_HARDWARE_STM32 = "stm32";
+
+
 
 static const string GB_IMPULSE_DIRECTORY = "C:/impulse_data";
 static const string GB_IMPULSE_DEV_DIRECTORY = "./../debug/dataset";
@@ -41,10 +46,10 @@ static const double GB_CLICK_DETECTION_INTERVAL_STARTING = 0.1;
 
 static const double GB_TRAINING_SAMPLE_TAKEN_FROM_CLASSIFICATION = 0.50;
 
+static const int GB_MAX_SERIAL_DATA_BYTES_LENGTH = 12;
 
-
-string currentEnvirnoment; 
-
+string currentEnvirnoment;
+string currentHardwareType;
 
 // Training
 /*

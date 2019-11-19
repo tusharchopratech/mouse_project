@@ -5,14 +5,28 @@
 
 string GloveTools::getRealTimeRawData()
 {
-    if (chV1[0] == 0.0 || chV2[0] == 0.0 || chV3[0] == 0.0 || chV4[0] == 0.0)
+
+    if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
     {
-    }
-    else
-    {
-        while (chV1[0] == mDaq.getChannelOneVoltage(0) || chV2[0] == mDaq.getChannelTwoVoltage(0) || chV3[0] == mDaq.getChannelThreeVoltage(0) || chV4[0] == mDaq.getChannelFourVoltage(0))
+        if (chV1[0] == 0.0 || chV2[0] == 0.0 || chV3[0] == 0.0 || chV4[0] == 0.0)
         {
         }
+        else
+        {
+            while (chV1[0] == mDaq.getChannelOneVoltage(0) || chV2[0] == mDaq.getChannelTwoVoltage(0) || chV3[0] == mDaq.getChannelThreeVoltage(0) || chV4[0] == mDaq.getChannelFourVoltage(0))
+            {
+            }
+        }
+    }
+    else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+    {
+        cout << "1" << endl;
+        while (stm32.getHowManyNewSamples() < 10)
+        {
+            cout<<stm32.getHowManyNewSamples()<<endl;
+        }
+        stm32.setNewSamplesToZero();
+        cout << "2" << endl;
     }
 
     string chV1String = "", chV2String = "", chV3String = "", chV4String = "";
@@ -24,10 +38,22 @@ string GloveTools::getRealTimeRawData()
     tc = MouseFunctions::Instance().getThumbMouseStatus();
     for (int i = 0; i < GB_TOTAL_NUMBER_OF_SAMPLES; i++)
     {
-        chV1[i] = mDaq.getChannelOneVoltage(i);
-        chV2[i] = mDaq.getChannelTwoVoltage(i);
-        chV3[i] = mDaq.getChannelThreeVoltage(i);
-        chV4[i] = mDaq.getChannelFourVoltage(i);
+        if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
+        {
+            chV1[i] = mDaq.getChannelOneVoltage(i);
+            chV2[i] = mDaq.getChannelTwoVoltage(i);
+            chV3[i] = mDaq.getChannelThreeVoltage(i);
+            chV4[i] = mDaq.getChannelFourVoltage(i);
+        }
+        else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+        {
+            cout << "3" << endl;
+            chV1[i] = stm32.getChannelOneVoltage(i);
+            chV2[i] = stm32.getChannelTwoVoltage(i);
+            chV3[i] = stm32.getChannelThreeVoltage(i);
+            chV4[i] = stm32.getChannelFourVoltage(i);
+            cout << "4" << endl;
+        }
         lC[i] = lc;
         rC[i] = rc;
         tC[i] = tc;

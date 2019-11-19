@@ -33,8 +33,17 @@ void GloveTools::startTrainingRecording()
         }
         else
         {
-            while (t1 == mDaq.getChannelOneVoltage(0) || t2 == mDaq.getChannelTwoVoltage(0) || t3 == mDaq.getChannelThreeVoltage(0) || t4 == mDaq.getChannelFourVoltage(0))
+            if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
             {
+                while (t1 == mDaq.getChannelOneVoltage(0) || t2 == mDaq.getChannelTwoVoltage(0) || t3 == mDaq.getChannelThreeVoltage(0) || t4 == mDaq.getChannelFourVoltage(0))
+                {
+                }
+            }
+            else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+            {
+                while (t1 == stm32.getChannelOneVoltage(0) || t2 == stm32.getChannelTwoVoltage(0) || t3 == stm32.getChannelThreeVoltage(0) || t4 == stm32.getChannelFourVoltage(0))
+                {
+                }
             }
         }
 
@@ -44,10 +53,20 @@ void GloveTools::startTrainingRecording()
 
         for (int i = 0; i < GB_TOTAL_NUMBER_OF_SAMPLES; i++)
         {
-            trainingDataChannel1.push_back(mDaq.getChannelOneVoltage(i));
-            trainingDataChannel2.push_back(mDaq.getChannelTwoVoltage(i));
-            trainingDataChannel3.push_back(mDaq.getChannelThreeVoltage(i));
-            trainingDataChannel4.push_back(mDaq.getChannelFourVoltage(i));
+            if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
+            {
+                trainingDataChannel1.push_back(mDaq.getChannelOneVoltage(i));
+                trainingDataChannel2.push_back(mDaq.getChannelTwoVoltage(i));
+                trainingDataChannel3.push_back(mDaq.getChannelThreeVoltage(i));
+                trainingDataChannel4.push_back(mDaq.getChannelFourVoltage(i));
+            }
+            else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+            {
+                trainingDataChannel1.push_back(stm32.getChannelOneVoltage(i));
+                trainingDataChannel2.push_back(stm32.getChannelTwoVoltage(i));
+                trainingDataChannel3.push_back(stm32.getChannelThreeVoltage(i));
+                trainingDataChannel4.push_back(stm32.getChannelFourVoltage(i));
+            }
             trainingDataLeftClick.push_back(lCStatus);
             trainingDataRightClick.push_back(rCStatus);
             trainingDataThumbClick.push_back(tCStatus);

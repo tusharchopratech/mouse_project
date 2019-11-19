@@ -10,9 +10,18 @@ GloveTools::GloveTools()
 {
     if (gb_getCurrentEnvirnoment() == GB_ENV_STAGING || gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION)
     {
-        std::thread newThread(&MDaq::getVoltageFromChannel, mDaq);
-        newThread.detach();
+        if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+        {
+            std::thread newThread(&STM32::startRecordingData, stm32);
+            newThread.detach();
+        }
+        else if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
+        {
+            std::thread newThread2(&MDaq::getVoltageFromChannel, mDaq);
+            newThread2.detach();
+        }
     }
+
     MouseFunctions::Instance().setupMouseMonitoring();
 
     chV1 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];

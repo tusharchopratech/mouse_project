@@ -15,7 +15,6 @@ private:
     double lf = GB_FILTER_LOW_FREQUENCY;
     double hf = GB_FILTER_HIGH_FREQUENCY;
     Iir::Butterworth::BandPass<GB_FILTER_ORDER> fCh1, fCh2, fCh3, fCh4;
-
 public:
     FilterTools()
     {
