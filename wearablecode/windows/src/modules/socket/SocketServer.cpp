@@ -79,8 +79,8 @@ int __cdecl SocketServer::setupSocket()
     {
         gloveTools.readDemoData();
     }
-    printf("\n\nReady to connect Socket on port : %s", DEFAULT_PORT);
-    printf("\nPlease send connect request and data!!\n\n");
+    printf("Socket is ready at port : %s !\n", DEFAULT_PORT);
+    //printf("\nPlease send connect request and data!!\n\n");
 
     ClientSocket = accept(ListenSocket, NULL, NULL);
     if (ClientSocket == INVALID_SOCKET)
@@ -183,11 +183,14 @@ void SocketServer::sendRealTimeLogs()
     while (isRealTimeRunning)
     {
         Json json = gloveTools.getRealTimeGamePlayDataForDisplay();
-        json["type"] = "real_time_logs_and_signals_data";
-        finalSocketData = json.dump();
-        // cout<<finalSocketData<<endl;
-        send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
-        Sleep(100);
+        if (json["status"] == "success")
+        {
+            json["type"] = "real_time_logs_and_signals_data";
+            finalSocketData = json.dump();
+            // cout<<finalSocketData<<endl;
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+            Sleep(100);
+        }
     }
 }
 
@@ -197,10 +200,13 @@ void SocketServer::sendRealTimeTrainingData()
     while (isTrainingRunning)
     {
         Json json = gloveTools.getRealTimeTraingDataForDisplay();
-        json["type"] = "real_time_training_data";
-        finalSocketData = json.dump();
-        send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
-        Sleep(300);
+        if (json["status"] == "success")
+        {
+            json["type"] = "real_time_training_data";
+            finalSocketData = json.dump();
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+            Sleep(100);
+        }
     }
 }
 

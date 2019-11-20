@@ -231,23 +231,28 @@ class UserTraining extends Component {
     ipcRenderer.on(
       "socket_data_received",
       function(event, data) {
-        var jsonObject = JSON.parse(String(data));
-        if (jsonObject.type == "algo_outputs") {
-          console.log(jsonObject);
-          this.setState({
-            start_showing_random_clicks: false,
-            showCaliberationButton: false,
-            openLoadingDialogForUserTraining: false
-          });
-          this.props.callbackSetMainSection("report", jsonObject);
-        } else if (jsonObject.type == "communication_success" && jsonObject.value == "settings_set") {
-          console.log("Configuration Set!!");
-          this.setState({
-            openConfigDialog: false
-          });
-        } else if (jsonObject.type == "real_time_training_data") {
-          // console.log(jsonObject);
-          this.signalComponentRef.addPoints(jsonObject);
+        try {
+          var jsonObject = JSON.parse(String(data));
+          if (jsonObject.type == "algo_outputs") {
+            console.log(jsonObject);
+            this.setState({
+              start_showing_random_clicks: false,
+              showCaliberationButton: false,
+              openLoadingDialogForUserTraining: false
+            });
+            this.props.callbackSetMainSection("report", jsonObject);
+          } else if (jsonObject.type == "communication_success" && jsonObject.value == "settings_set") {
+            console.log("Configuration Set!!");
+            this.setState({
+              openConfigDialog: false
+            });
+          } else if (jsonObject.type == "real_time_training_data") {
+            // console.log(jsonObject);
+            this.signalComponentRef.addPoints(jsonObject);
+          }
+        } catch (e) {
+          console.log("Error in paring data ", String(data));
+          console.log(e);
         }
       }.bind(this)
     );

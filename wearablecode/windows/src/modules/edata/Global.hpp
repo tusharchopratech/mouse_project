@@ -34,7 +34,7 @@ static const string GB_HARDWARE_STM32 = "stm32";
 
 
 
-static const string GB_IMPULSE_DIRECTORY = "C:/impulse_data";
+static const string GB_IMPULSE_DIRECTORY = "C:/impulse_data_2";
 static const string GB_IMPULSE_DEV_DIRECTORY = "./../debug/dataset";
 
 static const double TRUE_POSTIVE_MILLISECONDS_CHECK = 100;

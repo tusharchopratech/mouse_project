@@ -44,23 +44,21 @@ void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
     {
         tmp.clear();
         raw_data_10_samples.clear();
-        if (t1 == 0.0 || t2 == 0.0 || t3 == 0.0 || t4 == 0.0)
+        if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
         {
-        }
-        else
-        {
-            if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
+            if (t1 == 0.0 || t2 == 0.0 || t3 == 0.0 || t4 == 0.0)
+            {
+            }
+            else
             {
                 while (t1 == mDaq.getChannelOneVoltage(0) || t2 == mDaq.getChannelTwoVoltage(0) || t3 == mDaq.getChannelThreeVoltage(0) || t4 == mDaq.getChannelFourVoltage(0))
                 {
                 }
             }
-            else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
-            {
-                while (t1 == stm32.getChannelOneVoltage(0) || t2 == stm32.getChannelTwoVoltage(0) || t3 == stm32.getChannelThreeVoltage(0) || t4 == stm32.getChannelFourVoltage(0))
-                {
-                }
-            }
+        }
+        else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+        {
+            stm32.recordSamplesFromSTM32();
         }
 
         int lc = MouseFunctions::Instance().getLeftMouseStatus();
@@ -168,10 +166,12 @@ Json GloveTools::getRealTimeGamePlayDataForDisplay()
         json["impulse_right_click"] = v9;
 
         realTimeGamePlayDataForDisplaySizeIndex = size;
+        json["status"] = "success";
     }
     catch (exception &e)
     {
         cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
+        json["status"] = "failed";
     }
     return json;
 }

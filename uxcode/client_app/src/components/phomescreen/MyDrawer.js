@@ -64,7 +64,7 @@ class MyDrawer extends Component {
                         <ListItemIcon>
                             <MouseIcon />
                         </ListItemIcon>
-                        <ListItemText primary={'User Traning'} />
+                        <ListItemText primary={'User Training'} />
                     </ListItem>
                     <ListItem button onClick={this.handleClick.bind(this, 'report')}>
                         <ListItemIcon>

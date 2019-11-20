@@ -49,7 +49,7 @@ private:
 
     string participantName;
     int trialNumber, numberOfChannelesUsedForTraining;
-    int clickType = 1; // only two values: 1 is for left and 2 is for right
+    int clickType = 3; // only two values: 1 is for left and 2 is for right
 
     double *chV1, *chV2, *chV3, *chV4;
     int *lC, *rC, *tC;

@@ -28,23 +28,21 @@ void GloveTools::startTrainingRecording()
 
     while (isTrainingRunning)
     {
-        if (t1 == 0.0 || t2 == 0.0 || t3 == 0.0 || t4 == 0.0)
+        if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
         {
-        }
-        else
-        {
-            if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
+            if (t1 == 0.0 || t2 == 0.0 || t3 == 0.0 || t4 == 0.0)
+            {
+            }
+            else
             {
                 while (t1 == mDaq.getChannelOneVoltage(0) || t2 == mDaq.getChannelTwoVoltage(0) || t3 == mDaq.getChannelThreeVoltage(0) || t4 == mDaq.getChannelFourVoltage(0))
                 {
                 }
             }
-            else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
-            {
-                while (t1 == stm32.getChannelOneVoltage(0) || t2 == stm32.getChannelTwoVoltage(0) || t3 == stm32.getChannelThreeVoltage(0) || t4 == stm32.getChannelFourVoltage(0))
-                {
-                }
-            }
+        }
+        else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+        {
+            stm32.recordSamplesFromSTM32();
         }
 
         int lCStatus = MouseFunctions::Instance().getLeftMouseStatus();
@@ -72,46 +70,62 @@ void GloveTools::startTrainingRecording()
             trainingDataThumbClick.push_back(tCStatus);
         }
 
-        t1 = mDaq.getChannelOneVoltage(0);
-        t2 = mDaq.getChannelTwoVoltage(0);
-        t3 = mDaq.getChannelThreeVoltage(0);
-        t4 = mDaq.getChannelFourVoltage(0);
+        if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
+        {
+            t1 = mDaq.getChannelOneVoltage(0);
+            t2 = mDaq.getChannelTwoVoltage(0);
+            t3 = mDaq.getChannelThreeVoltage(0);
+            t4 = mDaq.getChannelFourVoltage(0);
+        }
     }
 }
 
 Json GloveTools::getRealTimeTraingDataForDisplay()
 {
     Json json;
-    std::vector<double> v1, v2, v3, v4, v5, v6, v7;
-    int size = trainingDataChannel1.size();
-
-    int start = realTimeTraingDataForDisplaySizeIndex;
-    int end = size;
-    for (int i = start; i < end; i++)
+    try
     {
-        v1.push_back(trainingDataChannel1.at(i));
-        v2.push_back(trainingDataChannel2.at(i));
-        v3.push_back(trainingDataChannel3.at(i));
-        v4.push_back(trainingDataChannel4.at(i));
-        v5.push_back(trainingDataLeftClick.at(i));
-        v6.push_back(trainingDataRightClick.at(i));
-        v7.push_back(trainingDataThumbClick.at(i));
+        std::vector<double> v1, v2, v3, v4, v5, v6, v7;
+        int size = trainingDataChannel1.size();
+
+        int start = realTimeTraingDataForDisplaySizeIndex;
+        int end = size;
+        for (int i = start; i < end; i++)
+        {
+            v1.push_back(trainingDataChannel1.at(i));
+            v2.push_back(trainingDataChannel2.at(i));
+            v3.push_back(trainingDataChannel3.at(i));
+            v4.push_back(trainingDataChannel4.at(i));
+            v5.push_back(trainingDataLeftClick.at(i));
+            v6.push_back(trainingDataRightClick.at(i));
+            v7.push_back(trainingDataThumbClick.at(i));
+        }
+        json["total_samples"] = v1.size();
+        json["ch_v1"] = v1;
+        json["ch_v2"] = v2;
+        json["ch_v3"] = v3;
+        json["ch_v4"] = v4;
+        json["left_click"] = v5;
+        json["right_click"] = v6;
+        json["thumb_click"] = v7;
+        realTimeTraingDataForDisplaySizeIndex = size;
+        json["status"] = "success";
     }
-    json["total_samples"] = v1.size();
-    json["ch_v1"] = v1;
-    json["ch_v2"] = v2;
-    json["ch_v3"] = v3;
-    json["ch_v4"] = v4;
-    json["left_click"] = v5;
-    json["right_click"] = v6;
-    json["thumb_click"] = v7;
-    realTimeTraingDataForDisplaySizeIndex = size;
+    catch (exception &e)
+    {
+        cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
+        json["status"] = "failed";
+    }
     return json;
 }
 
 Json GloveTools::stopTraining()
 {
+    cout << "Training Log 1 : Stopping Training" << endl;
     isTrainingRunning = false;
+    Sleep(100);
+    Json result;
+    result["status"] = "failed";
     try
     {
         if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
@@ -157,12 +171,16 @@ Json GloveTools::stopTraining()
         {
             cout << "Error! File is not open.";
         }
+        cout << "Training Log 2 : Training Data Saved" << endl;
+        Json j;
+        j = myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber, clickType);
+        j["status"] = "success";
+        return j;
     }
     catch (exception &e)
     {
         cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
     }
-    Json result = myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber, clickType);
     return result;
 }
 

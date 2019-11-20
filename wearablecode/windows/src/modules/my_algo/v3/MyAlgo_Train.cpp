@@ -36,12 +36,13 @@ std::vector<double> MyAlgo::fnTrainBothClicks(std::vector<std::vector<std::vecto
     {
         int channelTemp = channelId.at(i) - 1;
         double thresholdTemp = featData.at(i).at(1).at(channelTemp);
-
+        // cout << "W2" << " ";
         for (int j = 0; j < featData.at(i).size(); j++)
         {
             // Get the maximum except the period 100 ms before the left click and within left click
             if (clickAssemble.at(j) != 4 && clickAssemble.at(j) != clickType)
             {
+
                 if (thresholdTemp < featData.at(i).at(j).at(channelTemp))
                     thresholdTemp = featData.at(i).at(j).at(channelTemp);
             }
@@ -49,8 +50,6 @@ std::vector<double> MyAlgo::fnTrainBothClicks(std::vector<std::vector<std::vecto
         thresholdAssemble.push_back(thresholdTemp);
         // how about if the threshold is bigger than that of 0-100 ms?
     }
-
-
     return thresholdAssemble;
 }
 

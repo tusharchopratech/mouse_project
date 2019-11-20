@@ -5,28 +5,35 @@
 void STM32::setupSerialPort()
 {
 
+    newSampleReceived = 0;
     channelVoltage1 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
     channelVoltage2 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
     channelVoltage3 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
     channelVoltage4 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
+
+    if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
+    {
+        serialPort = new SerialPort();
+        while (!serialPort->isConnected())
+        {
+            serialPort = new SerialPort();
+        }
+        if (serialPort->isConnected())
+        {
+            std::cout << "Serial port connection done !" << endl;
+            // writeToSerialPort();
+        }
+    }
 }
 
-void STM32::startRecordingData()
+void STM32::recordSamplesFromSTM32()
 {
-    serialPort = new SerialPort(portName);
-    while (!serialPort->isConnected())
-    {
-        serialPort = new SerialPort(portName);
-    }
-    if (serialPort->isConnected())
-    {
-        std::cout << "Connection established at port " << portName << endl;
-        writeToSerialPort();
-    }
-    while (1)
+    sampleIndex = 0;
+    while (sampleIndex < GB_TOTAL_NUMBER_OF_SAMPLES)
     {
         readFromSerialPort();
     }
+    Sleep(3);
 }
 
 void STM32::writeToSerialPort()
@@ -36,6 +43,7 @@ void STM32::writeToSerialPort()
 }
 void STM32::readFromSerialPort()
 {
+
     try
     {
         int readResult = serialPort->readSerialPort(incomingData, GB_MAX_SERIAL_DATA_BYTES_LENGTH);
@@ -55,33 +63,13 @@ void STM32::readFromSerialPort()
                     double totalt = vectorOfBytes.at(10) | vectorOfBytes.at(11) << 8;
                     if (totalt == number_1 + number_2 + number_3 + number_4)
                     {
-                        // cout << number_1 << " " << number_2 << " " << number_3 << " " << number_4 << " " << endl;
-                        //cout <<" readFromSerialPort() "<< rawDataVector.size() << endl;
-                        number_1 = 0.00087912 * number_1;
-                        number_2 = 0.00087912 * number_2;
-                        number_3 = 0.00087912 * number_3;
-                        number_4 = 0.00087912 * number_4;
-                        // cout << number_1 << " " << number_2 << " " << number_3 << " " << number_4 << endl;
-
-                        channelVoltage1[sampleIndex] = number_1;
-                        channelVoltage2[sampleIndex] = number_2;
-                        channelVoltage3[sampleIndex] = number_3;
-                        channelVoltage4[sampleIndex] = number_4;
+                        channelVoltage1[sampleIndex] = ((5 * number_1) / 1024.0);
+                        channelVoltage2[sampleIndex] = ((5 * number_2) / 1024.0);
+                        channelVoltage3[sampleIndex] = ((5 * number_3) / 1024.0);
+                        channelVoltage4[sampleIndex] = ((5 * number_4) / 1024.0);
                         sampleIndex++;
-                        newSampleReceived++;
-                        // std::vector<double> tmp;
-                        // tmp.push_back(number_1);
-                        // tmp.push_back(number_2);
-                        // tmp.push_back(number_3);
-                        // tmp.push_back(number_4);
-                        // rawDataVector.push_back(tmp);
-
                         vectorOfBytes.erase(vectorOfBytes.begin(), vectorOfBytes.begin() + 12);
                         deleteChar = false;
-                        if (sampleIndex == GB_TOTAL_NUMBER_OF_SAMPLES)
-                        {
-                            sampleIndex = 0;
-                        }
                     }
                 }
                 if (deleteChar == true)
@@ -97,29 +85,9 @@ void STM32::readFromSerialPort()
     }
 }
 
-std::vector<std::vector<double>> STM32::getNewData()
-{
-    while (rawDataVector.size() < GB_TOTAL_NUMBER_OF_SAMPLES)
-    {
-        cout << " getNewData() " << rawDataVector.size() << endl;
-    }
-
-    std::vector<std::vector<double>> tmp = rawDataVector;
-    rawDataVector.clear();
-    return tmp;
-}
-
-int STM32::getHowManyNewSamples()
-{
-    return newSampleReceived;
-}
-void STM32::setNewSamplesToZero()
-{
-    newSampleReceived = 0;
-}
-
 double STM32::getChannelOneVoltage(int samplePosition)
 {
+    // return vectorChannel1.at(samplePosition);
     return channelVoltage1[samplePosition];
 }
 

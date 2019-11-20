@@ -10,12 +10,7 @@ GloveTools::GloveTools()
 {
     if (gb_getCurrentEnvirnoment() == GB_ENV_STAGING || gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION)
     {
-        if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
-        {
-            std::thread newThread(&STM32::startRecordingData, stm32);
-            newThread.detach();
-        }
-        else if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
+        if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
         {
             std::thread newThread2(&MDaq::getVoltageFromChannel, mDaq);
             newThread2.detach();

@@ -5,7 +5,6 @@
 * LICENSE: MIT
 */
 
-
 #ifndef SERIALPORT_H
 #define SERIALPORT_H
 
@@ -22,14 +21,18 @@ using namespace std;
 class SerialPort
 {
 private:
+    // char *portName = "\\\\.\\COM6";
+    string comPort = "\\\\.\\";
     HANDLE handler;
     bool connected;
     COMSTAT status;
     DWORD errors;
+
 public:
-    SerialPort(char *portName);
+    SerialPort();
     ~SerialPort();
 
+    string getSerialCOMport();
     int readSerialPort(unsigned char *buffer, unsigned int buf_size);
     bool writeSerialPort(unsigned char *buffer, unsigned int buf_size);
     bool isConnected();

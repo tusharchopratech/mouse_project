@@ -5,7 +5,6 @@
 
 string GloveTools::getRealTimeRawData()
 {
-
     if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
     {
         if (chV1[0] == 0.0 || chV2[0] == 0.0 || chV3[0] == 0.0 || chV4[0] == 0.0)
@@ -20,13 +19,8 @@ string GloveTools::getRealTimeRawData()
     }
     else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
     {
-        cout << "1" << endl;
-        while (stm32.getHowManyNewSamples() < 10)
-        {
-            cout<<stm32.getHowManyNewSamples()<<endl;
-        }
-        stm32.setNewSamplesToZero();
-        cout << "2" << endl;
+        stm32.recordSamplesFromSTM32();
+        // gb_logTime();
     }
 
     string chV1String = "", chV2String = "", chV3String = "", chV4String = "";
@@ -47,12 +41,10 @@ string GloveTools::getRealTimeRawData()
         }
         else if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
         {
-            cout << "3" << endl;
             chV1[i] = stm32.getChannelOneVoltage(i);
             chV2[i] = stm32.getChannelTwoVoltage(i);
             chV3[i] = stm32.getChannelThreeVoltage(i);
             chV4[i] = stm32.getChannelFourVoltage(i);
-            cout << "4" << endl;
         }
         lC[i] = lc;
         rC[i] = rc;
