@@ -11,6 +11,7 @@ SerialPort::SerialPort()
 {
     // char *portName;
     comPort += getSerialCOMport();
+    cout << comPort.c_str() << endl;
     this->connected = false;
     this->handler = CreateFileA(static_cast<LPCSTR>(comPort.c_str()),
                                 GENERIC_READ | GENERIC_WRITE,
@@ -72,7 +73,7 @@ SerialPort::~SerialPort()
 
 string SerialPort::getSerialCOMport()
 {
-    cout<<"Available serial ports :-"<<endl;
+    cout << "Available serial ports :-" << endl;
     string portName = "";
     char lpTargetPath[5000];      // buffer to store the path of the COMPORTS
     for (int i = 0; i < 255; i++) // checking ports from COM0 to COM255
@@ -86,7 +87,7 @@ string SerialPort::getSerialCOMport()
             portName = str;
         }
     }
-    cout<<"Connecting to Port "<<portName<<" !"<<endl;
+    cout << "Connecting to Port " << portName << " !" << endl;
     return portName;
 }
 
@@ -98,6 +99,7 @@ int SerialPort::readSerialPort(unsigned char *buffer, unsigned int buf_size)
     //ClearCommError(this->handler, &this->errors, &this->status);
     if (ReadFile(this->handler, buffer, buf_size, &bytesRead, NULL))
     {
+        PurgeComm(this->handler, PURGE_RXCLEAR);
         return bytesRead;
     }
     return 0;

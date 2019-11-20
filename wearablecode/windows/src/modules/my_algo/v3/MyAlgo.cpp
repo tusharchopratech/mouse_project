@@ -87,24 +87,24 @@ Json MyAlgo::startAnalysing()
         else if (clickType == 3)
         {
             cout << "Training Log 5 : MyAlgo getting results for Both clicks" << endl;
-            cout << "Q1" << endl;
+           
             // For Left Click
             thresholdValuesLeftClick = fnTrainBothClicks(featData, clickLabel, channelIDLeft, 1);
-            cout << "Q2" << endl;
+           
             backupThresholdValuesLeftClick = thresholdValuesLeftClick;
-            cout << "Q3" << endl;
+           
             // For Right Click
             thresholdValuesRightClick = fnTrainBothClicks(featData, clickLabel, channelIDRight, 2);
             backupThresholdValuesRightClick = thresholdValuesRightClick;
-            cout << "Q4" << endl;
+         
             // For Left Click
             results = fnEvaluateBothClicks(featData, channelIDLeft, thresholdValuesLeftClick, clickLabel, 1, sampRate, refractoryTime, numV);
-            cout << "Q5" << endl;
+           
             tmp["true_positives"] = results.at(0);
             tmp["false_positives"] = results.at(1);
             tmp["average_lead"] = results.at(2);
             finalJson["left_click"] = tmp;
-            cout << "Q6" << endl;
+           
             // For Right Click
             results.clear();
             results = fnEvaluateBothClicks(featData, channelIDRight, thresholdValuesRightClick, clickLabel, 2, sampRate, refractoryTime, numV);

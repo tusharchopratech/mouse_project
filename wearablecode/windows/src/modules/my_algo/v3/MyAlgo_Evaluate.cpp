@@ -107,13 +107,12 @@ std::vector<double> MyAlgo::fnEvaluateBothClicks(std::vector<std::vector<std::ve
     try
     {
 
-        cout << "E1" << endl;
         int numFeat = featData.size(); // # of features
         std::vector<int> votCount;
-        int numSample = 0; // # of samples
+        int numSample = featData.at(0).size(); // # of samples
         for (int ii = 0; ii < numFeat; ii++)
         {
-            if (numSample < featData.at(ii).size())
+            if (numSample > featData.at(ii).size())
                 numSample = featData.at(ii).size();
 
             votCount.push_back(0);
@@ -123,7 +122,6 @@ std::vector<double> MyAlgo::fnEvaluateBothClicks(std::vector<std::vector<std::ve
         double numFP = 0;
         std::vector<double> timeLead;
 
-        cout << "E2" << endl;
         while (i < numSample)
         {
             if (clickAssemble.at(i) == 4)
