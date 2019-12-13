@@ -1,0 +1,49 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558 
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "NPM Build",
+            "type": "npm",
+            "script": "build",
+            "path": "uxcode/client_app/",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "VS C++ Build 1",
+            "type": "shell",
+            "command": "cl.exe",
+            "args": [ "/EHsc","/Zi","/bigobj","/W3", "/GA", "/DWIN32","/MT", "/c" ,"${workspaceFolder}/wearablecode/windows/src/main.cpp"],
+            "group": {
+              "kind": "build",
+              "isDefault": true
+            },
+            "options": {
+              "cwd": "${workspaceFolder}/wearablecode/windows/src"
+            },
+            "presentation": {
+              "reveal": "always"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "VS C++ Build 2",
+            "type": "shell",
+            "command": "link",
+            "args": ["/DEBUG","/LIBPATH:..", "main", "kernel32.lib","user32.lib","${workspaceFolder}/wearablecode/windows/lib/daq/cbw64.lib" ,"${workspaceFolder}/wearablecode/windows/lib/filter/iir.lib"],
+            "group": {
+              "kind": "build",
+              "isDefault": true
+            },
+            "options": {
+              "cwd": "${workspaceFolder}/wearablecode/windows/src"
+            },
+            "presentation": {
+              "reveal": "always"
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
