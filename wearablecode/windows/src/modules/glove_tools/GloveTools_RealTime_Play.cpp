@@ -6,26 +6,34 @@
 
 int GloveTools::startRealTime(double thresholdPrecentageLeft, double thresholdPrecentageRight)
 {
-
-    isRealTimeRunning = true;
-    raw_data_n_samples.clear();
-    myAlgo.setThresholdValues(thresholdPrecentageLeft, thresholdPrecentageRight);
-    MouseFunctions::Instance().startRealTimePlay();
-    if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
+    if (myAlgo.getIfThresholdCalculated())
     {
-        std::thread newThread(&GloveTools::startRealTimeSampleCollectionsForRealTimePlay, this);
-        newThread.detach();
-        std::thread newThread2(&GloveTools::writeRealTimeData, this);
-        newThread2.detach();
-    }
-    else if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
-    {
+        isRealTimeRunning = true;
+        raw_data_n_samples.clear();
+        myAlgo.setThresholdValues(thresholdPrecentageLeft, thresholdPrecentageRight);
+        MouseFunctions::Instance().startRealTimePlay();
+        if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
+        {
+            std::thread newThread(&GloveTools::startRealTimeSampleCollectionsForRealTimePlay, this);
+            newThread.detach();
+            std::thread newThread2(&GloveTools::writeRealTimeData, this);
+            newThread2.detach();
+        }
+        else if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+        {
 
-        std::thread newThread(&GloveTools::startDemoSampleCollections, this);
-        newThread.detach();
+            std::thread newThread(&GloveTools::startDemoSampleCollections, this);
+            newThread.detach();
+        }
+        cout << "Real Time Started!" << endl;
+        return 1;
     }
-    cout << "Real Time Started!" << endl;
-    return 1;
+    else
+    {
+        cout << "Real Time Start Failed :-> Threshold not calculated" << endl;
+        return 0;
+    }
+    return 0;
 }
 
 void GloveTools::setThresholds(double thresholdPrecentageLeft, double thresholdPrecentageRight)

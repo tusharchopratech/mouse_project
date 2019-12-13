@@ -69,6 +69,7 @@ public:
     std::vector<double> fnEvaluateBothClicks(std::vector<std::vector<std::vector<double>>> featData, std::vector<int> channelID, std::vector<double> thresholdValues, std::vector<int> clickAssemble, int clickType, int sampRate, double refractoryTime, int numV);
     string fnRealTimeBoth(std::vector<std::vector<double>> rawdata3Samples, int vots);
 
+    bool getIfThresholdCalculated();
     void setThresholdValues(double thresholdPercentageLeft, double thresholdPercentageRight);
     bool detectAndFireImpulseClicks(std::vector<std::vector<double>> raw_data_10_samples);
     bool fnRealTime(std::vector<std::vector<double>> rawdata, std::vector<int> channel, std::vector<double> thresholdValues, int vots);

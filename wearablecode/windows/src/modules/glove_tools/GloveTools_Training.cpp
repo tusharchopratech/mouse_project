@@ -115,6 +115,7 @@ Json GloveTools::getRealTimeTraingDataForDisplay()
     {
         cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
         json["status"] = "failed";
+        
     }
     return json;
 }

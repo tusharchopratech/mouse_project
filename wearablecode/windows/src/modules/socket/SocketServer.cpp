@@ -156,14 +156,24 @@ void SocketServer::startListeningFromSocket()
         }
         else if (obj["type"] == "message" && obj["value"] == "start_real_time")
         {
-            gloveTools.startRealTime(obj["left_threshold_percentage"], obj["right_threshold_percentage"]);
-            isRealTimeRunning = true;
-            Json json;
-            json["type"] = "start_real_time_success";
-            finalSocketData = json.dump();
-            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
-            std::thread newThread(&SocketServer::sendRealTimeLogs, this);
-            newThread.detach();
+            if (gloveTools.startRealTime(obj["left_threshold_percentage"], obj["right_threshold_percentage"]) == 1)
+            {
+                isRealTimeRunning = true;
+                Json json;
+                json["type"] = "start_real_time_success";
+                finalSocketData = json.dump();
+                send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+                std::thread newThread(&SocketServer::sendRealTimeLogs, this);
+                newThread.detach();
+            }
+            else
+            {
+                Json json;
+                json["type"] = "start_real_time_failed";
+                json["message"] = "threshold_not_set";
+                finalSocketData = json.dump();
+                send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+            }
         }
         else if (obj["type"] == "message" && obj["value"] == "stop_real_time")
         {

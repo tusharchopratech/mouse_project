@@ -17,6 +17,7 @@ import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+import * as Constants from '../edata/Constants';
 
 class UserTraining extends Component {
   constructor(props) {
@@ -29,7 +30,7 @@ class UserTraining extends Component {
     this.clickSequence = [];
 
     this.tfNoClicks = 5;
-    this.tfPName = "tushar";
+    this.tfPName = "Erik";
     this.tfnoChannels = 4;
     this.tfTrainNo = 1;
     this.tfClickType = "both";
@@ -49,7 +50,7 @@ class UserTraining extends Component {
     this.state = {
       start_showing_random_clicks: false,
       openLoadingDialogForUserTraining: false,
-      openConfigDialog: true,
+      openConfigDialog: false,
       settingsErrorMessage: "",
       openSnackBar: false
     };
@@ -84,7 +85,16 @@ class UserTraining extends Component {
     }
   };
 
-  onClickStartTraining = (event) => {
+  startTrainingProcessStep1 = () => {
+    this.setState({openConfigDialog: true});
+  };
+
+  closeSettingsDialog = () => {
+    this.setState({openConfigDialog: false});
+  };
+
+  startTrainingProcessStep2 = () => {
+    Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.RUNNING_USER_TRAINING);
     if (window.require("electron").remote.getGlobal("shared_object").current_envirnoment == "dev") {
       this.setState({
         start_showing_random_clicks: false,
@@ -99,13 +109,15 @@ class UserTraining extends Component {
       ReactDOM.findDOMNode(this.refs.start_caliberation_button).style.display = "none";
       setTimeout(
         function() {
-          this.setState({
-            start_showing_random_clicks: true
-          });
+          this.setState({start_showing_random_clicks: true});
         }.bind(this),
         2000
       );
     }
+  };
+
+  startTrainingProcess = (event) => {
+    this.startTrainingProcessStep1();
   };
 
   handleTfChange = (name, event) => {
@@ -225,6 +237,7 @@ class UserTraining extends Component {
   };
 
   componentDidMount = () => {
+    Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_USER_TRAINING);
     console.log("User Training Component Mounted");
     this.right = this.right - document.getElementById("signal-section-div").clientWidth;
     const {ipcRenderer} = window.require("electron");
@@ -240,12 +253,12 @@ class UserTraining extends Component {
               showCaliberationButton: false,
               openLoadingDialogForUserTraining: false
             });
+            Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_USER_TRAINING);
             this.props.callbackSetMainSection("report", jsonObject);
           } else if (jsonObject.type == "communication_success" && jsonObject.value == "settings_set") {
             console.log("Configuration Set!!");
-            this.setState({
-              openConfigDialog: false
-            });
+            this.setState({openConfigDialog: false});
+            this.startTrainingProcessStep2();
           } else if (jsonObject.type == "real_time_training_data") {
             // console.log(jsonObject);
             this.signalComponentRef.addPoints(jsonObject);
@@ -285,14 +298,14 @@ class UserTraining extends Component {
         <div style={{display: "flex", height: "100%", alignItems: "center", flexDirection: "row"}}>
           <div style={{flex: 2, display: "flex", height: "100%", alignItems: "center"}}>
             <div id="test-section-div" style={{textAlign: "center", width: "100%"}}>
-              <Fab variant="extended" color="primary" aria-label="Add" ref="start_caliberation_button" onMouseDown={this.onClickStartTraining.bind(this)} className={classes.margin}>
+              <Fab variant="extended" color="primary" aria-label="Add" ref="start_caliberation_button" onMouseDown={this.startTrainingProcess.bind(this)} className={classes.margin}>
                 <MouseIcon className={classes.extendedIcon} />
                 Start Training
               </Fab>
               {this.renderTest(this.state.start_showing_random_clicks)}
             </div>
           </div>
-          <div id="signal-section-div" style={{flex: 1, display: "flex", height: "100%", alignItems: "center", borderLeft: "1px solid #dcdcdc", padding: "10px"}}>
+          <div id="signal-section-div" style={{flex: 1, display: "flex", height: "100%", alignItems: "center", borderLeft: "1px solid #dcdcdc", padding: "10px",  background: "#ffffff"}}>
             <div style={{display: "flex", flexDirection: "column", width: "100%", alignItems: "center"}}>
               <h5 style={{paddingBottom: "10px"}}>Real Time Signals</h5>
               <SignalComponent onRef={(ref) => (this.signalComponentRef = ref)} parentComponentName={"user_training"} />
@@ -318,37 +331,41 @@ class UserTraining extends Component {
 
         <Dialog open={this.state.openConfigDialog} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" disableBackdropClick={true} disableEscapeKeyDown={true} style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
           <div style={{display: "flex", justifyContent: "center"}}>
-            <DialogTitle id="alert-dialog-title">{"Training Configuration"}</DialogTitle>
+            <DialogTitle id="alert-dialog-title">{"Confirm Settings ?"}</DialogTitle>
           </div>
           <DialogContent style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
             <div style={{display: "flex", justifyContent: "flex-start", flexDirection: "column"}}>
               <div style={{flex: 1}}>
-                <TextField type="number" value={this.tfNoClicks} label="Number of Clicks" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_no_of_clicks")} variant="outlined" />
+                <TextField type="number" defaultValue={this.tfNoClicks} label="Number of Clicks" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_no_of_clicks")} variant="outlined" />
               </div>
               <div style={{flex: 1}}>
-                <TextField label="Participant Name" value={this.tfPName} className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_p_name")} variant="outlined" />
+                <TextField label="Participant Name" defaultValue={this.tfPName} className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_p_name")} variant="outlined" />
               </div>
               <div style={{flex: 1}}>
-                <TextField type="number" value={this.tfnoChannels} label="Number Of Channels" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_no_channels")} variant="outlined" />
+                <TextField type="number" defaultValue={this.tfnoChannels} label="Number Of Channels" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_no_channels")} variant="outlined" />
               </div>
               <div style={{flex: 1}}>
-                <TextField type="number" value={this.tfTrainNo} label="Trial Number" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_trail_no")} variant="outlined" />
+                <TextField type="number" defaultValue={this.tfTrainNo} label="Trial Number" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_trail_no")} variant="outlined" />
               </div>
-              <div style={{flex: 1, width: "100%"}}>
+
+              {/* <div style={{flex: 1, width: "100%"}}>
                 <FormControl className={classes.formControl} style={{width: "100%"}}>
                   <InputLabel>Click Type</InputLabel>
                   <Select onChange={this.handleTfChange.bind(this, "select_click_type")} value={"both"}>
                     <MenuItem value={"left"}>Left</MenuItem>
                     <MenuItem value={"right"}>Right</MenuItem>
                     <MenuItem value={"both"}>Both</MenuItem>
-                    {/* <MenuItem value={"both"}>Both</MenuItem> */}
                   </Select>
                 </FormControl>
-              </div>
+              </div> */}
 
               <div style={{display: "flex", justifyContent: "center", paddingTop: 15}}>
                 <Button variant="outlined" color="primary" className={classes.button} onClick={this.sendSettings}>
-                  Start Training
+                  Start
+                </Button>
+                <div style={{paddingLeft: 10}}></div>
+                <Button variant="outlined" color="primary" className={classes.button} onClick={this.closeSettingsDialog}>
+                  Close
                 </Button>
               </div>
             </div>

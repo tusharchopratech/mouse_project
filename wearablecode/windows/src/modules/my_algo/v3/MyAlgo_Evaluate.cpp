@@ -167,7 +167,6 @@ std::vector<double> MyAlgo::fnEvaluateBothClicks(std::vector<std::vector<std::ve
                 i = i + round(sampRate * refractoryTime);
             }
         }
-        cout << "E3" << endl;
         double aveTimeLead = 0;
         for (int i = 0; i < timeLead.size(); i++)
         {
@@ -190,7 +189,6 @@ std::vector<double> MyAlgo::fnEvaluateBothClicks(std::vector<std::vector<std::ve
                 i++;
             }
         }
-        cout << "E4" << endl;
         varReturn.push_back(numTP / clickTimes);
         varReturn.push_back(numFP / clickTimes);
         varReturn.push_back(aveTimeLead);

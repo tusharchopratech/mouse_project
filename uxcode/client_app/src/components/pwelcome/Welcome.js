@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
-import { ReactComponent as HandIconWhite } from '../../images/hand_white.svg';
-
+import {ReactComponent as WaveIconWhite} from "../../images/wave_white.svg";
 
 class Welcome extends Component {
 
@@ -40,7 +39,7 @@ class Welcome extends Component {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: 20 }}>
                         <Fab variant="extended" color="primary" aria-label="Add" onClick={this.startCaliberation} className={classes.margin}>
-                            <HandIconWhite className={classes.extendedIcon} />
+                            <WaveIconWhite className={classes.extendedIcon} />
                             Start Glove Caliberation
                         </Fab>
                     </div>

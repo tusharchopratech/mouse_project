@@ -5,6 +5,7 @@ REM cl /W3 /GA /DWIN32 /MT /I C:\boost_1_70_0\boost_1_70_0 /I C:\stb /I C:\armad
 cl /EHsc /Zi /bigobj /W3 /GA /DWIN32 /MT /c main.cpp && SET /A a =  %a% + 1 
 if %a%==0 (goto fail)
 REM link /LIBPATH:C:\boost_1_70_0\boost_1_70_0\stage\lib\* /LIBPATH:..\ main kernel32.lib user32.lib ..\lib\daq\cbw64.lib ..\lib\filter\iir.lib  && SET /A a = %a% + 1 
+REM link /LIBPATH:..\ main kernel32.lib user32.lib ..\lib\daq\cbw64.lib ..\lib\filter\iir.lib  && SET /A a = %a% + 1 
 link /DEBUG /LIBPATH:..\ main kernel32.lib user32.lib ..\lib\daq\cbw64.lib ..\lib\filter\iir.lib  && SET /A a = %a% + 1 
 if %a%==2 (goto success) else (goto fail)
 

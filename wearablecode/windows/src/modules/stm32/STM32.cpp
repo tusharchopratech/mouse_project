@@ -11,6 +11,31 @@ void STM32::setupSerialPort()
     channelVoltage3 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
     channelVoltage4 = new double[GB_TOTAL_NUMBER_OF_SAMPLES];
 
+    f_bp_1.setup(order, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, (lf + hf) / 2, (hf - lf));
+    f_bp_2.setup(order, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, (lf + hf) / 2, (hf - lf));
+    f_bp_3.setup(order, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, (lf + hf) / 2, (hf - lf));
+    f_bp_4.setup(order, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, (lf + hf) / 2, (hf - lf));
+
+    int i = 0;
+    for (int freq = notchFreq; freq < 500; freq += notchFreq)
+    {
+        f_n_1[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
+        f_n_2[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
+        f_n_3[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
+        f_n_4[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
+        i++;
+    }
+
+    i = 0;
+    for (int freq = notchFreq; freq < 500; freq += notchFreq)
+    {
+        f_bs_1[i].setup(order, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, band);
+        f_bs_2[i].setup(order, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, band);
+        f_bs_3[i].setup(order, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, band);
+        f_bs_4[i].setup(order, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, band);
+        i++;
+    }
+
     if (gb_getCurrentHardwareType() == GB_HARDWARE_STM32)
     {
         serialPort = new SerialPort();
@@ -63,10 +88,37 @@ void STM32::readFromSerialPort()
                     double totalt = vectorOfBytes.at(10) | vectorOfBytes.at(11) << 8;
                     if (totalt == number_1 + number_2 + number_3 + number_4)
                     {
-                        channelVoltage1[sampleIndex] = ((5 * number_1) / 1024.0);
-                        channelVoltage2[sampleIndex] = ((5 * number_2) / 1024.0);
-                        channelVoltage3[sampleIndex] = ((5 * number_3) / 1024.0);
-                        channelVoltage4[sampleIndex] = ((5 * number_4) / 1024.0);
+                        number_1 = ((5 * number_1) / 1024.0);
+                        number_2 = ((5 * number_2) / 1024.0);
+                        number_3 = ((5 * number_3) / 1024.0);
+                        number_4 = ((5 * number_4) / 1024.0);
+
+                        number_1 = f_bp_1.filter(number_1);
+                        number_2 = f_bp_2.filter(number_2);
+                        number_3 = f_bp_3.filter(number_3);
+                        number_4 = f_bp_4.filter(number_4);
+
+                        for (int i = 0; i < 10; i++)
+                        {
+                            number_1 = f_n_1[i].filter(number_1);
+                            number_2 = f_n_2[i].filter(number_2);
+                            number_3 = f_n_3[i].filter(number_3);
+                            number_4 = f_n_4[i].filter(number_4);
+                        }
+                        int index = 0;
+                        for (int freq = notchFreq; freq < 500; freq += notchFreq)
+                        {
+                            number_1 = f_bs_1[index].filter(number_1);
+                            number_2 = f_bs_2[index].filter(number_2);
+                            number_3 = f_bs_3[index].filter(number_3);
+                            number_4 = f_bs_4[index].filter(number_4);
+                            index++;
+                        }
+
+                        channelVoltage1[sampleIndex] = number_1;
+                        channelVoltage2[sampleIndex] = number_2;
+                        channelVoltage3[sampleIndex] = number_3;
+                        channelVoltage4[sampleIndex] = number_4;
                         sampleIndex++;
                         vectorOfBytes.erase(vectorOfBytes.begin(), vectorOfBytes.begin() + 12);
                         deleteChar = false;

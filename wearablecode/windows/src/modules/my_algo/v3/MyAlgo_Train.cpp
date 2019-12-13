@@ -65,4 +65,13 @@ void MyAlgo::setThresholdValues(double thresholdPercentageLeft, double threshold
     }
 }
 
+bool MyAlgo::getIfThresholdCalculated()
+{
+    if (thresholdValuesLeftClick.size() == 0 && thresholdValuesRightClick.size() == 0)
+    {
+        return false;
+    }
+    return true;
+}
+
 #endif

@@ -6,7 +6,6 @@ import Snackbar from "@material-ui/core/Snackbar";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
-import {ReactComponent as HandIconWhite} from "../../images/hand_white.svg";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
@@ -14,6 +13,9 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import SignalComponent from "../psignalscomp/SignalsComp";
 import Slider from "@material-ui/core/Slider";
+import {ReactComponent as GamePadIconWhite} from "../../images/gamepad_white.svg";
+import * as Constants from '../edata/Constants';
+
 
 class RealTimeData extends Component {
   constructor(props) {
@@ -41,11 +43,9 @@ class RealTimeData extends Component {
       const {ipcRenderer} = window.require("electron");
       var s = JSON.stringify({type: "message", value: "start_real_time", left_threshold_percentage: this.leftThresholdPercentage, right_threshold_percentage: this.rightThresholdPercentage});
       ipcRenderer.send("socket_data_send", s);
-      this.isRealTimeRunning = true;
     } else if (this.isRealTimeRunning == true) {
       this.setState({openLoadingDialog: true});
       ipcRenderer.send("socket_data_send", "stop_real_time");
-      this.isRealTimeRunning = false;
     }
   };
 
@@ -64,6 +64,7 @@ class RealTimeData extends Component {
   };
 
   componentDidMount = () => {
+    Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_REAL_TIME);
     var tmp = [];
     for (var i = 0; i < this.numberOfLogs; i++) {
       tmp.push("-");
@@ -77,6 +78,8 @@ class RealTimeData extends Component {
         try {
           var jsonObject = JSON.parse(String(data));
           if (jsonObject.type == "start_real_time_success") {
+            Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.RUNNING_REAL_TIME);
+            this.isRealTimeRunning = true;
             this.setState({buttonText: "Stop Real Time Play", snackBarText: "Impulse started succesfully. Please start the game.", openSnackBar: true});
             setTimeout(
               function() {
@@ -84,8 +87,21 @@ class RealTimeData extends Component {
               }.bind(this),
               4000
             );
+          } else if (jsonObject.type == "start_real_time_failed") {
+            Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_REAL_TIME);
+            this.isRealTimeRunning = false;
+            if (jsonObject.message == "threshold_not_set") {
+              this.setState({buttonText: "Start Real Time Play", snackBarText: "Please do the training first.", openSnackBar: true});
+              setTimeout(
+                function() {
+                  this.setState({openSnackBar: false});
+                }.bind(this),
+                4000
+              );
+            }
           } else if (jsonObject.type == "stop_real_time_success") {
-            console.log(String(data));
+            Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_REAL_TIME);
+            this.isRealTimeRunning = false;
             this.setState({buttonText: "Start Real Time Play", snackBarText: "Stopped succesfully!!.", openSnackBar: true, openLoadingDialog: false});
             setTimeout(
               function() {
@@ -142,14 +158,14 @@ class RealTimeData extends Component {
 
                 <div style={{display: "flex", justifyContent: "center", paddingTop: 10}}>
                   <Fab variant="extended" color="primary" aria-label="Add" onClick={this.toggleGamePlay} className={classes.margin}>
-                    <HandIconWhite className={classes.extendedIcon} />
+                    <GamePadIconWhite className={classes.extendedIcon} />
                     {this.state.buttonText}
                   </Fab>
                 </div>
               </div>
             </div>
           </div>
-          <div id="signal-section-div" style={{flex: 1, display: "flex", height: "100%", alignItems: "center", borderLeft: "1px solid #dcdcdc", padding: "10px"}}>
+          <div id="signal-section-div" style={{flex: 1, display: "flex", height: "100%", alignItems: "center", borderLeft: "1px solid #dcdcdc", padding: "10px", background: "#ffffff"}}>
             <div style={{display: "flex", flexDirection: "column", width: "100%", alignItems: "center"}}>
               <h5 style={{paddingBottom: "35px"}}>Real Time Signals</h5>
               <div style={{width: "60%"}}>
