@@ -87,11 +87,11 @@ class UserTraining extends Component {
   };
 
   startTrainingProcessStep1 = () => {
-    this.setState({ openConfigDialog: true });
+    this.setState({openConfigDialog: true});
   };
 
   closeSettingsDialog = () => {
-    this.setState({ openConfigDialog: false });
+    this.setState({openConfigDialog: false});
   };
 
   startTrainingProcessStep2 = () => {
@@ -110,14 +110,14 @@ class UserTraining extends Component {
       ReactDOM.findDOMNode(this.refs.start_caliberation_button).style.display = "none";
       setTimeout(
         function() {
-          this.setState({ start_showing_random_clicks: true });
+          this.setState({start_showing_random_clicks: true});
         }.bind(this),
         2000
       );
     }
   };
 
-  startTrainingProcess = event => {
+  startTrainingProcess = (event) => {
     this.startTrainingProcessStep1();
   };
 

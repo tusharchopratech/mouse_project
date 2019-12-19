@@ -90,6 +90,10 @@
         "strstream": "cpp",
         "*.ipp": "cpp"
     },
+<<<<<<< HEAD
     "prettier.printWidth": 800,
     "git.ignoreLimitWarning": true
+=======
+    "prettier.printWidth": 800
+>>>>>>> b67e148b5cebca22abcce0842a156fca6f615e7c
 }
