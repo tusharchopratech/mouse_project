@@ -83,6 +83,8 @@ ipc.on("socket_data_send", (event, data) => {
     client.write(JSON.stringify({type: "message", value: "start_real_time"}) + "*****");
   } else if (data == "stop_real_time") {
     client.write(JSON.stringify({type: "message", value: "stop_real_time"}) + "*****");
+  } else if (data == "get_results_from_old_file") {
+    client.write(JSON.stringify({type: "message", value: "get_results_from_old_file"}) + "*****");
   } else {
     client.write(data + "*****");
   }

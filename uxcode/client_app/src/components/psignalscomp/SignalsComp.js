@@ -9,6 +9,7 @@ class SignalsComp extends Component {
 
     this.parentComponentName = this.props.parentComponentName;
     this.totalSamplesOnChart = 2048 * 2;
+    this.refreshGraphIntervalInMillisecods = 400; // Milliseconds
 
     this.rms1 = 0;
     this.rms2 = 0;
@@ -99,7 +100,7 @@ class SignalsComp extends Component {
       this.iRCArray.push(0.0);
     }
     this.setDataToChart();
-    setInterval(this.renderGraphs, 600);
+    setInterval(this.renderGraphs, this.refreshGraphIntervalInMillisecods);
   };
 
   componentWillUnmount = () => {

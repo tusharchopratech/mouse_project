@@ -20,7 +20,7 @@ void MouseFunctions::setLeftMouseStatus(int status)
             }
             else
             {
-                double tmpCurrentTime = gb_getCurrentTimeInMillisecondsDouble();
+                unsigned long long tmpCurrentTime = gb_getCurrentTimeInMillisecondsDouble();
                 lastLeftClickAction = "os_left_down";
                 impulseLogs.push_back("OS Left Down Click at " + std::to_string(tmpCurrentTime));
 
@@ -60,7 +60,7 @@ void MouseFunctions::setRightMouseStatus(int status)
             }
             else
             {
-                double tmpCurrentTime = gb_getCurrentTimeInMillisecondsDouble();
+                unsigned long long tmpCurrentTime = gb_getCurrentTimeInMillisecondsDouble();
                 lastRightClickAction = "os_right_down";
                 impulseLogs.push_back("OS Right Down Click at " + std::to_string(tmpCurrentTime));
 

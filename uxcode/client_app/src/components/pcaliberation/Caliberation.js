@@ -4,7 +4,8 @@ import PropTypes, {array} from "prop-types";
 import Fab from "@material-ui/core/Fab";
 import {Line} from "react-chartjs-2";
 import SignalComponent from "../psignalscomp/SignalsComp";
-import {ReactComponent as HandIconWhite} from "../../images/hand_white.svg";
+import {ReactComponent as MouseIconWhite} from "../../images/mouse_white.svg";
+import * as Constants from '../edata/Constants';
 
 class Caliberation extends Component {
   constructor(props) {
@@ -19,6 +20,7 @@ class Caliberation extends Component {
   };
 
   componentDidMount = () => {
+    Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_CALIBERATION);
     console.log("Caliberation Component Mounted");
     const {ipcRenderer} = window.require("electron");
     ipcRenderer.send("socket_data_send", "start_raw_real_time_data");
@@ -61,7 +63,7 @@ class Caliberation extends Component {
 
           <div style={{display: "flex", justifyContent: "center", paddingTop: 30}}>
             <Fab variant="extended" color="primary" aria-label="Add" onClick={this.startTraining} className={classes.margin}>
-              <HandIconWhite className={classes.extendedIcon} />
+              <MouseIconWhite className={classes.extendedIcon} />
               Next Step ( Click Training )
             </Fab>
           </div>

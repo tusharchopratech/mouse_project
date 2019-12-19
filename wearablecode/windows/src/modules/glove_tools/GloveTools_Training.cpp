@@ -8,10 +8,10 @@ int GloveTools::startTraining()
     isTrainingRunning = true;
     std::thread newThread(&GloveTools::startTrainingRecording, this);
     newThread.detach();
-    if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
-    {
-        cout << "Unable to delete folder : " << GB_IMPULSE_DIRECTORY << endl;
-    }
+    // if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
+    // {
+    //     cout << "Unable to delete folder : " << GB_IMPULSE_DIRECTORY << endl;
+    // }
     return 1;
 }
 
@@ -83,6 +83,7 @@ void GloveTools::startTrainingRecording()
 Json GloveTools::getRealTimeTraingDataForDisplay()
 {
     Json json;
+    int errorFlag=0;
     try
     {
         std::vector<double> v1, v2, v3, v4, v5, v6, v7;
@@ -93,12 +94,19 @@ Json GloveTools::getRealTimeTraingDataForDisplay()
         for (int i = start; i < end; i++)
         {
             v1.push_back(trainingDataChannel1.at(i));
+            errorFlag=1;
             v2.push_back(trainingDataChannel2.at(i));
+            errorFlag=2;
             v3.push_back(trainingDataChannel3.at(i));
+            errorFlag=3;
             v4.push_back(trainingDataChannel4.at(i));
+            errorFlag=4;
             v5.push_back(trainingDataLeftClick.at(i));
+            errorFlag=5;
             v6.push_back(trainingDataRightClick.at(i));
+            errorFlag=6;
             v7.push_back(trainingDataThumbClick.at(i));
+            errorFlag=7;
         }
         json["total_samples"] = v1.size();
         json["ch_v1"] = v1;
@@ -114,7 +122,11 @@ Json GloveTools::getRealTimeTraingDataForDisplay()
     catch (exception &e)
     {
         cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
+        cout<<json.dump(4)<<endl;
+        cout<<"Error Flag "<<endl;
+        cout<<"See error abouv"<<endl;
         json["status"] = "failed";
+        
     }
     return json;
 }
@@ -128,10 +140,10 @@ Json GloveTools::stopTraining()
     result["status"] = "failed";
     try
     {
-        if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
-        {
-            cout << "Unable to delete folder : " << GB_IMPULSE_DIRECTORY << endl;
-        }
+        // if (!std::experimental::filesystem::remove_all(GB_IMPULSE_DIRECTORY))
+        // {
+        //     cout << "Unable to delete folder : " << GB_IMPULSE_DIRECTORY << endl;
+        // }
         if (!CreateDirectoryA(GB_IMPULSE_DIRECTORY.c_str(), NULL))
         {
             cout << "Unable to create folder : " << GB_IMPULSE_DIRECTORY << endl;
@@ -154,6 +166,7 @@ Json GloveTools::stopTraining()
             trainingDataThumbClick = demoTrainingDataThumbClick;
         }
         string file = GB_IMPULSE_DIRECTORY + "/data_" + participantName + std::to_string(trialNumber) + "_C" + std::to_string(numberOfChannelesUsedForTraining) + ".txt";
+        deleteFile(participantName, trialNumber, numberOfChannelesUsedForTraining);
         std::ofstream myfile(file);
         if (myfile.fail())
         {
@@ -182,6 +195,10 @@ Json GloveTools::stopTraining()
         cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
     }
     return result;
+}
+
+Json GloveTools::getPreviousSavedDataResults(){
+    return myAlgo.getAlgoResults(participantName, numberOfChannelesUsedForTraining, trialNumber, clickType);
 }
 
 #endif

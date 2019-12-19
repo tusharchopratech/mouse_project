@@ -18,6 +18,8 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import * as Constants from "../edata/Constants";
+import Snackbar from "@material-ui/core/Snackbar";
 
 export class HomeScreen extends Component {
   constructor(props) {
@@ -55,13 +57,15 @@ export class HomeScreen extends Component {
     } else if (val === "real_time_data") {
       return <RealTimeData />;
     } else if (val === "report") {
-      return <Report report={this.report} />;
+      return <Report report={this.report} callbackSetMainSection={this.setMainSection}/>;
     } else if (val === "welcome") {
       return <Welcome callbackSetMainSection={this.setMainSection} />;
     }
   };
 
   componentDidMount = () => {
+    Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_WELCOME);
+
     this.left = this.containerRef.current.offsetLeft;
     this.right = this.left + this.containerRef.current.offsetWidth;
     this.top = 0;
@@ -143,7 +147,6 @@ export class HomeScreen extends Component {
           disableBackdropClick={true}
           disableEscapeKeyDown={true}
           style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
-
           <div style={{display: "flex", justifyContent: "center"}}>
             <DialogTitle id="alert-dialog-title">{"Impulse Message."}</DialogTitle>
           </div>

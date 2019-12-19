@@ -6,26 +6,33 @@
 
 int GloveTools::startRealTime(double thresholdPrecentageLeft, double thresholdPrecentageRight)
 {
-
-    isRealTimeRunning = true;
-    raw_data_n_samples.clear();
-    myAlgo.setThresholdValues(thresholdPrecentageLeft, thresholdPrecentageRight);
-    MouseFunctions::Instance().startRealTimePlay();
-    if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
+    if (myAlgo.getIfThresholdCalculated())
     {
-        std::thread newThread(&GloveTools::startRealTimeSampleCollectionsForRealTimePlay, this);
-        newThread.detach();
-        std::thread newThread2(&GloveTools::writeRealTimeData, this);
-        newThread2.detach();
+        isRealTimeRunning = true;
+        raw_data_n_samples.clear();
+        myAlgo.setThresholdValues(thresholdPrecentageLeft, thresholdPrecentageRight);
+        MouseFunctions::Instance().startRealTimePlay();
+        if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
+        {
+            std::thread newThread(&GloveTools::startRealTimeSampleCollectionsForRealTimePlay, this);
+            newThread.detach();
+            std::thread newThread2(&GloveTools::writeRealTimeData, this);
+            newThread2.detach();
+        }
+        else if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+        {
+            std::thread newThread(&GloveTools::startDemoSampleCollections, this);
+            newThread.detach();
+        }
+        cout << "Real Time Started!" << endl;
+        return 1;
     }
-    else if (gb_getCurrentEnvirnoment() == GB_ENV_DEVELOPMENT)
+    else
     {
-
-        std::thread newThread(&GloveTools::startDemoSampleCollections, this);
-        newThread.detach();
+        cout << "Real Time Start Failed :-> Threshold not calculated" << endl;
+        return 0;
     }
-    cout << "Real Time Started!" << endl;
-    return 1;
+    return 0;
 }
 
 void GloveTools::setThresholds(double thresholdPrecentageLeft, double thresholdPrecentageRight)
@@ -120,11 +127,13 @@ void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()
             raw_data_n_samples.push_back(tmp);
             tmp.clear();
         }
-
-        t1 = mDaq.getChannelOneVoltage(0);
-        t2 = mDaq.getChannelTwoVoltage(0);
-        t3 = mDaq.getChannelThreeVoltage(0);
-        t4 = mDaq.getChannelFourVoltage(0);
+        if (gb_getCurrentHardwareType() == GB_HARDWARE_MDAQ)
+        {
+            t1 = mDaq.getChannelOneVoltage(0);
+            t2 = mDaq.getChannelTwoVoltage(0);
+            t3 = mDaq.getChannelThreeVoltage(0);
+            t4 = mDaq.getChannelFourVoltage(0);
+        }
 
         myAlgo.detectAndFireImpulseClicks(raw_data_10_samples);
     }

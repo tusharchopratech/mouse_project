@@ -1,5 +1,5 @@
-import React, {Component} from "react";
-import {withStyles} from "@material-ui/core/styles";
+import React, { Component } from "react";
+import { withStyles } from "@material-ui/core/styles";
 import Fab from "@material-ui/core/Fab";
 import ReactDOM from "react-dom";
 import Button from "@material-ui/core/Button";
@@ -8,7 +8,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import {ReactComponent as MouseIcon} from "../../images/mouse_white.svg";
+import { ReactComponent as MouseIcon } from "../../images/mouse_white.svg";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import TextField from "@material-ui/core/TextField";
 import Snackbar from "@material-ui/core/Snackbar";
@@ -17,6 +17,7 @@ import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+import * as Constants from "../edata/Constants";
 
 class UserTraining extends Component {
   constructor(props) {
@@ -29,7 +30,7 @@ class UserTraining extends Component {
     this.clickSequence = [];
 
     this.tfNoClicks = 5;
-    this.tfPName = "tushar";
+    this.tfPName = "Erik";
     this.tfnoChannels = 4;
     this.tfTrainNo = 1;
     this.tfClickType = "both";
@@ -49,22 +50,23 @@ class UserTraining extends Component {
     this.state = {
       start_showing_random_clicks: false,
       openLoadingDialogForUserTraining: false,
-      openConfigDialog: true,
+      openConfigDialog: false,
       settingsErrorMessage: "",
       openSnackBar: false
     };
   }
 
-  renderTest = (val) => {
+  renderTest = val => {
     if (val === true) {
       // console.log("I run ", this.i);
       if (this.i < this.clickSequence.length) {
         this.currentClickType = this.clickSequence[this.i];
         this.i++;
+        console.log("I ="+this.i+" Length="+this.clickSequence.length);
         this.x = this.top + Math.random() * (this.bottom - this.top);
         this.y = this.left + Math.random() * (this.right - this.left);
         return (
-          <Fab size="small" variant="extended" color="primary" aria-label="Add" ref="test_click_button" style={{position: "absolute", top: this.x, left: this.y}} onMouseDown={this.onMouseDown.bind(this)}>
+          <Fab size="small" variant="extended" color="primary" aria-label="Add" ref="test_click_button" style={{ position: "absolute", top: this.x, left: this.y }} onMouseDown={this.onMouseDown.bind(this)}>
             {" "}
             Click {this.currentClickType}!
           </Fab>
@@ -76,7 +78,7 @@ class UserTraining extends Component {
           showCaliberationButton: false,
           openLoadingDialogForUserTraining: true
         });
-        const {ipcRenderer} = window.require("electron");
+        const { ipcRenderer } = window.require("electron");
         ipcRenderer.send("socket_data_send", "stop_training");
       }
     } else {
@@ -84,28 +86,39 @@ class UserTraining extends Component {
     }
   };
 
-  onClickStartTraining = (event) => {
+  startTrainingProcessStep1 = () => {
+    this.setState({ openConfigDialog: true });
+  };
+
+  closeSettingsDialog = () => {
+    this.setState({ openConfigDialog: false });
+  };
+
+  startTrainingProcessStep2 = () => {
+    Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.RUNNING_USER_TRAINING);
     if (window.require("electron").remote.getGlobal("shared_object").current_envirnoment == "dev") {
       this.setState({
         start_showing_random_clicks: false,
         showCaliberationButton: false,
         openLoadingDialogForUserTraining: true
       });
-      const {ipcRenderer} = window.require("electron");
+      const { ipcRenderer } = window.require("electron");
       ipcRenderer.send("socket_data_send", "stop_training");
     } else {
-      const {ipcRenderer} = window.require("electron");
+      const { ipcRenderer } = window.require("electron");
       ipcRenderer.send("socket_data_send", "start_training");
       ReactDOM.findDOMNode(this.refs.start_caliberation_button).style.display = "none";
       setTimeout(
         function() {
-          this.setState({
-            start_showing_random_clicks: true
-          });
+          this.setState({ start_showing_random_clicks: true });
         }.bind(this),
         2000
       );
     }
+  };
+
+  startTrainingProcess = event => {
+    this.startTrainingProcessStep1();
   };
 
   handleTfChange = (name, event) => {
@@ -126,7 +139,7 @@ class UserTraining extends Component {
     }
   };
 
-  sendSettings = (event) => {
+  sendSettings = (sessionType,event) => {
     var noClicks = this.tfNoClicks;
     var pName = this.tfPName;
     var noChannels = this.tfnoChannels;
@@ -136,11 +149,12 @@ class UserTraining extends Component {
       if (pName != "") {
         if (isNaN(noChannels) == false && parseInt(noChannels) >= 1 && parseInt(noChannels) <= 4) {
           if (isNaN(trainNo) == false && parseInt(trainNo) >= 1) {
-            const {ipcRenderer} = window.require("electron");
-            var json = JSON.stringify({type: "communication", value: "settings", participant_name: pName, no_of_channels: parseInt(noChannels), trail_no: parseInt(trainNo), click_type: clickType});
+            const { ipcRenderer } = window.require("electron");
+            console.log(sessionType);
+            var json = JSON.stringify({ type: "communication", value: "settings", participant_name: pName, no_of_channels: parseInt(noChannels), trail_no: parseInt(trainNo), click_type: clickType, session_type: sessionType });
             console.log(json);
             ipcRenderer.send("socket_data_send", json);
-
+            this.clickSequence = [];
             for (var i = 0; i < this.tfNoClicks; i++) {
               this.clickSequence.push("left");
             }
@@ -152,44 +166,44 @@ class UserTraining extends Component {
             }
             this.clickSequence = this.shuffleArray(this.clickSequence);
           } else {
-            this.setState({settingsErrorMessage: "Train Number should be a positive integer, >=1", openSnackBar: true});
+            this.setState({ settingsErrorMessage: "Train Number should be a positive integer, >=1", openSnackBar: true });
             setTimeout(
               function() {
-                this.setState({openSnackBar: false});
+                this.setState({ openSnackBar: false });
               }.bind(this),
               4000
             );
           }
         } else {
-          this.setState({settingsErrorMessage: "Number of channels should be between 1 to 4.", openSnackBar: true});
+          this.setState({ settingsErrorMessage: "Number of channels should be between 1 to 4.", openSnackBar: true });
           setTimeout(
             function() {
-              this.setState({openSnackBar: false});
+              this.setState({ openSnackBar: false });
             }.bind(this),
             4000
           );
         }
       } else {
-        this.setState({settingsErrorMessage: "Participant name cannot be blank", openSnackBar: true});
+        this.setState({ settingsErrorMessage: "Participant name cannot be blank", openSnackBar: true });
         setTimeout(
           function() {
-            this.setState({openSnackBar: false});
+            this.setState({ openSnackBar: false });
           }.bind(this),
           4000
         );
       }
     } else {
-      this.setState({settingsErrorMessage: "Number of click should be a positive number and between 5 and 50.", openSnackBar: true});
+      this.setState({ settingsErrorMessage: "Number of click should be a positive number and between 5 and 50.", openSnackBar: true });
       setTimeout(
         function() {
-          this.setState({openSnackBar: false});
+          this.setState({ openSnackBar: false });
         }.bind(this),
         4000
       );
     }
   };
 
-  onMouseDown = (event) => {
+  onMouseDown = event => {
     // console.log(event.button);
     if (this.state.start_showing_random_clicks) {
       if (this.currentClickType == "left") {
@@ -225,9 +239,10 @@ class UserTraining extends Component {
   };
 
   componentDidMount = () => {
+    Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_USER_TRAINING);
     console.log("User Training Component Mounted");
     this.right = this.right - document.getElementById("signal-section-div").clientWidth;
-    const {ipcRenderer} = window.require("electron");
+    const { ipcRenderer } = window.require("electron");
     ipcRenderer.on(
       "socket_data_received",
       function(event, data) {
@@ -240,12 +255,27 @@ class UserTraining extends Component {
               showCaliberationButton: false,
               openLoadingDialogForUserTraining: false
             });
+            Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_USER_TRAINING);
             this.props.callbackSetMainSection("report", jsonObject);
-          } else if (jsonObject.type == "communication_success" && jsonObject.value == "settings_set") {
-            console.log("Configuration Set!!");
-            this.setState({
-              openConfigDialog: false
-            });
+          } else if (jsonObject.type == "communication_success") {
+            if (jsonObject.value == "settings_set_for_new_recording") {
+              console.log("Configuration Set!!");
+              this.setState({ openConfigDialog: false });
+              this.startTrainingProcessStep2();
+            } else if (jsonObject.value == "old_file_not_found") {
+              console.log("Old File Not Found.");
+              this.setState({ settingsErrorMessage: "No Model with this configuration found.", openSnackBar: true });
+              setTimeout( function() {this.setState({ openSnackBar: false });}.bind(this), 4000  );
+            } else if (jsonObject.value == "old_file_found") {
+              console.log("Old File Found.");
+              this.setState({
+                start_showing_random_clicks: false,
+                showCaliberationButton: false,
+                openLoadingDialogForUserTraining: true
+              });
+              const { ipcRenderer } = window.require("electron");
+              ipcRenderer.send("socket_data_send", "get_results_from_old_file");
+            }
           } else if (jsonObject.type == "real_time_training_data") {
             // console.log(jsonObject);
             this.signalComponentRef.addPoints(jsonObject);
@@ -260,11 +290,11 @@ class UserTraining extends Component {
 
   componentWillUnmount = () => {
     console.log("User Training  Component Unmounted!!");
-    const {ipcRenderer} = window.require("electron");
+    const { ipcRenderer } = window.require("electron");
     ipcRenderer.removeAllListeners("socket_data_received");
   };
 
-  shuffleArray = (arra1) => {
+  shuffleArray = arra1 => {
     var ctr = arra1.length,
       temp,
       index;
@@ -279,76 +309,85 @@ class UserTraining extends Component {
   };
 
   render() {
-    const {classes} = this.props;
+    const { classes } = this.props;
     return (
-      <div style={{height: "100%", width: "100%"}}>
-        <div style={{display: "flex", height: "100%", alignItems: "center", flexDirection: "row"}}>
-          <div style={{flex: 2, display: "flex", height: "100%", alignItems: "center"}}>
-            <div id="test-section-div" style={{textAlign: "center", width: "100%"}}>
-              <Fab variant="extended" color="primary" aria-label="Add" ref="start_caliberation_button" onMouseDown={this.onClickStartTraining.bind(this)} className={classes.margin}>
+      <div style={{ height: "100%", width: "100%" }}>
+        <div style={{ display: "flex", height: "100%", alignItems: "center", flexDirection: "row" }}>
+          <div style={{ flex: 2, display: "flex", height: "100%", alignItems: "center" }}>
+            <div id="test-section-div" style={{ textAlign: "center", width: "100%" }}>
+              <Fab variant="extended" color="primary" aria-label="Add" ref="start_caliberation_button" onMouseDown={this.startTrainingProcess.bind(this)} className={classes.margin}>
                 <MouseIcon className={classes.extendedIcon} />
                 Start Training
               </Fab>
               {this.renderTest(this.state.start_showing_random_clicks)}
             </div>
           </div>
-          <div id="signal-section-div" style={{flex: 1, display: "flex", height: "100%", alignItems: "center", borderLeft: "1px solid #dcdcdc", padding: "10px"}}>
-            <div style={{display: "flex", flexDirection: "column", width: "100%", alignItems: "center"}}>
-              <h5 style={{paddingBottom: "10px"}}>Real Time Signals</h5>
-              <SignalComponent onRef={(ref) => (this.signalComponentRef = ref)} parentComponentName={"user_training"} />
+          <div id="signal-section-div" style={{ flex: 1, display: "flex", height: "100%", alignItems: "center", borderLeft: "1px solid #dcdcdc", padding: "10px", background: "#ffffff" }}>
+            <div style={{ display: "flex", flexDirection: "column", width: "100%", alignItems: "center" }}>
+              <h5 style={{ paddingBottom: "10px" }}>Real Time Signals</h5>
+              <SignalComponent onRef={ref => (this.signalComponentRef = ref)} parentComponentName={"user_training"} />
             </div>
           </div>
         </div>
 
-        <Dialog open={this.state.openLoadingDialogForUserTraining} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" disableBackdropClick={true} disableEscapeKeyDown={true} style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
-          <div style={{display: "flex", justifyContent: "center"}}>
+        <Dialog open={this.state.openLoadingDialogForUserTraining} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" disableBackdropClick={true} disableEscapeKeyDown={true} style={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
+          <div style={{ display: "flex", justifyContent: "center" }}>
             <DialogTitle id="alert-dialog-title">{"Impulse Message."}</DialogTitle>
           </div>
-          <DialogContent style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
+          <DialogContent style={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
             <div>
-              <div style={{display: "flex", justifyContent: "center"}}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
                 <CircularProgress className={classes.progress} />
               </div>
-              <div style={{display: "flex", justifyContent: "center", paddingTop: 15}}>
+              <div style={{ display: "flex", justifyContent: "center", paddingTop: 15 }}>
                 <DialogContentText id="alert-dialog-description"> {"Extracting Information..."}</DialogContentText>
               </div>
             </div>
           </DialogContent>
         </Dialog>
 
-        <Dialog open={this.state.openConfigDialog} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" disableBackdropClick={true} disableEscapeKeyDown={true} style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
-          <div style={{display: "flex", justifyContent: "center"}}>
-            <DialogTitle id="alert-dialog-title">{"Training Configuration"}</DialogTitle>
+        <Dialog open={this.state.openConfigDialog} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description" disableBackdropClick={true} disableEscapeKeyDown={true} style={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <DialogTitle id="alert-dialog-title">{"Confirm Settings ?"}</DialogTitle>
           </div>
-          <DialogContent style={{display: "flex", justifyContent: "center", flexDirection: "column"}}>
-            <div style={{display: "flex", justifyContent: "flex-start", flexDirection: "column"}}>
-              <div style={{flex: 1}}>
-                <TextField type="number" value={this.tfNoClicks} label="Number of Clicks" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_no_of_clicks")} variant="outlined" />
+          <DialogContent style={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "flex-start", flexDirection: "column" }}>
+              <div style={{ flex: 1 }}>
+                <TextField type="number" defaultValue={this.tfNoClicks} label="Number of Clicks" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_no_of_clicks")} variant="outlined" />
               </div>
-              <div style={{flex: 1}}>
-                <TextField label="Participant Name" value={this.tfPName} className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_p_name")} variant="outlined" />
+              <div style={{ flex: 1 }}>
+                <TextField label="Participant Name" defaultValue={this.tfPName} className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_p_name")} variant="outlined" />
               </div>
-              <div style={{flex: 1}}>
-                <TextField type="number" value={this.tfnoChannels} label="Number Of Channels" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_no_channels")} variant="outlined" />
+              <div style={{ flex: 1 }}>
+                <TextField type="number" defaultValue={this.tfnoChannels} label="Number Of Channels" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_no_channels")} variant="outlined" />
               </div>
-              <div style={{flex: 1}}>
-                <TextField type="number" value={this.tfTrainNo} label="Trial Number" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_trail_no")} variant="outlined" />
+              <div style={{ flex: 1 }}>
+                <TextField type="number" defaultValue={this.tfTrainNo} label="Trial Number" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_trail_no")} variant="outlined" />
               </div>
-              <div style={{flex: 1, width: "100%"}}>
+
+              {/* <div style={{flex: 1, width: "100%"}}>
                 <FormControl className={classes.formControl} style={{width: "100%"}}>
                   <InputLabel>Click Type</InputLabel>
                   <Select onChange={this.handleTfChange.bind(this, "select_click_type")} value={"both"}>
                     <MenuItem value={"left"}>Left</MenuItem>
                     <MenuItem value={"right"}>Right</MenuItem>
                     <MenuItem value={"both"}>Both</MenuItem>
-                    {/* <MenuItem value={"both"}>Both</MenuItem> */}
                   </Select>
                 </FormControl>
-              </div>
+              </div> */}
 
-              <div style={{display: "flex", justifyContent: "center", paddingTop: 15}}>
-                <Button variant="outlined" color="primary" className={classes.button} onClick={this.sendSettings}>
-                  Start Training
+              <div style={{ display: "flex", justifyContent: "center", paddingTop: 15 }}>
+                <Button variant="outlined" color="primary" className={classes.button} onClick={this.sendSettings.bind(this, "new")}>
+                  Start
+                </Button>
+                <div style={{ paddingLeft: 10 }}></div>
+                <Button variant="outlined" color="primary" className={classes.button} onClick={this.closeSettingsDialog}>
+                  Close
+                </Button>
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", paddingTop: 15, width: "100%" }}>
+                <Button variant="outlined" color="primary" className={classes.button} onClick={this.sendSettings.bind(this, "old")}>
+                  Use Old Model
                 </Button>
               </div>
             </div>
@@ -372,7 +411,7 @@ class UserTraining extends Component {
   }
 }
 
-const styles = (theme) => ({
+const styles = theme => ({
   margin: {
     margin: theme.spacing.unit
   },
@@ -381,4 +420,4 @@ const styles = (theme) => ({
   }
 });
 
-export default withStyles(styles, {withTheme: true})(UserTraining);
+export default withStyles(styles, { withTheme: true })(UserTraining);

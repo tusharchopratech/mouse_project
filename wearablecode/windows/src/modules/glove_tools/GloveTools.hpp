@@ -2,6 +2,8 @@
 #define GloveTools_HPP
 
 #include <iostream>
+
+#include <stdio.h>
 #include <list>
 #include "..\filter\FilterTools.cpp"
 #include "..\m_daq\MDaq.cpp"
@@ -72,11 +74,14 @@ public:
     void startTrainingRecording();
     Json getRealTimeTraingDataForDisplay();
     Json stopTraining();
+    Json getPreviousSavedDataResults();
 
     string getRealTimeRawDemoData();
     string getRealTimeRawData();
     Json getRealTimeGamePlayDataForDisplay();
-    void setTrainingSettings(string pName, int trialNo, int noCh, string cType);
+    Json setTrainingSettings(string pName, int trialNo, int noCh, string cType, string modelType);
+    bool ifFileExist(string participantName, int trialNumber, int numberOfChannelesUsedForTraining);
+    bool deleteFile(string participantName, int trialNumber, int numberOfChannelesUsedForTraining);
     void readDemoData();
 };
 

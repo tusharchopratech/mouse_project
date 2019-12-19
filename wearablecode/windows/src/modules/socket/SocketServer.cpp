@@ -104,7 +104,6 @@ void SocketServer::startListeningFromSocket()
         string str(receivedMessageFromClient);
         str = str.substr(0, str.find("*****"));
         Json obj = Json::parse(str);
-        // cout << obj.dump(2) << endl;
         if (obj["type"] == "message" && obj["value"] == "raw_real_time_data")
         {
             finalSocketData = "";
@@ -137,12 +136,20 @@ void SocketServer::startListeningFromSocket()
             finalSocketData = json.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
+        else if (obj["type"] == "message" && obj["value"] == "get_results_from_old_file")
+        {
+            cout<<obj.dump(4)<<endl;
+            Json json;
+            json = gloveTools.getPreviousSavedDataResults();
+            json["type"] = "algo_outputs";
+             cout<<json.dump(4)<<endl;
+            finalSocketData = json.dump();
+            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+        }
         else if (obj["type"] == "communication" && obj["value"] == "settings")
         {
-            gloveTools.setTrainingSettings(obj["participant_name"], obj["trail_no"], obj["no_of_channels"], obj["click_type"]);
-            Json json;
+            Json json = gloveTools.setTrainingSettings(obj["participant_name"], obj["trail_no"], obj["no_of_channels"], obj["click_type"], obj["session_type"]);
             json["type"] = "communication_success";
-            json["value"] = "settings_set";
             finalSocketData = json.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
@@ -156,14 +163,24 @@ void SocketServer::startListeningFromSocket()
         }
         else if (obj["type"] == "message" && obj["value"] == "start_real_time")
         {
-            gloveTools.startRealTime(obj["left_threshold_percentage"], obj["right_threshold_percentage"]);
-            isRealTimeRunning = true;
-            Json json;
-            json["type"] = "start_real_time_success";
-            finalSocketData = json.dump();
-            send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
-            std::thread newThread(&SocketServer::sendRealTimeLogs, this);
-            newThread.detach();
+            if (gloveTools.startRealTime(obj["left_threshold_percentage"], obj["right_threshold_percentage"]) == 1)
+            {
+                isRealTimeRunning = true;
+                Json json;
+                json["type"] = "start_real_time_success";
+                finalSocketData = json.dump();
+                send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+                std::thread newThread(&SocketServer::sendRealTimeLogs, this);
+                newThread.detach();
+            }
+            else
+            {
+                Json json;
+                json["type"] = "start_real_time_failed";
+                json["message"] = "threshold_not_set";
+                finalSocketData = json.dump();
+                send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
+            }
         }
         else if (obj["type"] == "message" && obj["value"] == "stop_real_time")
         {

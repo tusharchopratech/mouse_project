@@ -10,10 +10,10 @@
 
 Json MyAlgo::getAlgoResults(string pName, int noCh, int trialNo, int cType)
 {
-    clickType = cType;
     participantName = pName;
     trialNumber = trialNo;
     numberOfChannelesUsedForTraining = noCh;
+    clickType = cType;
     readData();
     processData();
     cout << "Training Log 3 : MyAlgo read the data." << endl;
@@ -114,13 +114,14 @@ Json MyAlgo::startAnalysing()
             finalJson["right_click"] = tmp;
             results.clear();
             cout << "Training Log 6 : MyAlgo got results for Both clicks" << endl;
+            finalJson["status"] = "success";
         }
     }
     catch (exception &e)
     {
         cout << e.what() << "   **Info**   File : " << __FILE__ << " Function : " << __func__ << " at Line : " << __LINE__ << '\n';
         cout << "Restarting startAnalysing()" << endl;
-        startAnalysing();
+        // startAnalysing();
     }
     cout << "Training Log 7 : Results are :-" << endl;
     std::cout << finalJson.dump(4) << endl;
