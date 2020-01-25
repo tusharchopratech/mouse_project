@@ -40,6 +40,9 @@ static const string GB_IMPULSE_DEV_DIRECTORY = "./../debug/dataset";
 static const double TRUE_POSTIVE_MILLISECONDS_CHECK = 100;
 static const double GB_NEXT_SAMPLE_CHECK_AFTER_TRUE_POSITIVE = 100;
 
+static const double GB_DEFAULT_REFRACTORY_PERIOD_IN_MS = 100;
+static const double GB_DEFAULT_MAX_LEAD_IN_MS = 200;
+
 static const double GB_TRAINING_WINDOW_INTERVAL_STARTING = 0.75;
 static const double GB_TRAINING_WINDOW_INTERVAL_ENDING = 0.35;
 static const double GB_CLICK_DETECTION_INTERVAL_STARTING = 0.1;

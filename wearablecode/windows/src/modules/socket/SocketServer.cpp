@@ -153,9 +153,10 @@ void SocketServer::startListeningFromSocket()
             finalSocketData = json.dump();
             send(ClientSocket, finalSocketData.c_str(), static_cast<int>(finalSocketData.length()), 0);
         }
-        else if (obj["type"] == "communication" && obj["value"] == "set_thresholds")
+        else if (obj["type"] == "communication" && obj["value"] == "real_time_parameters")
         {
-            gloveTools.setThresholds(obj["left_threshold_percentage"], obj["right_threshold_percentage"]);
+            cout<<obj.dump(4)<<endl;
+            gloveTools.setRealTimeParameters(obj["left_threshold_percentage"], obj["right_threshold_percentage"], obj["refractory_period"], obj["max_lead"]);
             Json json;
             json["type"] = "set_thresholds_success";
             finalSocketData = json.dump();
@@ -163,7 +164,7 @@ void SocketServer::startListeningFromSocket()
         }
         else if (obj["type"] == "message" && obj["value"] == "start_real_time")
         {
-            if (gloveTools.startRealTime(obj["left_threshold_percentage"], obj["right_threshold_percentage"]) == 1)
+            if (gloveTools.startRealTime() == 1)
             {
                 isRealTimeRunning = true;
                 Json json;

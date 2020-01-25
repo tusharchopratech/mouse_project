@@ -77,7 +77,7 @@ void MouseFunctions::stopRealTimePlay()
 void MouseFunctions::unblockLeftClickFiring()
 {
     double currentTime = gb_getCurrentTimeInMillisecondsDouble();
-    while (gb_getCurrentTimeInMillisecondsDouble() - currentTime < restPeriodMs)
+    while (gb_getCurrentTimeInMillisecondsDouble() - currentTime < fireUpClickAfterMs)
     {
     }
     isLeftClickFiringAvaiable = true;
@@ -104,7 +104,7 @@ void MouseFunctions::checkAndFireLeftUpClick()
 void MouseFunctions::unblockRightClickFiring()
 {
     double currentTime = gb_getCurrentTimeInMillisecondsDouble();
-    while (gb_getCurrentTimeInMillisecondsDouble() - currentTime < restPeriodMs)
+    while (gb_getCurrentTimeInMillisecondsDouble() - currentTime < fireUpClickAfterMs)
     {
     }
     isRightClickFiringAvaiable = true;
@@ -126,6 +126,12 @@ void MouseFunctions::checkAndFireRightUpClick()
         impulseLogs.push_back("IP Right UP Click at " + gb_getCurrentTimeInMilliseconds());
         impulseLogs.push_back("--");
     }
+}
+
+void MouseFunctions::setRefractoryAndMaxLead(double refractoryPeriodInMs, double maxLeadInMS)
+{
+    refractoryPeriodMs = refractoryPeriodInMs;
+    fireUpClickAfterMs = maxLeadInMS;
 }
 
 std::vector<string> MouseFunctions::getImpulseLogs()

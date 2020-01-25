@@ -4,13 +4,12 @@
 #include "GloveTools.hpp"
 #include <exception>
 
-int GloveTools::startRealTime(double thresholdPrecentageLeft, double thresholdPrecentageRight)
+int GloveTools::startRealTime()
 {
     if (myAlgo.getIfThresholdCalculated())
     {
         isRealTimeRunning = true;
         raw_data_n_samples.clear();
-        myAlgo.setThresholdValues(thresholdPrecentageLeft, thresholdPrecentageRight);
         MouseFunctions::Instance().startRealTimePlay();
         if (gb_getCurrentEnvirnoment() == GB_ENV_PRODUCTION || gb_getCurrentEnvirnoment() == GB_ENV_STAGING)
         {
@@ -35,9 +34,10 @@ int GloveTools::startRealTime(double thresholdPrecentageLeft, double thresholdPr
     return 0;
 }
 
-void GloveTools::setThresholds(double thresholdPrecentageLeft, double thresholdPrecentageRight)
+void GloveTools::setRealTimeParameters(double thresholdPrecentageLeft, double thresholdPrecentageRight, double refractoryPeriod, double maxLead)
 {
-    myAlgo.setThresholdValues(thresholdPrecentageLeft, thresholdPrecentageRight);
+     myAlgo.setThresholdValues(thresholdPrecentageLeft, thresholdPrecentageRight);
+     MouseFunctions::Instance().setRefractoryAndMaxLead(refractoryPeriod, maxLead);
 }
 
 void GloveTools::startRealTimeSampleCollectionsForRealTimePlay()

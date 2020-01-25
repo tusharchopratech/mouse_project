@@ -17,7 +17,7 @@ void test_filter_code();
 
 int main()
 {
-	gb_setCurrentEnvirnoment(GB_ENV_STAGING, GB_HARDWARE_STM32);
+	gb_setCurrentEnvirnoment(GB_ENV_PRODUCTION, GB_HARDWARE_STM32);
 	// gb_setCurrentEnvirnoment(GB_ENV_PRODUCTION, GB_HARDWARE_STM32);
 	// MyAlgo myAlgo;
 	// myAlgo.getAlgoResults("tushar", 4, 1, 3);

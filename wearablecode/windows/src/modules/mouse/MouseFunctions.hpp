@@ -21,9 +21,8 @@ private:
     int thumbMouseStatus = 0;
 
     bool isRealTimeRunning;
-    double refractoryPeriodMs = 100.0;
-    double restPeriodMs = 200.0;
-    double fireUpClickAfterMs = 200.0;
+    double refractoryPeriodMs = GB_DEFAULT_REFRACTORY_PERIOD_IN_MS;
+    double fireUpClickAfterMs = GB_DEFAULT_MAX_LEAD_IN_MS;
     std::vector<string> impulseLogs;
 
     string lastLeftClickAction = "os_left_down";
@@ -70,6 +69,8 @@ public:
 
     void setImpulseRightClickStatus(int status);
     int getImpulseRightClickStatus();
+
+    void setRefractoryAndMaxLead(double refractoryPeriodInMs, double maxLeadInMS);
 
     LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam);
 

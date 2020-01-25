@@ -12,6 +12,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import SignalComponent from "../psignalscomp/SignalsComp";
+import TextField from '@material-ui/core/TextField';
 import Slider from "@material-ui/core/Slider";
 import {ReactComponent as GamePadIconWhite} from "../../images/gamepad_white.svg";
 import * as Constants from '../edata/Constants';
@@ -25,6 +26,8 @@ class RealTimeData extends Component {
     this.thresholdPercentage = 50;
     this.leftThresholdPercentage = 50;
     this.rightThresholdPercentage = 50;
+    this.refractoryPeriod = 100;
+    this.maxLead = 200;
     this.state = {
       openLoadingDialog: true,
       buttonText: "Start Real Time Play",
@@ -41,7 +44,7 @@ class RealTimeData extends Component {
     const {ipcRenderer} = window.require("electron");
     if (this.isRealTimeRunning == false) {
       const {ipcRenderer} = window.require("electron");
-      var s = JSON.stringify({type: "message", value: "start_real_time", left_threshold_percentage: this.leftThresholdPercentage, right_threshold_percentage: this.rightThresholdPercentage});
+      var s = JSON.stringify({type: "message", value: "start_real_time"});
       ipcRenderer.send("socket_data_send", s);
     } else if (this.isRealTimeRunning == true) {
       this.setState({openLoadingDialog: true});
@@ -51,17 +54,70 @@ class RealTimeData extends Component {
 
   setLeftSliderValue = (event, value) => {
     this.leftThresholdPercentage = 100 - value;
-    const {ipcRenderer} = window.require("electron");
-    var s = JSON.stringify({type: "communication", value: "set_thresholds", left_threshold_percentage: this.leftThresholdPercentage, right_threshold_percentage: this.rightThresholdPercentage});
-    ipcRenderer.send("socket_data_send", s);
+    this.sendRealTimeParameters();
   };
 
   setRightSliderValue = (event, value) => {
     this.rightThresholdPercentage = 100 - value;
-    const {ipcRenderer} = window.require("electron");
-    var s = JSON.stringify({type: "communication", value: "set_thresholds", left_threshold_percentage: this.leftThresholdPercentage, right_threshold_percentage: this.rightThresholdPercentage});
-    ipcRenderer.send("socket_data_send", s);
+    this.sendRealTimeParameters();
   };
+
+  handleTfChange = (name, event) => {
+    if (name == "tf_refractory_period") {
+      this.refractoryPeriod = event.target.value;
+      if(this.refractoryPeriod == "")
+      {
+        this.refractoryPeriod=10;
+      }
+      else
+      {  
+        this.refractoryPeriod = parseInt(this.refractoryPeriod);
+        if(this.refractoryPeriod>999)
+        {
+          this.refractoryPeriod=999;
+        }
+        else if(this.refractoryPeriod<10)
+        {
+          this.marefractoryPeriodLead=10;
+        }
+      }
+    }
+    if (name == "tf_max_lead") {
+      this.maxLead = event.target.value;
+      if(this.maxLead == "")
+      {
+        this.maxLead=10;
+      }
+      else
+      {  
+        this.maxLead = parseInt(this.maxLead);
+        if(this.maxLead>999)
+        {
+          this.maxLead=999;
+        }
+        else if(this.maxLead<10)
+        {
+          this.maxLead=10;
+        }
+      }
+    }
+
+    // console.log(this.maxLead);
+    // console.log(typeof(this.maxLead));
+    this.sendRealTimeParameters();
+  };
+
+  sendRealTimeParameters = () =>{
+    const {ipcRenderer} = window.require("electron");
+    var s = JSON.stringify({type: "communication", 
+    value: "real_time_parameters", 
+    left_threshold_percentage: this.leftThresholdPercentage, 
+    right_threshold_percentage: this.rightThresholdPercentage,
+    refractory_period: this.refractoryPeriod,
+    max_lead:this.maxLead});
+    ipcRenderer.send("socket_data_send", s);
+  }
+
 
   componentDidMount = () => {
     Constants.setCurrentState(Constants.CURRENT_IMPULSE_STATE.SCREEN_REAL_TIME);
@@ -128,6 +184,7 @@ class RealTimeData extends Component {
         }
       }.bind(this)
     );
+    this.sendRealTimeParameters();
   };
 
   render() {
@@ -176,6 +233,15 @@ class RealTimeData extends Component {
                 <Slider defaultValue={this.rightThresholdPercentage} onChangeCommitted={this.setRightSliderValue} aria-labelledby="discrete-slider-always" step={1} valueLabelDisplay="on" />
               </div>
               <p>Right Click Sensitivity</p>
+             
+              <div style={{display: "flex", justifyContent: "flex-start", flexDirection: "row"}}>
+                <div style={{flex: 1}}>
+                  <TextField type="number" defaultValue={this.refractoryPeriod} label="Refractory Period (10-999 ms)" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_refractory_period")} variant="outlined" />
+                </div>
+                <div style={{flex: 1}}>
+                  <TextField type="number" defaultValue={this.maxLead} label="Max Lead (10-999 ms)" className={classes.textField} margin="normal" onChange={this.handleTfChange.bind(this, "tf_max_lead")} variant="outlined" />
+               </div>
+              </div>
               <SignalComponent onRef={(ref) => (this.signalComponentRef = ref)} parentComponentName={"real_time_game_play"} />
             </div>
           </div>

@@ -17,14 +17,14 @@ void STM32::setupSerialPort()
     f_bp_4.setup(order, GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, (lf + hf) / 2, (hf - lf));
 
     int i = 0;
-    for (int freq = notchFreq; freq < 500; freq += notchFreq)
-    {
-        f_n_1[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
-        f_n_2[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
-        f_n_3[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
-        f_n_4[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
-        i++;
-    }
+    // for (int freq = notchFreq; freq < 500; freq += notchFreq)
+    // {
+    //     f_n_1[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
+    //     f_n_2[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
+    //     f_n_3[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
+    //     f_n_4[i].setup(GB_SAMPLING_RATE_OF_FILTER_AND_DAQ_CARD, freq, 15);
+    //     i++;
+    // }
 
     i = 0;
     for (int freq = notchFreq; freq < 500; freq += notchFreq)
@@ -98,13 +98,13 @@ void STM32::readFromSerialPort()
                         number_3 = f_bp_3.filter(number_3);
                         number_4 = f_bp_4.filter(number_4);
 
-                        for (int i = 0; i < 10; i++)
-                        {
-                            number_1 = f_n_1[i].filter(number_1);
-                            number_2 = f_n_2[i].filter(number_2);
-                            number_3 = f_n_3[i].filter(number_3);
-                            number_4 = f_n_4[i].filter(number_4);
-                        }
+                        // for (int i = 0; i < 10; i++)
+                        // {
+                        //     number_1 = f_n_1[i].filter(number_1);
+                        //     number_2 = f_n_2[i].filter(number_2);
+                        //     number_3 = f_n_3[i].filter(number_3);
+                        //     number_4 = f_n_4[i].filter(number_4);
+                        // }
                         int index = 0;
                         for (int freq = notchFreq; freq < 500; freq += notchFreq)
                         {
