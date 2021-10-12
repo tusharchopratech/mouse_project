@@ -57,7 +57,7 @@
   },
   "main": "public/electron.js",
   "devDependencies": {
-    "electron": "^5.0.1",
+    "electron": "^11.5.0",
     "electron-packager": "^14.0.3",
     "electron-builder": "^20.39.0"
   },
