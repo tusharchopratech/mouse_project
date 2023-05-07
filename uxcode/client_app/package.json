@@ -13,7 +13,7 @@
     "electron-common-ipc": "^6.4.1",
     "electron-is-dev": "^1.1.0",
     "fast-tcp": "^3.3.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "node-abi": "^2.8.0",
     "node-cmd": "^3.0.0",
     "ps-node": "^0.1.6",
