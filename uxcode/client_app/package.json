@@ -23,7 +23,7 @@
     "react-csv": "^1.1.1",
     "react-dom": "^16.8.6",
     "react-rt-chart": "^2.0.0",
-    "react-scripts": "3.0.0",
+    "react-scripts": "5.0.1",
     "reactstrap": "^8.0.0",
     "tree-kill": "^1.2.1",
     "typescript": "^3.5.3",
